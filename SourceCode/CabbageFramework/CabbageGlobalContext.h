@@ -22,6 +22,11 @@
 #include"CabbageFramework/CabbageMultimedia/CabbageAnimation/PhysicalSimulator.h"
 
 
+
+#include"CabbageFramework/CabbageCommon/SourceFilesPath.h"
+
+
+
 struct CabbageGlobalContext
 {
 	//CabbageScene cabbageScene;
@@ -47,7 +52,29 @@ struct CabbageGlobalContext
 		:gbufferSize(imageSize), shadowMapSize(ktm::uvec2(2048, 2048)),
 		//frameSurface(imageSize),
           finalOutputImage(gbufferSize, ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage),
-          physicalSimulator(sceneManager)
+          physicalSimulator(sceneManager),
+		shaderPath(
+			    [] {
+	        std::string resultPath = "";
+	        std::string runtimePath = std::filesystem::current_path().string();
+	        // std::replace(runtimePath.begin(), runtimePath.end(), '\\', '/');
+	        std::regex pattern(R"((.*)CabbageFramework\b)");
+	        std::smatch matches;
+	        if (std::regex_search(runtimePath, matches, pattern))
+	        {
+	            if (matches.size() > 1)
+	            {
+	                resultPath = matches[1].str() + "CabbageFramework";
+	            }
+	            else
+	            {
+	                throw std::runtime_error("Failed to resolve source path.");
+	            }
+	        }
+	        std::replace(resultPath.begin(), resultPath.end(), '\\', '/');
+	        return resultPath + "/SourceCode" + "/CabbageFramework/CabbageMultimedia";
+	    }()
+		)
 	{
 		gbufferPostionImage = HardwareImage(gbufferSize, ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
 		gbufferBaseColorImage = HardwareImage(gbufferSize, ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
@@ -183,20 +210,22 @@ struct CabbageGlobalContext
 		rendererPipleLine.executePipeline(ktm::uvec3(gbufferSize.x / 8, gbufferSize.y / 8, 1));
 	}
 
+	std::string shaderPath;
+	
 	ktm::uvec2 shadowMapSize;
 	ktm::fvec2 shadowMapFrustumSize;
 	HardwareImage shadowMapPostionImage;
 	HardwareImage shadowMapBaseColorImage;
 	HardwareImage shadowMapNormalImage;
 	HardwareImage shadowMapMotionVectorImage;
-    RasterizerPipeline shadowMapPipleLine = RasterizerPipeline(CabbageFiles::readStringFile( CabbageFiles::shaderPath + "/shaders/test.vert.glsl"), CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/test.frag.glsl"));
+    RasterizerPipeline shadowMapPipleLine = RasterizerPipeline(CabbageFiles::readStringFile( shaderPath + "/shaders/test.vert.glsl"), CabbageFiles::readStringFile(shaderPath + "/shaders/test.frag.glsl"));
 
 	ktm::uvec2 gbufferSize;
 	HardwareImage gbufferPostionImage;
 	HardwareImage gbufferBaseColorImage;
 	HardwareImage gbufferNormalImage;
 	HardwareImage gbufferMotionVectorImage;
-    RasterizerPipeline gbufferPipleLine = RasterizerPipeline(CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/test.vert.glsl"), CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/test.frag.glsl"));
+    RasterizerPipeline gbufferPipleLine = RasterizerPipeline(CabbageFiles::readStringFile(shaderPath + "/shaders/test.vert.glsl"), CabbageFiles::readStringFile(shaderPath + "/shaders/test.frag.glsl"));
 
 
 	HardwareBuffer uniformBuffer;
@@ -205,10 +234,10 @@ struct CabbageGlobalContext
 	//HardwareImage guiOutputImage;
 	HardwareImage finalOutputImage;
 
-	ComputePipeline rendererPipleLine = ComputePipeline(CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/test.comp.glsl"));
+	ComputePipeline rendererPipleLine = ComputePipeline(CabbageFiles::readStringFile(shaderPath + "/shaders/test.comp.glsl"));
 
 
-	ComputePipeline testComputePipleLine = ComputePipeline(CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/comp.glsl"));
+	ComputePipeline testComputePipleLine = ComputePipeline(CabbageFiles::readStringFile(shaderPath + "/shaders/comp.glsl"));
 
 	// frameIndex = 90��270��450��630��ʱ�򣬹�Դ�ֱ������ҡ�����������ǰ
 	// uint64_t frameIndex = 400;
