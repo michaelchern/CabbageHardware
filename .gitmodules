@@ -16,3 +16,18 @@
 [submodule "ExternalEnvironment/glfw"]
 	path = ExternalEnvironment/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "ExternalEnvironment/vulkan/volk"]
+	path = ExternalEnvironment/vulkan/volk
+	url = https://github.com/zeux/volk.git
+[submodule "ExternalEnvironment/vulkan/Vulkan-Headers"]
+	path = ExternalEnvironment/vulkan/Vulkan-Headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+[submodule "ExternalEnvironment/vulkan/VulkanMemoryAllocator"]
+	path = ExternalEnvironment/vulkan/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+[submodule "ExternalEnvironment/vulkan/SPIRV-Cross"]
+	path = ExternalEnvironment/vulkan/SPIRV-Cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross.git
+[submodule "ExternalEnvironment/vulkan/glslang"]
+	path = ExternalEnvironment/vulkan/glslang
+	url = https://github.com/KhronosGroup/glslang.git
