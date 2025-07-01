@@ -162,6 +162,8 @@ if(IS_ROOT_DIR)
     # ---------------------------------------------------------------------------
     set(BUILD_SHARED_LIBS OFF)
 
+    add_subdirectory(ExternalEnvironment/Helicon EXCLUDE_FROM_ALL)
+
     # --- GLFW ---
     add_subdirectory(ExternalEnvironment/glfw EXCLUDE_FROM_ALL)
     # --- Assimp ---
