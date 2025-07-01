@@ -189,14 +189,14 @@ struct CabbageGlobalContext
 	HardwareImage shadowMapBaseColorImage;
 	HardwareImage shadowMapNormalImage;
 	HardwareImage shadowMapMotionVectorImage;
-    RasterizerPipeline shadowMapPipleLine = RasterizerPipeline(CabbageFiles::shaderPath + "/shaders/test.vert.glsl", CabbageFiles::shaderPath + "/shaders/test.frag.glsl");
+    RasterizerPipeline shadowMapPipleLine = RasterizerPipeline(CabbageFiles::readStringFile( CabbageFiles::shaderPath + "/shaders/test.vert.glsl"), CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/test.frag.glsl"));
 
 	ktm::uvec2 gbufferSize;
 	HardwareImage gbufferPostionImage;
 	HardwareImage gbufferBaseColorImage;
 	HardwareImage gbufferNormalImage;
 	HardwareImage gbufferMotionVectorImage;
-    RasterizerPipeline gbufferPipleLine = RasterizerPipeline(CabbageFiles::shaderPath + "/shaders/test.vert.glsl", CabbageFiles::shaderPath + "/shaders/test.frag.glsl");
+    RasterizerPipeline gbufferPipleLine = RasterizerPipeline(CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/test.vert.glsl"), CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/test.frag.glsl"));
 
 
 	HardwareBuffer uniformBuffer;
@@ -205,10 +205,10 @@ struct CabbageGlobalContext
 	//HardwareImage guiOutputImage;
 	HardwareImage finalOutputImage;
 
-	ComputePipeline rendererPipleLine = ComputePipeline(CabbageFiles::shaderPath + "/shaders/test.comp.glsl");
+	ComputePipeline rendererPipleLine = ComputePipeline(CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/test.comp.glsl"));
 
 
-	ComputePipeline testComputePipleLine = ComputePipeline(CabbageFiles::shaderPath + "/shaders/comp.glsl");
+	ComputePipeline testComputePipleLine = ComputePipeline(CabbageFiles::readStringFile(CabbageFiles::shaderPath + "/shaders/comp.glsl"));
 
 	// frameIndex = 90��270��450��630��ʱ�򣬹�Դ�ֱ������ҡ�����������ǰ
 	// uint64_t frameIndex = 400;

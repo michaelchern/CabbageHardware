@@ -1,5 +1,5 @@
 #include"HardcodeShaders.h"
-std::unordered_map<std::string, ShaderCodeModule> HardcodeShaders::hardcodeShadersGLSL = {{"VertexShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_192_63",
+std::unordered_map<std::string, ShaderCodeModule> HardcodeShaders::hardcodeShadersGLSL = {{"VertexShader__SourceCode_CabbageGlobalContext_h_192_63",
 ShaderCodeModule(R"(#version 460
 #extension GL_EXT_nonuniform_qualifier : require
 
@@ -55,7 +55,7 @@ void main()
 }
 
  )")
-},{"FragmentShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_192_63",
+},{"FragmentShader__SourceCode_CabbageGlobalContext_h_192_63",
 ShaderCodeModule(R"(#version 460
 #extension GL_EXT_nonuniform_qualifier : require
 
@@ -92,7 +92,7 @@ void main()
 }
 
  )")
-},{"VertexShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_199_61",
+},{"VertexShader__SourceCode_CabbageGlobalContext_h_199_61",
 ShaderCodeModule(R"(#version 460
 #extension GL_EXT_nonuniform_qualifier : require
 
@@ -148,7 +148,7 @@ void main()
 }
 
  )")
-},{"FragmentShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_199_61",
+},{"FragmentShader__SourceCode_CabbageGlobalContext_h_199_61",
 ShaderCodeModule(R"(#version 460
 #extension GL_EXT_nonuniform_qualifier : require
 
@@ -185,7 +185,7 @@ void main()
 }
 
  )")
-},{"ComputeShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_208_53",
+},{"ComputeShader__SourceCode_CabbageGlobalContext_h_208_53",
 ShaderCodeModule(R"(#version 460
 #extension GL_EXT_nonuniform_qualifier : require
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
@@ -487,7 +487,7 @@ void main()
 }
 
  )")
-},{"ComputeShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_211_56",
+},{"ComputeShader__SourceCode_CabbageGlobalContext_h_211_56",
 ShaderCodeModule(R"(#version 460
 #extension GL_EXT_nonuniform_qualifier : require
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
