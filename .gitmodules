@@ -42,3 +42,7 @@
 	path = ExternalEnvironment/vulkan/glslang
 	url = https://github.com/KhronosGroup/glslang.git
 	ignore = all
+[submodule "ExternalEnvironment/Helicon"]
+	path = ExternalEnvironment/Helicon
+	url = https://github.com/CoronaEngine/Helicon.git
+	ignore = all
