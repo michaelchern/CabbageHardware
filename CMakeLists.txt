@@ -28,21 +28,6 @@ if(POLICY CMP0077)
 endif()
 
 # -------------------------------------------------------------------------------
-# 依赖查找
-# -------------------------------------------------------------------------------
-# 查找 Python 3.13 版本
-# 要求包含解释器(Interpreter)和开发组件(Development)
-find_package(Python3 3.13 REQUIRED COMPONENTS Interpreter Development)
-
-# 查找 CUDA 工具链
-find_package(CUDAToolkit)
-
-execute_process(
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/scripts/pip_install.py"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/scripts"
-)
-
-# -------------------------------------------------------------------------------
 # 源代码管理
 # -------------------------------------------------------------------------------
 # 文件分组函数
@@ -190,7 +175,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # -------------------------------------------------------------------------------
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE
-        "${Python3_INCLUDE_DIRS}"
         "${CMAKE_CURRENT_SOURCE_DIR}/SourceCode"
 
         "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/ktm"
@@ -207,20 +191,5 @@ if(WIN32)
         "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/Vulkan-Headers/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/VulkanMemoryAllocator/include"
 
-    )
-
-    target_link_directories(${PROJECT_NAME} PRIVATE "${Python3_LIBRARY_DIRS}")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${Python3_LIBRARIES}")
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/scripts/npm_build.py"
-        VERBATIM
-    )
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/scripts/sync_res.py"
-        "--python-root-dir" "${Python3_ROOT_DIR}"
-        "--runtime-output_dir" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-        "--cmake-root-dir" "${CMAKE_CURRENT_SOURCE_DIR}"
-        VERBATIM
     )
 endif()

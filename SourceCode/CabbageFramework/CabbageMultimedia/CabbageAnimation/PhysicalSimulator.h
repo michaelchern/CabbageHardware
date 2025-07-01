@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CabbageEditor/PythonAPI.h"
+//#include "CabbageEditor/PythonAPI.h"
 
 #include"CabbageFramework/CabbageAssets/SceneManager.h"
 
