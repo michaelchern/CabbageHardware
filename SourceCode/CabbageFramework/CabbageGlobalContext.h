@@ -19,9 +19,7 @@
 
 #include"CabbageFramework/CabbageAssets/SceneManager.h"
 
-#include"CabbageFramework/CabbageMultimedia/CabbageAnimation/PhysicalSimulator.h"
-
-
+#include"CabbageEngine.h"
 
 #include"CabbageFramework/CabbageCommon/SourceFilesPath.h"
 
@@ -52,7 +50,7 @@ struct CabbageGlobalContext
 		:gbufferSize(imageSize), shadowMapSize(ktm::uvec2(2048, 2048)),
 		//frameSurface(imageSize),
           finalOutputImage(gbufferSize, ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage),
-          physicalSimulator(sceneManager),
+          //physicalSimulator(sceneManager),
 		shaderPath(
 			    [] {
 	        std::string resultPath = "";
@@ -251,7 +249,7 @@ struct CabbageGlobalContext
 
 	SceneManager sceneManager;
 
-	PhysicalSimulator physicalSimulator;
+	//PhysicalSimulator physicalSimulator;
 
 
 	void updateEngine(EngineOperateList& cmdList)
@@ -259,7 +257,7 @@ struct CabbageGlobalContext
 		sceneCamera = cmdList.sceneCamera;
 
 		sceneManager.updateScene(cmdList);
-        physicalSimulator.update();
+        //physicalSimulator.update();
 
 		cmdList.clearList();
 
