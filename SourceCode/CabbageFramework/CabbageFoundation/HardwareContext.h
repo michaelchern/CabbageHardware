@@ -79,10 +79,6 @@ struct HardwareContext
 	~HardwareContext() = default;
 
 	DeviceManager deviceManager;
-
-	DeviceManager::DeviceUtils mainDevice;
-    std::vector<DeviceManager::DeviceUtils> userDevices;
-
 	ResourceManager resourceManager;
     std::vector<DisplayManager> displayManagers;
 

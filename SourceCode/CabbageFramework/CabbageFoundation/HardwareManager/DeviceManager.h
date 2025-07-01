@@ -142,6 +142,9 @@ public:
 
 	bool executeSingleTimeCommands(std::function<void(VkCommandBuffer& commandBuffer)> commandsFunction);
 
+	DeviceUtils mainDevice;
+
+	std::vector<DeviceUtils> userDevices;
 
 private:
 
