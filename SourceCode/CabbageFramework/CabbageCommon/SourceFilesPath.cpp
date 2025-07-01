@@ -12,13 +12,13 @@ const std::string CabbageFiles::rootPath =
         std::string resultPath = "";
         std::string runtimePath = std::filesystem::current_path().string();
         //std::replace(runtimePath.begin(), runtimePath.end(), '\\', '/');
-        std::regex pattern(R"((.*)CabbageEngine\b)");
+        std::regex pattern(R"((.*)CabbageFramework\b)");
         std::smatch matches;
         if (std::regex_search(runtimePath, matches, pattern))
         {
             if (matches.size() > 1)
             {
-                resultPath = matches[1].str() + "CabbageEngine";
+                resultPath = matches[1].str() + "CabbageFramework";
             }
             else
             {
@@ -34,13 +34,13 @@ const std::string CabbageFiles::codePath =
         std::string resultPath = "";
         std::string runtimePath = std::filesystem::current_path().string();
         // std::replace(runtimePath.begin(), runtimePath.end(), '\\', '/');
-        std::regex pattern(R"((.*)CabbageEngine\b)");
+        std::regex pattern(R"((.*)CabbageFramework\b)");
         std::smatch matches;
         if (std::regex_search(runtimePath, matches, pattern))
         {
             if (matches.size() > 1)
             {
-                resultPath = matches[1].str() + "CabbageEngine";
+                resultPath = matches[1].str() + "CabbageFramework";
             }
             else
             {
@@ -56,13 +56,13 @@ const std::string CabbageFiles::shaderPath =
         std::string resultPath = "";
         std::string runtimePath = std::filesystem::current_path().string();
         // std::replace(runtimePath.begin(), runtimePath.end(), '\\', '/');
-        std::regex pattern(R"((.*)CabbageEngine\b)");
+        std::regex pattern(R"((.*)CabbageFramework\b)");
         std::smatch matches;
         if (std::regex_search(runtimePath, matches, pattern))
         {
             if (matches.size() > 1)
             {
-                resultPath = matches[1].str() + "CabbageEngine";
+                resultPath = matches[1].str() + "CabbageFramework";
             }
             else
             {
@@ -78,13 +78,13 @@ const std::string CabbageFiles::hardcodeShaderPath =
         std::string resultPath = "";
         std::string runtimePath = std::filesystem::current_path().string();
         // std::replace(runtimePath.begin(), runtimePath.end(), '\\', '/');
-        std::regex pattern(R"((.*)CabbageEngine\b)");
+        std::regex pattern(R"((.*)CabbageFramework\b)");
         std::smatch matches;
         if (std::regex_search(runtimePath, matches, pattern))
         {
             if (matches.size() > 1)
             {
-                resultPath = matches[1].str() + "CabbageEngine";
+                resultPath = matches[1].str() + "CabbageFramework";
             }
             else
             {

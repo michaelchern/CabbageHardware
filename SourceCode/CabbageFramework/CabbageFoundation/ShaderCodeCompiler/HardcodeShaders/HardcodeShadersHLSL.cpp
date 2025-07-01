@@ -1,5 +1,5 @@
 #include"HardcodeShaders.h"
-std::unordered_map<std::string, ShaderCodeModule> HardcodeShaders::hardcodeShadersHLSL = {{"VertexShader__SourceCode_CabbageGlobalContext_h_192_63",
+std::unordered_map<std::string, ShaderCodeModule> HardcodeShaders::hardcodeShadersHLSL = {{"VertexShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_192_63",
 ShaderCodeModule(R"(ByteAddressBuffer bonesMatrix[] : register(t2, space0);
 struct UniformBufferObject_1
 {
@@ -86,7 +86,7 @@ SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input)
     return stage_output;
 }
  )")
-},{"FragmentShader__SourceCode_CabbageGlobalContext_h_192_63",
+},{"FragmentShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_192_63",
 ShaderCodeModule(R"(struct UniformBufferObject_1
 {
     row_major float4x4 viewProjMatrix;
@@ -152,7 +152,7 @@ SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input)
     return stage_output;
 }
  )")
-},{"VertexShader__SourceCode_CabbageGlobalContext_h_199_61",
+},{"VertexShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_199_61",
 ShaderCodeModule(R"(ByteAddressBuffer bonesMatrix[] : register(t2, space0);
 struct UniformBufferObject_1
 {
@@ -239,7 +239,7 @@ SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input)
     return stage_output;
 }
  )")
-},{"FragmentShader__SourceCode_CabbageGlobalContext_h_199_61",
+},{"FragmentShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_199_61",
 ShaderCodeModule(R"(struct UniformBufferObject_1
 {
     row_major float4x4 viewProjMatrix;
@@ -305,7 +305,7 @@ SPIRV_Cross_Output main(SPIRV_Cross_Input stage_input)
     return stage_output;
 }
  )")
-},{"ComputeShader__SourceCode_CabbageGlobalContext_h_208_53",
+},{"ComputeShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_208_53",
 ShaderCodeModule(R"(struct UniformBufferObject_1_1
 {
     float3 lightPostion;
@@ -617,7 +617,7 @@ void main(SPIRV_Cross_Input stage_input)
     comp_main();
 }
  )")
-},{"ComputeShader__SourceCode_CabbageGlobalContext_h_211_56",
+},{"ComputeShader_E__CabbageFramework_SourceCode_CabbageFramework_CabbageGlobalContext_h_211_56",
 ShaderCodeModule(R"(cbuffer PushConsts
 {
     float3 pushConsts_lightColor : packoffset(c0);

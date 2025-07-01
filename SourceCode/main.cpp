@@ -2,7 +2,7 @@
 
 //#include "CabbageEditor/PythonAPI.h"
 
-#include "CabbageGlobalContext.h"
+#include "CabbageFramework/CabbageGlobalContext.h"
 #include "CabbageFramework/CabbageAssets/SceneManager.h"
 
 #include<thread>
