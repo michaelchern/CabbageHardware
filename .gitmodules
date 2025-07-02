@@ -1,14 +1,6 @@
-[submodule "ExternalEnvironment/assimp"]
-	path = ExternalEnvironment/assimp
-	url = https://github.com/assimp/assimp.git
-	ignore = all
 [submodule "ExternalEnvironment/ktm"]
 	path = ExternalEnvironment/ktm
 	url = https://github.com/YGXXD/ktm.git
-	ignore = all
-[submodule "ExternalEnvironment/stb"]
-	path = ExternalEnvironment/stb
-	url = https://github.com/nothings/stb.git
 	ignore = all
 [submodule "ExternalEnvironment/glfw"]
 	path = ExternalEnvironment/glfw
