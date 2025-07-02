@@ -15,11 +15,6 @@
 #include"CabbageFramework/CabbageFoundation/PipelineManager/RasterizerPipeline.h"
 
 
-#include "CabbageFramework/CabbageMultimedia/CabbageAnimation/CabbageAnimator.h"
-
-#include"CabbageFramework/CabbageAssets/SceneManager.h"
-
-#include"CabbageEngine.h"
 
 #include"CabbageFramework/CabbageCommon/SourceFilesPath.h"
 
@@ -148,31 +143,31 @@ struct CabbageGlobalContext
 		gbufferUniformBufferObjects.viewProjMatrix = uniformBufferObjects.eyeProjMatrix * uniformBufferObjects.eyeViewMatrix;
         gbufferUniformBuffer.copyFromData(&gbufferUniformBufferObjects, sizeof(gbufferUniformBufferObjects));
 
-		for (auto& model : sceneManager.sceneActors)
-		{
-            gbufferPipleLine["pushConsts.modelMatrix"] = model.second.modelMatrix;
+		//for (auto& model : sceneManager.sceneActors)
+		//{
+  //          gbufferPipleLine["pushConsts.modelMatrix"] = model.second.modelMatrix;
 
-			gbufferPipleLine["pushConsts.uniformBufferIndex"] = gbufferUniformBuffer.storeDescriptor();
-			gbufferPipleLine["pushConsts.boneIndex"] = model.second.bonesMatrixBuffer.storeDescriptor();
+		//	gbufferPipleLine["pushConsts.uniformBufferIndex"] = gbufferUniformBuffer.storeDescriptor();
+		//	gbufferPipleLine["pushConsts.boneIndex"] = model.second.bonesMatrixBuffer.storeDescriptor();
 
-			for (auto& geom : model.second.geomMeshes)
-			{
-				gbufferPipleLine["inPosition"] = geom.pointsBuffer;
-				gbufferPipleLine["inNormal"] = geom.normalsBuffer;
-				gbufferPipleLine["inTexCoord"] = geom.texCoordsBuffer;
-				gbufferPipleLine["boneIndexes"] = geom.boneIndexesBuffer;
-				gbufferPipleLine["jointWeights"] = geom.boneWeightsBuffer;
-				gbufferPipleLine["pushConsts.textureIndex"] = geom.textureIndex;
+		//	for (auto& geom : model.second.geomMeshes)
+		//	{
+		//		gbufferPipleLine["inPosition"] = geom.pointsBuffer;
+		//		gbufferPipleLine["inNormal"] = geom.normalsBuffer;
+		//		gbufferPipleLine["inTexCoord"] = geom.texCoordsBuffer;
+		//		gbufferPipleLine["boneIndexes"] = geom.boneIndexesBuffer;
+		//		gbufferPipleLine["jointWeights"] = geom.boneWeightsBuffer;
+		//		gbufferPipleLine["pushConsts.textureIndex"] = geom.textureIndex;
 
-				gbufferPipleLine.recordGeomMesh(geom.indexBuffer);
-			}
-		}
+		//		gbufferPipleLine.recordGeomMesh(geom.indexBuffer);
+		//	}
+		//}
 
-		gbufferPipleLine["gbufferPostion"] = gbufferPostionImage;
-		gbufferPipleLine["gbufferBaseColor"] = gbufferBaseColorImage;
-		gbufferPipleLine["gbufferNormal"] = gbufferNormalImage;
-		gbufferPipleLine["gbufferMotionVector"] = gbufferMotionVectorImage;
-		gbufferPipleLine.executePipeline(gbufferSize);
+		//gbufferPipleLine["gbufferPostion"] = gbufferPostionImage;
+		//gbufferPipleLine["gbufferBaseColor"] = gbufferBaseColorImage;
+		//gbufferPipleLine["gbufferNormal"] = gbufferNormalImage;
+		//gbufferPipleLine["gbufferMotionVector"] = gbufferMotionVectorImage;
+		//gbufferPipleLine.executePipeline(gbufferSize);
 	}
 
 
@@ -245,27 +240,34 @@ struct CabbageGlobalContext
 	//HardwareFrameSurface frameSurface;
 
 
-	EngineOperateList::CameraManager sceneCamera;
+	//EngineOperateList::CameraManager sceneCamera;
+	    struct CameraManager
+    {
+        float cameraFov = 45.0f;
+        ktm::fvec3 cameraPosition = ktm::fvec3(1.0f, 1.0f, 1.0f);
+        ktm::fvec3 cameraForward = ktm::fvec3(-1.0f, -1.0f, -1.0f);
+        ktm::fvec3 cameraWorldUp = ktm::fvec3(0.0f, 1.0f, 0.0f);
+    }sceneCamera;
 
-	SceneManager sceneManager;
+	//SceneManager sceneManager;
 
 	//PhysicalSimulator physicalSimulator;
 
-
-	void updateEngine(EngineOperateList& cmdList)
+		ktm::fvec3 sunDir = ktm::fvec3(0.0, 1.0, 0.0);
+	void updateEngine()
 	{
-		sceneCamera = cmdList.sceneCamera;
+		//sceneCamera = cmdList.sceneCamera;
 
-		sceneManager.updateScene(cmdList);
+		//sceneManager.updateScene(cmdList);
         //physicalSimulator.update();
 
-		cmdList.clearList();
+		//cmdList.clearList();
 
 		//shadowMapPipeline();
 
 		gbufferPipeline(ktm::fvec2(0.0, 0.0));
 
-		compositePipeline(cmdList.sunDir);
+		compositePipeline(sunDir);
 
 		//{
   //          testComputePipleLine["pushConsts.finalOutputImage"] = finalOutputImage.storeDescriptor();
@@ -273,17 +275,17 @@ struct CabbageGlobalContext
   //          testComputePipleLine.executePipeline(ktm::uvec3(gbufferSize.x / 8, gbufferSize.y / 8, 1));
 		//}
 
-        if (globalHardwareContext.displayManagers.size() != CabbageEngine::sceneList.size())
-        {
-            globalHardwareContext.displayManagers.resize(CabbageEngine::sceneList.size());
-            for (size_t i = 0; i < CabbageEngine::sceneList.size(); i++)
-            {
-                globalHardwareContext.displayManagers[i].initDisplayManager(CabbageEngine::sceneList[i]->surface);
-            }
-        }
-        for (size_t i = 0; i < CabbageEngine::sceneList.size(); i++)
-        {
-            globalHardwareContext.displayManagers[i].displayFrame(CabbageEngine::sceneList[i]->surface, finalOutputImage.image);
-        }
+        //if (globalHardwareContext.displayManagers.size() != CabbageEngine::sceneList.size())
+        //{
+        //    globalHardwareContext.displayManagers.resize(CabbageEngine::sceneList.size());
+        //    for (size_t i = 0; i < CabbageEngine::sceneList.size(); i++)
+        //    {
+        //        globalHardwareContext.displayManagers[i].initDisplayManager(CabbageEngine::sceneList[i]->surface);
+        //    }
+        //}
+        //for (size_t i = 0; i < CabbageEngine::sceneList.size(); i++)
+        //{
+        //    globalHardwareContext.displayManagers[i].displayFrame(CabbageEngine::sceneList[i]->surface, finalOutputImage.image);
+        //}
 	}
 };

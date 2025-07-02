@@ -3,7 +3,6 @@
 //#include "CabbageEditor/PythonAPI.h"
 
 #include "CabbageFramework/CabbageGlobalContext.h"
-#include "CabbageFramework/CabbageAssets/SceneManager.h"
 
 #include<thread>
 
@@ -23,7 +22,7 @@ int main()
     //};
     //boost::pfr::for_each_field_with_name(CabbageEngine{}, lammdaReflect);
 
-    CabbageEngine::Scene tempscene;
+    //CabbageEngine::Scene tempscene;
     //CabbageEngine::Actor temp = CabbageEngine::Actor(tempscene, "E:\\CabbageEngine\\TestCase\\vampire\\dancing_vampire.dae");
 
     //PythonAPI pythonManager;
@@ -51,15 +50,14 @@ int main()
     //    }
     //}).detach();
 
+	void* surface = nullptr;
     std::thread([&]() {
         if (glfwInit() >= 0)
         {
             GLFWwindow *window;
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
             window = glfwCreateWindow(800, 800, "Cabbage Engine", nullptr, nullptr);
-            void *surface = glfwGetWin32Window(window);
-
-            tempscene.setDisplaySurface(surface);
+            surface = glfwGetWin32Window(window);
 
             while (!glfwWindowShouldClose(window))
             {
@@ -73,15 +71,11 @@ int main()
     }).detach();
 
     CabbageGlobalContext app;
-    EngineOperateList originCmdList;
+    //EngineOperateList originCmdList;
     while (true)
     {
-        //mtx.lock();
-        //EngineOperateList originCmdList = engineCmdList;
-        //engineCmdList.clearList();
-        //mtx.unlock();
 
-        app.updateEngine(originCmdList);
+        app.updateEngine();
     }
 
     return 0;
