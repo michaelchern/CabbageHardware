@@ -19,9 +19,9 @@
 
 #include <ktm/ktm.h>
 
-#include "CabbageFramework/CabbageFoundation/CabbageFramework.h"
-#include "CabbageFramework/CabbageFoundation/PipelineManager/ComputePipeline.h"
-#include"CabbageFramework/CabbageFoundation/PipelineManager/RasterizerPipeline.h"
+#include "CabbageHardware/CabbageFramework.h"
+#include "CabbageHardware/PipelineManager/ComputePipeline.h"
+#include "CabbageHardware/PipelineManager/RasterizerPipeline.h"
 
 
 

@@ -1,9 +1,9 @@
 #pragma once
 
 
-#include"CabbageFramework/CabbageFoundation/HardwareManager/DeviceManager.h"
-#include"CabbageFramework/CabbageFoundation/HardwareManager/DisplayManager.h"
-#include"CabbageFramework/CabbageFoundation/HardwareManager/ResourceManager.h"
+#include"CabbageHardware/HardwareManager/DeviceManager.h"
+#include"CabbageHardware/HardwareManager/DisplayManager.h"
+#include"CabbageHardware/HardwareManager/ResourceManager.h"
 
 
 
