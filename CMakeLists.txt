@@ -166,28 +166,10 @@ if(IS_ROOT_DIR)
 
     # --- GLFW ---
     add_subdirectory(ExternalEnvironment/glfw EXCLUDE_FROM_ALL)
-    # --- Assimp ---
-    add_subdirectory(ExternalEnvironment/assimp EXCLUDE_FROM_ALL)
-    # --- glslang ---
-    set(ENABLE_OPT OFF)
-    add_subdirectory(ExternalEnvironment/vulkan/glslang EXCLUDE_FROM_ALL)
-    # --- SPIRV-Cross ---
-    set(SPIRV_CROSS_SHARED OFF)
-    set(SPIRV_CROSS_STATIC ON)
-    set(SPIRV_CROSS_ENABLE_TESTS OFF)
-    set(SPIRV_CROSS_CLI OFF)
-    add_subdirectory(ExternalEnvironment/vulkan/SPIRV-Cross EXCLUDE_FROM_ALL)
 
     # --- 链接第三方库 ---
     target_link_libraries(${PROJECT_NAME} PRIVATE
         glfw
-        assimp
-        glslang
-        glslang-default-resource-limits
-        spirv-cross-core
-        spirv-cross-c
-        spirv-cross-cpp
-        spirv-cross-util
         Helicon
     )
 
@@ -201,12 +183,8 @@ if(IS_ROOT_DIR)
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/ktm"
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/stb"
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/glfw/include"
-            "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/boost/pfr/include"
-            "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/boost/preprocessor/include"
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan"
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/volk"
-            "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/glslang"
-            "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/SPIRV-Cross"
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/Vulkan-Headers/include"
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/VulkanMemoryAllocator/include"
         )
