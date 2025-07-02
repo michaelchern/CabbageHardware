@@ -197,6 +197,7 @@ if(IS_ROOT_DIR)
     if(WIN32)
         target_include_directories(${PROJECT_NAME} PRIVATE
             "${CMAKE_CURRENT_SOURCE_DIR}/SourceCode"
+            "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/Helicon/SourceCode"
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/ktm"
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/stb"
             "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/glfw/include"

@@ -5,7 +5,7 @@
 
 #include <ktm/ktm.h>
 
-#include"CabbageFramework/CabbageCommon/ShaderCodeCompiler/ShaderCodeCompiler.h"
+#include"ShaderCodeCompiler/ShaderCodeCompiler.h"
 
 #include"HardwareContext.h"
 
