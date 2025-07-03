@@ -1,24 +1,24 @@
 [submodule "ExternalEnvironment/ktm"]
-	path = ExternalEnvironment/ktm
+	path = Env/ktm
 	url = https://github.com/YGXXD/ktm.git
 	ignore = all
 [submodule "ExternalEnvironment/glfw"]
-	path = ExternalEnvironment/glfw
+	path = Env/glfw
 	url = https://github.com/glfw/glfw.git
 	ignore = all
 [submodule "ExternalEnvironment/vulkan/volk"]
-	path = ExternalEnvironment/vulkan/volk
+	path = Env/vulkan/volk
 	url = https://github.com/zeux/volk.git
 	ignore = all
 [submodule "ExternalEnvironment/vulkan/Vulkan-Headers"]
-	path = ExternalEnvironment/vulkan/Vulkan-Headers
+	path = Env/vulkan/Vulkan-Headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
 	ignore = all
 [submodule "ExternalEnvironment/vulkan/VulkanMemoryAllocator"]
-	path = ExternalEnvironment/vulkan/VulkanMemoryAllocator
+	path = Env/vulkan/VulkanMemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
 	ignore = all
 [submodule "ExternalEnvironment/Helicon"]
-	path = ExternalEnvironment/Helicon
+	path = Env/Helicon
 	url = https://github.com/CoronaEngine/Helicon.git
 	ignore = all

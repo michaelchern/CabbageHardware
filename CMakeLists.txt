@@ -48,14 +48,14 @@ function(set_source_groups SOURCE_FILES SOURCE_DIR SOURCE_DIR_NAME)
 endfunction()
 
 # ======================== 源码收集 ========================
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/SourceCode)
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Src)
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.*")
 message(STATUS "[CabbageHardware] 已收集源文件数量: ${SOURCE_FILES}")
 
 # ======================== 忽略特定文件/文件夹 ========================
 set(IGNORE_FILES "")
 if(NOT IS_ROOT_DIR)
-    set(IGNORE_FILES "SourceCode/main.cpp")
+    set(IGNORE_FILES "Src/main.cpp")
     message(STATUS "[CabbageHardware] 非根目录，忽略 main.cpp")
 endif()
 foreach(file ${IGNORE_FILES})
@@ -70,7 +70,7 @@ else()
     add_library(${PROJECT_NAME} ${SOURCE_FILES})
     message(STATUS "[CabbageHardware] 配置为静态库 (library)")
 endif()
-set_source_groups("${SOURCE_FILES}" ${SOURCE_DIR} "SourceCode")
+set_source_groups("${SOURCE_FILES}" ${SOURCE_DIR} "Src")
 
 # ======================== 编译器选项 ========================
 target_compile_options(${PROJECT_NAME} PRIVATE
@@ -87,7 +87,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>
     $<$<CXX_COMPILER_ID:MSVC>:/execution-charset:utf-8>
 )
-message(STATUS "[CabbageHardware] 编译器选项已设置")
 
 # ======================== 链接器选项 ========================
 target_link_options(${PROJECT_NAME} PRIVATE
@@ -98,7 +97,6 @@ target_link_options(${PROJECT_NAME} PRIVATE
     $<$<AND:$<CONFIG:MinSizeRel>,$<CXX_COMPILER_ID:MSVC>>:/OPT:REF>
     $<$<AND:$<CONFIG:MinSizeRel>,$<CXX_COMPILER_ID:MSVC>>:/OPT:ICF>
 )
-message(STATUS "[CabbageHardware] 链接器选项已设置")
 
 # ======================== 预处理器定义 ========================
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -111,7 +109,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
     NOMINMAX
 )
-message(STATUS "[CabbageHardware] 预处理器定义已设置")
 
 # ======================== 目标属性 ========================
 if(IS_ROOT_DIR)
@@ -129,7 +126,6 @@ else()
         VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>
     )
 endif()
-message(STATUS "[CabbageHardware] 目标属性已设置")
 
 # ======================== 全局属性 ========================
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -137,22 +133,21 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 
 # ======================== 子仓库与第三方库 ========================
 set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(ExternalEnvironment/Helicon EXCLUDE_FROM_ALL)
-add_subdirectory(ExternalEnvironment/glfw EXCLUDE_FROM_ALL)
+add_subdirectory(Env/Helicon EXCLUDE_FROM_ALL)
+add_subdirectory(Env/glfw EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw Helicon)
-message(STATUS "[CabbageHardware] 已添加并链接第三方库 Helicon 和 glfw")
 
 # ======================== Windows 平台专用配置 ========================
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/SourceCode"
-        "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/Helicon/SourceCode"
-        "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/ktm"
-        "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/glfw/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan"
-        "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/volk"
-        "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/Vulkan-Headers/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/ExternalEnvironment/vulkan/VulkanMemoryAllocator/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Src"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Env/Helicon/Src"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Env/ktm"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Env/glfw/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Env/vulkan"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Env/vulkan/volk"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Env/vulkan/Vulkan-Headers/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Env/vulkan/VulkanMemoryAllocator/include"
     )
     message(STATUS "[CabbageHardware] Windows 平台 include 路径已配置")
 endif()
