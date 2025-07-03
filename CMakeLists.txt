@@ -1,4 +1,4 @@
-# ============================= CabbageHardware CMake 配置 =============================
+    # ============================= CabbageHardware CMake 配置 =============================
 cmake_minimum_required(VERSION 4.0)
 set(CMAKE_POLICY_VERSION_MINIMUM "4.0")
 
@@ -155,7 +155,7 @@ endif()
 
 # ======================== Windows 平台专用配置 ========================
 if(WIN32)
-    target_include_directories(${PROJECT_NAME} PRIVATE
+    target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/Src"
         "${CMAKE_CURRENT_SOURCE_DIR}/Env/Helicon/Src"
         "${CMAKE_CURRENT_SOURCE_DIR}/Env/ktm"
