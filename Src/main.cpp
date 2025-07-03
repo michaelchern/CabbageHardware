@@ -19,13 +19,13 @@
 
 #include <ktm/ktm.h>
 
-#include "CabbageHardware/CabbageFramework.h"
-#include "CabbageHardware/PipelineManager/ComputePipeline.h"
-#include "CabbageHardware/PipelineManager/RasterizerPipeline.h"
+#include "CabbageFramework.h"
+#include "PipelineManager/ComputePipeline.h"
+#include "PipelineManager/RasterizerPipeline.h"
 
 
 
-#include"ShaderCodeCompiler/SourceFilesPath.h"
+#include"Compiler/SourceFilesPath.h"
 
 
 
