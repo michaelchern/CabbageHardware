@@ -19,6 +19,7 @@ endif()
 
 # ======================== 根目录判定与日志输出 ========================
 set(IS_ROOT_DIR FALSE)
+
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(IS_ROOT_DIR TRUE)
     message(STATUS "[CabbageHardware] 当前为项目根目录: ${CMAKE_CURRENT_SOURCE_DIR}")
@@ -37,11 +38,13 @@ function(set_source_groups SOURCE_FILES SOURCE_DIR SOURCE_DIR_NAME)
     foreach(each_source_file IN LISTS SOURCE_FILES)
         get_filename_component(each_source_path "${each_source_file}" PATH)
         file(RELATIVE_PATH each_source_path_rel ${SOURCE_DIR} ${each_source_path})
+
         # 空路径直接分组到根
         if("${each_source_path_rel}" STREQUAL "")
             source_group("${SOURCE_DIR_NAME}" FILES ${each_source_file})
             continue()
         endif()
+
         string(REPLACE "/" "\\" each_source_group_path ${each_source_path_rel})
         source_group("${SOURCE_DIR_NAME}/${each_source_group_path}" FILES ${each_source_file})
     endforeach()
@@ -54,10 +57,12 @@ message(STATUS "[CabbageHardware] 已收集源文件数量: ${SOURCE_FILES}")
 
 # ======================== 忽略特定文件/文件夹 ========================
 set(IGNORE_FILES "")
+
 if(NOT IS_ROOT_DIR)
     set(IGNORE_FILES "Src/main.cpp")
     message(STATUS "[CabbageHardware] 非根目录，忽略 main.cpp")
 endif()
+
 foreach(file ${IGNORE_FILES})
     list(FILTER SOURCE_FILES EXCLUDE REGEX ${file})
 endforeach()
@@ -70,18 +75,22 @@ else()
     add_library(${PROJECT_NAME} ${SOURCE_FILES})
     message(STATUS "[CabbageHardware] 配置为静态库 (library)")
 endif()
+
 set_source_groups("${SOURCE_FILES}" ${SOURCE_DIR} "Src")
 
 # ======================== 编译器选项 ========================
 target_compile_options(${PROJECT_NAME} PRIVATE
+
     # RelWithDebInfo: 保留调试信息
     $<$<AND:$<CONFIG:RelWithDebInfo>,$<NOT:$<CXX_COMPILER_ID:MSVC>>>:-fno-omit-frame-pointer>
     $<$<AND:$<CONFIG:RelWithDebInfo>,$<NOT:$<CXX_COMPILER_ID:MSVC>>>:-g>
+
     # MinSizeRel: 优化体积
     $<$<AND:$<CONFIG:MinSizeRel>,$<NOT:$<CXX_COMPILER_ID:MSVC>>>:-ffunction-sections>
     $<$<AND:$<CONFIG:MinSizeRel>,$<NOT:$<CXX_COMPILER_ID:MSVC>>>:-fdata-sections>
     $<$<AND:$<CONFIG:MinSizeRel>,$<CXX_COMPILER_ID:Clang>>:-Oz>
     $<$<AND:$<CONFIG:MinSizeRel>,$<CXX_COMPILER_ID:MSVC>>:/GL>
+
     # MSVC 通用
     $<$<CXX_COMPILER_ID:MSVC>:/W1>
     $<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>
@@ -90,6 +99,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 
 # ======================== 链接器选项 ========================
 target_link_options(${PROJECT_NAME} PRIVATE
+
     # MinSizeRel: 链接优化
     $<$<AND:$<CONFIG:MinSizeRel>,$<PLATFORM_ID:Linux>,$<NOT:$<CXX_COMPILER_ID:MSVC>>>:LINKER:--gc-sections>
     $<$<AND:$<CONFIG:MinSizeRel>,$<PLATFORM_ID:Darwin>>:-dead_strip>
@@ -100,11 +110,13 @@ target_link_options(${PROJECT_NAME} PRIVATE
 
 # ======================== 预处理器定义 ========================
 target_compile_definitions(${PROJECT_NAME} PRIVATE
+
     # 配置相关
     $<$<CONFIG:RelWithDebInfo>:ENABLE_DETAILED_LOGGING=1>
     $<$<CONFIG:RelWithDebInfo>:CABBAGE_ENGINE_DEBUG>
     $<$<CONFIG:MinSizeRel>:DISABLE_EXTRA_FEATURES=1>
     $<$<CONFIG:MinSizeRel>:CABBAGE_ENGINE_RELEASE>
+
     # MSVC 特定
     $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
     NOMINMAX
@@ -134,8 +146,12 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 # ======================== 子仓库与第三方库 ========================
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(Env/Helicon EXCLUDE_FROM_ALL)
-add_subdirectory(Env/glfw EXCLUDE_FROM_ALL)
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw Helicon)
+target_link_libraries(${PROJECT_NAME} PRIVATE Helicon)
+
+if(IS_ROOT_DIR)
+    add_subdirectory(Env/glfw EXCLUDE_FROM_ALL)
+    target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+endif()
 
 # ======================== Windows 平台专用配置 ========================
 if(WIN32)
