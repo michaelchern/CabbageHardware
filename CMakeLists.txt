@@ -1,20 +1,20 @@
-    # ============================= CabbageHardware CMake 配置 =============================
+    # ============================= CabbageRasterizer CMake 配置 =============================
 cmake_minimum_required(VERSION 4.0)
 set(CMAKE_POLICY_VERSION_MINIMUM "4.0")
 
 # ======================== 项目基本信息 ========================
 project(
-    CabbageHardware
+    CabbageRasterizer
     VERSION 0.5.0
-    HOMEPAGE_URL "https://github.com/CoronaEngine/CabbageHardware"
+    HOMEPAGE_URL "https://github.com/CoronaEngine/CabbageRasterizer"
     LANGUAGES C CXX
 )
 
 # ======================== 检查 CMake 预设配置 ========================
 if(NOT USED_PRESET_CONFIG)
-    message(FATAL_ERROR "[CabbageHardware] 错误: 必须使用 CMake 预设配置 (USED_PRESET_CONFIG)！")
+    message(FATAL_ERROR "[CabbageRasterizer] 错误: 必须使用 CMake 预设配置 (USED_PRESET_CONFIG)！")
 else()
-    message(STATUS "[CabbageHardware] 检测到 USED_PRESET_CONFIG，继续配置。")
+    message(STATUS "[CabbageRasterizer] 检测到 USED_PRESET_CONFIG，继续配置。")
 endif()
 
 # ======================== 根目录判定与日志输出 ========================
@@ -22,15 +22,15 @@ set(IS_ROOT_DIR FALSE)
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(IS_ROOT_DIR TRUE)
-    message(STATUS "[CabbageHardware] 当前为项目根目录: ${CMAKE_CURRENT_SOURCE_DIR}")
+    message(STATUS "[CabbageRasterizer] 当前为项目根目录: ${CMAKE_CURRENT_SOURCE_DIR}")
 else()
-    message(STATUS "[CabbageHardware] 当前为子目录: ${CMAKE_CURRENT_SOURCE_DIR}")
+    message(STATUS "[CabbageRasterizer] 当前为子目录: ${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 # ======================== CMake 策略配置 ========================
 if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW) # 使 option() 支持目录作用域
-    message(STATUS "[CabbageHardware] 已启用策略 CMP0077 (option() 支持目录作用域)")
+    message(STATUS "[CabbageRasterizer] 已启用策略 CMP0077 (option() 支持目录作用域)")
 endif()
 
 # ======================== 文件分组函数（用于 IDE 文件夹结构） ========================
@@ -53,14 +53,14 @@ endfunction()
 # ======================== 源码收集 ========================
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Src)
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.*")
-message(STATUS "[CabbageHardware] 已收集源文件数量: ${SOURCE_FILES}")
+message(STATUS "[CabbageRasterizer] 已收集源文件数量: ${SOURCE_FILES}")
 
 # ======================== 忽略特定文件/文件夹 ========================
 set(IGNORE_FILES "")
 
 if(NOT IS_ROOT_DIR)
     set(IGNORE_FILES "Src/main.cpp")
-    message(STATUS "[CabbageHardware] 非根目录，忽略 main.cpp")
+    message(STATUS "[CabbageRasterizer] 非根目录，忽略 main.cpp")
 endif()
 
 foreach(file ${IGNORE_FILES})
@@ -70,10 +70,10 @@ endforeach()
 # ======================== 主目标配置 ========================
 if(IS_ROOT_DIR)
     add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-    message(STATUS "[CabbageHardware] 配置为可执行程序 (executable)")
+    message(STATUS "[CabbageRasterizer] 配置为可执行程序 (executable)")
 else()
     add_library(${PROJECT_NAME} ${SOURCE_FILES})
-    message(STATUS "[CabbageHardware] 配置为静态库 (library)")
+    message(STATUS "[CabbageRasterizer] 配置为静态库 (library)")
 endif()
 
 set_source_groups("${SOURCE_FILES}" ${SOURCE_DIR} "Src")
@@ -165,12 +165,12 @@ if(WIN32)
         "${CMAKE_CURRENT_SOURCE_DIR}/Env/vulkan/Vulkan-Headers/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/Env/vulkan/VulkanMemoryAllocator/include"
     )
-    message(STATUS "[CabbageHardware] Windows 平台 include 路径已配置")
+    message(STATUS "[CabbageRasterizer] Windows 平台 include 路径已配置")
 endif()
 
 # ======================== 配置完成日志 ========================
 if(IS_ROOT_DIR)
-    message(STATUS "[CabbageHardware] 主目标与第三方库配置完成")
+    message(STATUS "[CabbageRasterizer] 主目标与第三方库配置完成")
 else()
-    message(STATUS "[CabbageHardware] 子目标与第三方库配置完成")
+    message(STATUS "[CabbageRasterizer] 子目标与第三方库配置完成")
 endif()
