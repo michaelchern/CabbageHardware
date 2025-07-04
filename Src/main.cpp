@@ -24,7 +24,7 @@
 #include "PipelineManager/RasterizerPipeline.h"
 
 
-#include"Compiler/SourceFilesPath.h"
+//#include"Compiler/SourceFilesPath.h"
 
 
 std::string vertexShader = R"( 
