@@ -37,4 +37,4 @@ target_include_directories(CabbageRasterizer PUBLIC
     "${PROJECT_SOURCE_DIR}/Env/vulkan/VulkanMemoryAllocator/include"
 )
 
-target_link_libraries(CabbageRasterizer PRIVATE Helicon)
+target_link_libraries(CabbageRasterizer PUBLIC Helicon)
