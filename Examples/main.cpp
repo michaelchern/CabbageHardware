@@ -101,7 +101,7 @@ int main()
 
 	RasterizerPipeline rasterizer(readStringFile(shaderPath + "/vert.glsl"), readStringFile(shaderPath + "/frag.glsl"));
 
-	ComputePipeline computer(readStringFile(shaderPath + "/compue.glsl"));
+	ComputePipeline computer(readStringFile(shaderPath + "/compute.glsl"));
 
 	if (glfwInit() >= 0)
 	{
