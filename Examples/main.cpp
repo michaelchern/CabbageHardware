@@ -103,6 +103,8 @@ int main()
 
 	ComputePipeline computer(readStringFile(shaderPath + "/compute.glsl"));
 
+	auto startTime = std::chrono::high_resolution_clock::now();
+
 	if (glfwInit() >= 0)
 	{
 		GLFWwindow* window;
@@ -115,9 +117,19 @@ int main()
 		{
 			glfwPollEvents();
 
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+			ktm::fmat4x4 model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+			ktm::fmat4x4 view = ktm::look_at_lh(ktm::fvec3(2.0f, 2.0f, 2.0f), ktm::fvec3(0.0f, 0.0f, 0.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+			ktm::fmat4x4 proj = ktm::perspective_lh(ktm::radians(45.0f), 800.0f / 800.0f, 0.1f, 10.0f);
+
+			rasterizer["pushConsts.model"] = model;
+			rasterizer["pushConsts.view"] = view;
+			rasterizer["pushConsts.proj"] = proj;
 			rasterizer["inPosition"] = postionBuffer;
-			rasterizer["inPosition"] = postionBuffer;
-			rasterizer["inPosition"] = postionBuffer;
+			rasterizer["inColor"] = colorBuffer;
+			rasterizer["inTexCoord"] = texCoordBuffer;
 			rasterizer["outColor"] = finalOutputImage;
 			rasterizer.recordGeomMesh(indexBuffer);
 			rasterizer.executePipeline(ktm::uvec2(800, 800));
