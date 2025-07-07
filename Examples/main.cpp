@@ -30,6 +30,23 @@ void main() {
 }
 )";
 
+std::string computeShader =
+R"( 
+#version 450
+#extension GL_EXT_nonuniform_qualifier : enable
+layout (local_size_x = 8, local_size_y = 8) in;
+layout (set = 0, binding = 3, rgba16) uniform image2D inputImageRGBA16[];
+layout(push_constant) uniform PushConsts
+{
+    uint imageID;
+} pushConsts;
+void main()
+{
+    vec4 color = imageLoad(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy));
+	imageStore(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy), color * 1.2);
+}
+)";
+
 std::vector<float> vertices= {
     -0.5f, -0.5f, -0.5f, 
      0.5f, -0.5f, -0.5f, 
@@ -87,6 +104,8 @@ int main()
 	HardwareImage finalOutputImage(ktm::uvec2(800,800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
 
 	RasterizerPipeline rasterizer(vertexShader, fragShader);
+    
+    ComputePipeline computer(computeShader);
 
 	if (glfwInit() >= 0)
 	{
@@ -104,6 +123,9 @@ int main()
             rasterizer["outColor"] = finalOutputImage;
             rasterizer.recordGeomMesh(indexBuffer);
             rasterizer.executePipeline(ktm::uvec2(800, 800));
+
+            computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
+            computer.executePipeline(ktm::uvec3(800/ 8, 800/ 8, 1));
 
 			globalHardwareContext.displayManagers[0].displayFrame(glfwGetWin32Window(window), finalOutputImage.image);
 		}
