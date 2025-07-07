@@ -1,4 +1,8 @@
-﻿#include <ktm/ktm.h>
+﻿#include <fstream>
+#include <regex>
+#include <filesystem>
+
+#include <ktm/ktm.h>
 
 #include <GLFW/glfw3.h>
 
@@ -9,43 +13,41 @@
 #include "PipelineManager/ComputePipeline.h"
 #include "PipelineManager/RasterizerPipeline.h"
 
-
-std::string vertexShader =
-R"( 
-#version 450
-layout(location = 0) in vec2 inPosition;
-
-void main() {
-    gl_Position = vec4(inPosition, 0.0, 1.0);
-}
-)";
-
-std::string fragShader =
-R"( 
-#version 450
-layout(location = 0) out vec4 outColor;
-
-void main() {
-    outColor = vec4(0.5, 0.5, 0.5, 1.0);
-}
-)";
-
-std::string computeShader =
-R"( 
-#version 450
-#extension GL_EXT_nonuniform_qualifier : enable
-layout (local_size_x = 8, local_size_y = 8) in;
-layout (set = 0, binding = 3, rgba16) uniform image2D inputImageRGBA16[];
-layout(push_constant) uniform PushConsts
+std::string readStringFile(const std::string_view file_path)
 {
-    uint imageID;
-} pushConsts;
-void main()
-{
-    vec4 color = imageLoad(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy));
-	imageStore(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy), color * 1.2);
+	std::ifstream file(file_path.data());
+	if (!file.is_open())
+	{
+		throw std::runtime_error("Could not open the file.");
+	}
+
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+
+	file.close();
+	return buffer.str();
 }
-)";
+
+std::string shaderPath = [] {
+	std::string resultPath = "";
+	std::string runtimePath = std::filesystem::current_path().string();
+	// std::replace(runtimePath.begin(), runtimePath.end(), '\\', '/');
+	std::regex pattern(R"((.*)CabbageDisplay\b)");
+	std::smatch matches;
+	if (std::regex_search(runtimePath, matches, pattern))
+	{
+		if (matches.size() > 1)
+		{
+			resultPath = matches[1].str() + "CabbageDisplay";
+		}
+		else
+		{
+			throw std::runtime_error("Failed to resolve source path.");
+		}
+	}
+	std::replace(resultPath.begin(), resultPath.end(), '\\', '/');
+	return resultPath + "/Examples/TestCase";
+	}();
 
 const std::vector<ktm::fvec3> pos = {
 	{-0.5f, -0.5f, 0.0f},
@@ -97,9 +99,9 @@ int main()
 
 	HardwareImage finalOutputImage(ktm::uvec2(800, 800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
 
-	RasterizerPipeline rasterizer(vertexShader, fragShader);
+	RasterizerPipeline rasterizer(readStringFile(shaderPath + "/vert.glsl"), readStringFile(shaderPath + "/frag.glsl"));
 
-	ComputePipeline computer(computeShader);
+	ComputePipeline computer(readStringFile(shaderPath + "/compue.glsl"));
 
 	if (glfwInit() >= 0)
 	{
