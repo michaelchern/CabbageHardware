@@ -10,7 +10,7 @@
 #include "PipelineManager/RasterizerPipeline.h"
 
 
-std::string vertexShader = 
+std::string vertexShader =
 R"( 
 #version 450
 layout(location = 0) in vec2 inPosition;
@@ -20,7 +20,7 @@ void main() {
 }
 )";
 
-std::string fragShader = 
+std::string fragShader =
 R"( 
 #version 450
 layout(location = 0) out vec4 outColor;
@@ -47,65 +47,59 @@ void main()
 }
 )";
 
-std::vector<float> vertices= {
-    -0.5f, -0.5f, -0.5f, 
-     0.5f, -0.5f, -0.5f, 
-     0.5f,  0.5f, -0.5f, 
-     0.5f,  0.5f, -0.5f, 
-    -0.5f,  0.5f, -0.5f, 
-    -0.5f, -0.5f, -0.5f,
-
-    -0.5f, -0.5f,  0.5f,
-     0.5f, -0.5f,  0.5f, 
-     0.5f,  0.5f,  0.5f, 
-     0.5f,  0.5f,  0.5f, 
-    -0.5f,  0.5f,  0.5f,
-    -0.5f, -0.5f,  0.5f,
-
-    -0.5f,  0.5f,  0.5f, 
-    -0.5f,  0.5f, -0.5f, 
-    -0.5f, -0.5f, -0.5f,
-    -0.5f, -0.5f, -0.5f,
-    -0.5f, -0.5f,  0.5f, 
-    -0.5f,  0.5f,  0.5f,
-
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f, -0.5f, 
-     0.5f, -0.5f, -0.5f, 
-     0.5f, -0.5f, -0.5f,  
-     0.5f, -0.5f,  0.5f, 
-     0.5f,  0.5f,  0.5f,
-
-    -0.5f, -0.5f, -0.5f, 
-     0.5f, -0.5f, -0.5f, 
-     0.5f, -0.5f,  0.5f, 
-     0.5f, -0.5f,  0.5f, 
-    -0.5f, -0.5f,  0.5f, 
-    -0.5f, -0.5f, -0.5f, 
-
-    -0.5f,  0.5f, -0.5f, 
-     0.5f,  0.5f, -0.5f, 
-     0.5f,  0.5f,  0.5f, 
-     0.5f,  0.5f,  0.5f, 
-    -0.5f,  0.5f,  0.5f,  
-    -0.5f,  0.5f, -0.5f,  
+const std::vector<ktm::fvec3> pos = {
+	{-0.5f, -0.5f, 0.0f},
+	{0.5f, -0.5f, 0.0f},
+	{0.5f, 0.5f, 0.0f},
+	{-0.5f, 0.5f, 0.0f},
+	{-0.5f, -0.5f, -0.5f},
+	{0.5f, -0.5f, -0.5f},
+	{0.5f, 0.5f, -0.5f},
+	{-0.5f, 0.5f, -0.5f},
 };
 
-std::vector<uint32_t> indices =
-{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 };
+const std::vector<ktm::fvec3> color = {
+	{1.0f, 0.0f, 0.0f},
+	{0.0f, 1.0f, 0.0f},
+	{0.0f, 0.0f, 1.0f},
+	{1.0f, 1.0f, 1.0f},
+ {1.0f, 0.0f, 0.0f},
+ {0.0f, 1.0f, 0.0f},
+{0.0f, 0.0f, 1.0f},
+{1.0f, 1.0f, 1.0f},
+};
+
+const std::vector<ktm::fvec2> texCoord = {
+	{1.0f, 0.0f},
+	{0.0f, 0.0f},
+	{0.0f, 1.0f},
+	 {1.0f, 1.0f},
+	{1.0f, 0.0f},
+	 {0.0f, 0.0f},
+	 {0.0f, 1.0f},
+	{1.0f, 1.0f}
+};
+
+const std::vector<uint16_t> indices = {
+	0, 1, 2, 2, 3, 0,
+	4, 5, 6, 6, 7, 4
+};
 
 int main()
 {
-	HardwareBuffer postionBuffer = HardwareBuffer(vertices, BufferUsage::VertexBuffer);
-    HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
+	HardwareBuffer postionBuffer = HardwareBuffer(pos, BufferUsage::VertexBuffer);
+	HardwareBuffer colorBuffer = HardwareBuffer(color, BufferUsage::VertexBuffer);
+	HardwareBuffer texCoordBuffer = HardwareBuffer(texCoord, BufferUsage::VertexBuffer);
+
+	HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
 
 	globalHardwareContext.displayManagers.resize(1);
 
-	HardwareImage finalOutputImage(ktm::uvec2(800,800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
+	HardwareImage finalOutputImage(ktm::uvec2(800, 800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
 
 	RasterizerPipeline rasterizer(vertexShader, fragShader);
-    
-    ComputePipeline computer(computeShader);
+
+	ComputePipeline computer(computeShader);
 
 	if (glfwInit() >= 0)
 	{
@@ -119,13 +113,15 @@ int main()
 		{
 			glfwPollEvents();
 
-            rasterizer["inPosition"] = postionBuffer;
-            rasterizer["outColor"] = finalOutputImage;
-            rasterizer.recordGeomMesh(indexBuffer);
-            rasterizer.executePipeline(ktm::uvec2(800, 800));
+			rasterizer["inPosition"] = postionBuffer;
+			rasterizer["inPosition"] = postionBuffer;
+			rasterizer["inPosition"] = postionBuffer;
+			rasterizer["outColor"] = finalOutputImage;
+			rasterizer.recordGeomMesh(indexBuffer);
+			rasterizer.executePipeline(ktm::uvec2(800, 800));
 
-            computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
-            computer.executePipeline(ktm::uvec3(800/ 8, 800/ 8, 1));
+			computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
+			computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
 			globalHardwareContext.displayManagers[0].displayFrame(glfwGetWin32Window(window), finalOutputImage.image);
 		}
@@ -135,5 +131,5 @@ int main()
 		glfwTerminate();
 	}
 
-    return 0;
+	return 0;
 }
