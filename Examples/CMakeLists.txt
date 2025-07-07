@@ -4,6 +4,7 @@ file(GLOB_RECURSE EXAMPLES_SOURCE_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${EXAMPLES_SOURCE_FILES})
 add_executable(CabbageDisplayExamples ${EXAMPLES_SOURCE_FILES})
 
 set_target_properties(CabbageDisplayExamples PROPERTIES
