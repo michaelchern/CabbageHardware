@@ -1,4 +1,8 @@
-﻿#include <ktm/ktm.h>
+﻿#include <fstream>
+#include <regex>
+#include <filesystem>
+
+#include <ktm/ktm.h>
 
 #include <GLFW/glfw3.h>
 
@@ -9,103 +13,97 @@
 #include "PipelineManager/ComputePipeline.h"
 #include "PipelineManager/RasterizerPipeline.h"
 
-
-std::string vertexShader = 
-R"( 
-#version 450
-layout(location = 0) in vec2 inPosition;
-
-void main() {
-    gl_Position = vec4(inPosition, 0.0, 1.0);
-}
-)";
-
-std::string fragShader = 
-R"( 
-#version 450
-layout(location = 0) out vec4 outColor;
-
-void main() {
-    outColor = vec4(0.5, 0.5, 0.5, 1.0);
-}
-)";
-
-std::string computeShader =
-R"( 
-#version 450
-#extension GL_EXT_nonuniform_qualifier : enable
-layout (local_size_x = 8, local_size_y = 8) in;
-layout (set = 0, binding = 3, rgba16) uniform image2D inputImageRGBA16[];
-layout(push_constant) uniform PushConsts
+std::string readStringFile(const std::string_view file_path)
 {
-    uint imageID;
-} pushConsts;
-void main()
-{
-    vec4 color = imageLoad(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy));
-	imageStore(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy), color * 1.2);
+	std::ifstream file(file_path.data());
+	if (!file.is_open())
+	{
+		throw std::runtime_error("Could not open the file.");
+	}
+
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+
+	file.close();
+	return buffer.str();
 }
-)";
 
-std::vector<float> vertices= {
-    -0.5f, -0.5f, -0.5f, 
-     0.5f, -0.5f, -0.5f, 
-     0.5f,  0.5f, -0.5f, 
-     0.5f,  0.5f, -0.5f, 
-    -0.5f,  0.5f, -0.5f, 
-    -0.5f, -0.5f, -0.5f,
+std::string shaderPath = [] {
+	std::string resultPath = "";
+	std::string runtimePath = std::filesystem::current_path().string();
+	// std::replace(runtimePath.begin(), runtimePath.end(), '\\', '/');
+	std::regex pattern(R"((.*)CabbageDisplay\b)");
+	std::smatch matches;
+	if (std::regex_search(runtimePath, matches, pattern))
+	{
+		if (matches.size() > 1)
+		{
+			resultPath = matches[1].str() + "CabbageDisplay";
+		}
+		else
+		{
+			throw std::runtime_error("Failed to resolve source path.");
+		}
+	}
+	std::replace(resultPath.begin(), resultPath.end(), '\\', '/');
+	return resultPath + "/Examples/TestCase";
+	}();
 
-    -0.5f, -0.5f,  0.5f,
-     0.5f, -0.5f,  0.5f, 
-     0.5f,  0.5f,  0.5f, 
-     0.5f,  0.5f,  0.5f, 
-    -0.5f,  0.5f,  0.5f,
-    -0.5f, -0.5f,  0.5f,
-
-    -0.5f,  0.5f,  0.5f, 
-    -0.5f,  0.5f, -0.5f, 
-    -0.5f, -0.5f, -0.5f,
-    -0.5f, -0.5f, -0.5f,
-    -0.5f, -0.5f,  0.5f, 
-    -0.5f,  0.5f,  0.5f,
-
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f, -0.5f, 
-     0.5f, -0.5f, -0.5f, 
-     0.5f, -0.5f, -0.5f,  
-     0.5f, -0.5f,  0.5f, 
-     0.5f,  0.5f,  0.5f,
-
-    -0.5f, -0.5f, -0.5f, 
-     0.5f, -0.5f, -0.5f, 
-     0.5f, -0.5f,  0.5f, 
-     0.5f, -0.5f,  0.5f, 
-    -0.5f, -0.5f,  0.5f, 
-    -0.5f, -0.5f, -0.5f, 
-
-    -0.5f,  0.5f, -0.5f, 
-     0.5f,  0.5f, -0.5f, 
-     0.5f,  0.5f,  0.5f, 
-     0.5f,  0.5f,  0.5f, 
-    -0.5f,  0.5f,  0.5f,  
-    -0.5f,  0.5f, -0.5f,  
+const std::vector<ktm::fvec3> pos = {
+	{-0.5f, -0.5f, 0.0f},
+	{0.5f, -0.5f, 0.0f},
+	{0.5f, 0.5f, 0.0f},
+	{-0.5f, 0.5f, 0.0f},
+	{-0.5f, -0.5f, -0.5f},
+	{0.5f, -0.5f, -0.5f},
+	{0.5f, 0.5f, -0.5f},
+	{-0.5f, 0.5f, -0.5f},
 };
 
-std::vector<uint32_t> indices =
-{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 };
+const std::vector<ktm::fvec3> color = {
+	{1.0f, 0.0f, 0.0f},
+	{0.0f, 1.0f, 0.0f},
+	{0.0f, 0.0f, 1.0f},
+	{1.0f, 1.0f, 1.0f},
+ {1.0f, 0.0f, 0.0f},
+ {0.0f, 1.0f, 0.0f},
+{0.0f, 0.0f, 1.0f},
+{1.0f, 1.0f, 1.0f},
+};
+
+const std::vector<ktm::fvec2> texCoord = {
+	{1.0f, 0.0f},
+	{0.0f, 0.0f},
+	{0.0f, 1.0f},
+	 {1.0f, 1.0f},
+	{1.0f, 0.0f},
+	 {0.0f, 0.0f},
+	 {0.0f, 1.0f},
+	{1.0f, 1.0f}
+};
+
+const std::vector<uint16_t> indices = {
+	0, 1, 2, 2, 3, 0,
+	4, 5, 6, 6, 7, 4
+};
 
 int main()
 {
-	HardwareBuffer postionBuffer = HardwareBuffer(vertices, BufferUsage::VertexBuffer);
-    HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
+	HardwareBuffer postionBuffer = HardwareBuffer(pos, BufferUsage::VertexBuffer);
+	HardwareBuffer colorBuffer = HardwareBuffer(color, BufferUsage::VertexBuffer);
+	HardwareBuffer texCoordBuffer = HardwareBuffer(texCoord, BufferUsage::VertexBuffer);
+
+	HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
 
 	globalHardwareContext.displayManagers.resize(1);
 
-	HardwareImage finalOutputImage(ktm::uvec2(800,800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
+	HardwareImage finalOutputImage(ktm::uvec2(800, 800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
 
-	RasterizerPipeline rasterizer(vertexShader, fragShader);
-    
-    ComputePipeline computer(computeShader);
+	RasterizerPipeline rasterizer(readStringFile(shaderPath + "/vert.glsl"), readStringFile(shaderPath + "/frag.glsl"));
+
+	ComputePipeline computer(readStringFile(shaderPath + "/compute.glsl"));
+
+	auto startTime = std::chrono::high_resolution_clock::now();
 
 	if (glfwInit() >= 0)
 	{
@@ -119,13 +117,25 @@ int main()
 		{
 			glfwPollEvents();
 
-            rasterizer["inPosition"] = postionBuffer;
-            rasterizer["outColor"] = finalOutputImage;
-            rasterizer.recordGeomMesh(indexBuffer);
-            rasterizer.executePipeline(ktm::uvec2(800, 800));
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-            computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
-            computer.executePipeline(ktm::uvec3(800/ 8, 800/ 8, 1));
+			ktm::fmat4x4 model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+			ktm::fmat4x4 view = ktm::look_at_lh(ktm::fvec3(2.0f, 2.0f, 2.0f), ktm::fvec3(0.0f, 0.0f, 0.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+			ktm::fmat4x4 proj = ktm::perspective_lh(ktm::radians(45.0f), 800.0f / 800.0f, 0.1f, 10.0f);
+
+			rasterizer["pushConsts.model"] = model;
+			rasterizer["pushConsts.view"] = view;
+			rasterizer["pushConsts.proj"] = proj;
+			rasterizer["inPosition"] = postionBuffer;
+			rasterizer["inColor"] = colorBuffer;
+			rasterizer["inTexCoord"] = texCoordBuffer;
+			rasterizer["outColor"] = finalOutputImage;
+			rasterizer.recordGeomMesh(indexBuffer);
+			rasterizer.executePipeline(ktm::uvec2(800, 800));
+
+			computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
+			computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
 			globalHardwareContext.displayManagers[0].displayFrame(glfwGetWin32Window(window), finalOutputImage.image);
 		}
@@ -135,5 +145,5 @@ int main()
 		glfwTerminate();
 	}
 
-    return 0;
+	return 0;
 }
