@@ -49,36 +49,99 @@ std::string shaderPath = [] {
 	return resultPath + "/Examples";
 	}();
 
-const std::vector<ktm::fvec3> pos = {
-	{-0.5f, -0.5f, 0.0f},
-	{0.5f, -0.5f, 0.0f},
-	{0.5f, 0.5f, 0.0f},
-	{-0.5f, 0.5f, 0.0f},
-	{-0.5f, -0.5f, -0.5f},
-	{0.5f, -0.5f, -0.5f},
-	{0.5f, 0.5f, -0.5f},
-	{-0.5f, 0.5f, -0.5f},
+std::vector<float> pos = {
+	-0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+
+	-0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
 };
 
-const std::vector<ktm::fvec3> color = {
-	{1.0f, 0.0f, 0.0f},
-	{0.0f, 1.0f, 0.0f},
-	{0.0f, 0.0f, 1.0f},
-	{1.0f, 1.0f, 1.0f},
- {1.0f, 0.0f, 0.0f},
- {0.0f, 1.0f, 0.0f},
-{0.0f, 0.0f, 1.0f},
-{1.0f, 1.0f, 1.0f},
+std::vector<float> normal = {
+	// Back face (Z-negative)
+	0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  // Triangle 1
+	0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  // Triangle 2
+
+	// Front face (Z-positive)
+	0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 1.0f,   // Triangle 1
+	0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 1.0f,   // Triangle 2
+
+	// Left face (X-negative)
+	-1.0f, 0.0f, 0.0f,  -1.0f, 0.0f, 0.0f,  -1.0f, 0.0f, 0.0f,  // Triangle 1
+	-1.0f, 0.0f, 0.0f,  -1.0f, 0.0f, 0.0f,  -1.0f, 0.0f, 0.0f,  // Triangle 2
+
+	// Right face (X-positive)
+	1.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,   // Triangle 1
+	1.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,   // Triangle 2
+
+	// Bottom face (Y-negative)
+	0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  // Triangle 1
+	0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  // Triangle 2
+
+	// Top face (Y-positive)
+	0.0f, 1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   // Triangle 1
+	0.0f, 1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f, 0.0f    // Triangle 2
 };
 
-const std::vector<uint32_t> indices = {
-	0, 1, 2, 2, 3, 0,
-	4, 5, 6, 6, 7, 4
+std::vector<float> color = {
+	// Back face (Red)
+	1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+	// Front face (Green)
+	0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,
+	// Left face (Blue)
+	0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,
+	// Right face (Yellow)
+	1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
+	// Bottom face (Cyan)
+	0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,
+	// Top face (Magenta)
+	1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,
 };
+
+std::vector<uint32_t> indices =
+{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 };
+
 
 int main()
 {
 	HardwareBuffer postionBuffer = HardwareBuffer(pos, BufferUsage::VertexBuffer);
+	HardwareBuffer normalBuffer = HardwareBuffer(normal, BufferUsage::VertexBuffer);
 	HardwareBuffer colorBuffer = HardwareBuffer(color, BufferUsage::VertexBuffer);
 
 	HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
@@ -111,8 +174,10 @@ int main()
 			rasterizer["pushConsts.model"] = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
 			rasterizer["pushConsts.view"] = ktm::look_at_lh(ktm::fvec3(2.0f, 2.0f, 2.0f), ktm::fvec3(0.0f, 0.0f, 0.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
 			rasterizer["pushConsts.proj"] = ktm::perspective_lh(ktm::radians(45.0f), 800.0f / 800.0f, 0.1f, 10.0f);
+			rasterizer["pushConsts.viewPos"] = ktm::fvec3(2.0f, 2.0f, 2.0f);
 			rasterizer["inPosition"] = postionBuffer;
 			rasterizer["inColor"] = colorBuffer;
+			rasterizer["inNormal"] = normalBuffer;
 			rasterizer["outColor"] = finalOutputImage;
 			rasterizer.recordGeomMesh(indexBuffer);
 			rasterizer.executePipeline(ktm::uvec2(800, 800));
