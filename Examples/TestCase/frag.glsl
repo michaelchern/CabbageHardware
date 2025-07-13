@@ -1,5 +1,13 @@
 #version 450
 
+layout(push_constant) uniform PushConsts
+{
+    mat4 model;
+    mat4 view;
+    mat4 proj;
+} pushConsts;
+
+
 layout(binding = 1) uniform sampler2D texSampler;
 
 layout(location = 0) in vec3 fragColor;
