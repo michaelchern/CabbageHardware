@@ -8,7 +8,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${EXAMPLES_SOURCE_FILES})
 add_executable(CabbageDisplayExamples ${EXAMPLES_SOURCE_FILES})
 
 # 设置VS启动项目
-set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT CabbageFrameworkExamples)
+set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT CabbageDisplayExamples)
 
 set_target_properties(CabbageDisplayExamples PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/$<CONFIG>
