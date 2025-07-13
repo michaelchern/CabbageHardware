@@ -121,6 +121,56 @@ std::vector<float> normal = {
 	0.0f, 1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f, 0.0f    // Triangle 2
 };
 
+std::vector<float> textureUV = {
+	// Back face
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	// Front face
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	// Left face
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	// Right face
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	// Bottom face
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	// Top face
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+};
+
 std::vector<float> color = {
 	// Back face (Red)
 	1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,
@@ -144,13 +194,14 @@ int main()
 {
 	HardwareBuffer postionBuffer = HardwareBuffer(pos, BufferUsage::VertexBuffer);
 	HardwareBuffer normalBuffer = HardwareBuffer(normal, BufferUsage::VertexBuffer);
+	HardwareBuffer uvBuffer = HardwareBuffer(textureUV, BufferUsage::VertexBuffer);
 	HardwareBuffer colorBuffer = HardwareBuffer(color, BufferUsage::VertexBuffer);
 
 	HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
 
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &nrChannels, 0);
-	//HardwareImage texture=(ktm::uvec2(image.width, image.height), ImageFormat::RGBA8_SRGB, ImageUsage::SampledImage, 1, image.data);
+	int width, height, channels;
+	unsigned char* data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &channels, 0);
+	HardwareImage texture(ktm::uvec2(width, height), ImageFormat::RGBA8_SRGB, ImageUsage::SampledImage, 1, data);
 
 	globalHardwareContext.displayManagers.resize(1);
 
@@ -177,7 +228,7 @@ int main()
 			auto currentTime = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-			//rasterizer["pushConsts.textureIndex"] = texture.;
+			rasterizer["pushConsts.textureIndex"] = texture.storeDescriptor();
 			rasterizer["pushConsts.model"] = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
 			rasterizer["pushConsts.view"] = ktm::look_at_lh(ktm::fvec3(2.0f, 2.0f, 2.0f), ktm::fvec3(0.0f, 0.0f, 0.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
 			rasterizer["pushConsts.proj"] = ktm::perspective_lh(ktm::radians(45.0f), 800.0f / 800.0f, 0.1f, 10.0f);
@@ -186,6 +237,7 @@ int main()
 			rasterizer["pushConsts.lightColor"] = ktm::fvec3(10.0f, 10.0f, 10.0f);
 			rasterizer["inPosition"] = postionBuffer;
 			rasterizer["inColor"] = colorBuffer;
+			rasterizer["inTexCoord"] = uvBuffer;
 			rasterizer["inNormal"] = normalBuffer;
 			rasterizer["outColor"] = finalOutputImage;
 			rasterizer.recordGeomMesh(indexBuffer);

@@ -1,4 +1,5 @@
 #version 450
+#extension GL_EXT_nonuniform_qualifier : enable
 
 layout(push_constant) uniform PushConsts
 {
@@ -11,12 +12,14 @@ layout(push_constant) uniform PushConsts
     vec3 lightPos;
 } pushConsts;
 
-layout(location = 0) in vec3 inPosition; // Input vertex position
-layout(location = 1) in vec3 inNormal;   // Input vertex normal
-layout(location = 2) in vec3 inColor;    // Input vertex color
+layout(location = 0) in vec3 inPosition;
+layout(location = 1) in vec3 inNormal;
+layout(location = 2) in vec2 fragTexCoord;
+layout(location = 3) in vec3 inColor;
 
 layout(location = 0) out vec4 outColor;
 
+layout(set = 0, binding = 1) uniform sampler2D textures[];
 
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -118,5 +121,6 @@ vec3 calculateColor(vec3 WorldPos, vec3 Normal, vec3 albedo, float metallic, flo
 
 void main()
 {
-    outColor = vec4(calculateColor(inPosition, inNormal, inColor, 0.5, 0.5),1.0);
+    vec4 color = vec4(vec3(texture(textures[pushConsts.textureIndex], fragTexCoord)), 1.0f);
+    outColor = vec4(calculateColor(inPosition, inNormal, 0.5 * color + 0.5 * inColor, 0.5, 0.5),1.0);
 }
