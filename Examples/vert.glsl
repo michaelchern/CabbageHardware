@@ -29,7 +29,7 @@ void main()
 
     fragPos = vec3(pushConsts.model * vec4(inPosition, 1.0));
 
-    fragNormal = inNormal;
+    fragNormal = normalize(mat3(transpose(inverse(pushConsts.model))) * inNormal);
 
     fragColor = inColor;
 
