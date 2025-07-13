@@ -4,10 +4,12 @@
 
 #include <ktm/ktm.h>
 
-#include <GLFW/glfw3.h>
-
 #define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 #include "CabbageFramework.h"
 #include "PipelineManager/ComputePipeline.h"
@@ -146,6 +148,8 @@ int main()
 
 	HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
 
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &nrChannels, 0);
 	//HardwareImage texture=(ktm::uvec2(image.width, image.height), ImageFormat::RGBA8_SRGB, ImageUsage::SampledImage, 1, image.data);
 
 	globalHardwareContext.displayManagers.resize(1);
