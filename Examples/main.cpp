@@ -175,6 +175,8 @@ int main()
 			rasterizer["pushConsts.view"] = ktm::look_at_lh(ktm::fvec3(2.0f, 2.0f, 2.0f), ktm::fvec3(0.0f, 0.0f, 0.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
 			rasterizer["pushConsts.proj"] = ktm::perspective_lh(ktm::radians(45.0f), 800.0f / 800.0f, 0.1f, 10.0f);
 			rasterizer["pushConsts.viewPos"] = ktm::fvec3(2.0f, 2.0f, 2.0f);
+			rasterizer["pushConsts.lightPos"] = ktm::fvec3(1.0f, 1.0f, 1.0f);
+			rasterizer["pushConsts.lightColor"] = ktm::fvec3(20.0f, 20.0f, 20.0f);
 			rasterizer["inPosition"] = postionBuffer;
 			rasterizer["inColor"] = colorBuffer;
 			rasterizer["inNormal"] = normalBuffer;
@@ -182,8 +184,8 @@ int main()
 			rasterizer.recordGeomMesh(indexBuffer);
 			rasterizer.executePipeline(ktm::uvec2(800, 800));
 
-			computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
-			computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
+			//computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
+			//computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
 			globalHardwareContext.displayManagers[0].displayFrame(glfwGetWin32Window(window), finalOutputImage.image);
 		}

@@ -5,8 +5,11 @@ layout(push_constant) uniform PushConsts
     mat4 model;
     mat4 view;
     mat4 proj;
-    vec3 viewPos; // Camera position in world space
+    vec3 viewPos;
+    vec3 lightColor;
+    vec3 lightPos;
 } pushConsts;
+
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;   // New: Input for vertex normals
