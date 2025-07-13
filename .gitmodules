@@ -22,3 +22,6 @@
 	path = Env/Helicon
 	url = https://github.com/CoronaEngine/Helicon.git
 	ignore = all
+[submodule "Env/stb"]
+	path = Env/stb
+	url = https://github.com/nothings/stb.git
