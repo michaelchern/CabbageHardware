@@ -25,3 +25,4 @@
 [submodule "Env/stb"]
 	path = Env/stb
 	url = https://github.com/nothings/stb.git
+	ignore = all
