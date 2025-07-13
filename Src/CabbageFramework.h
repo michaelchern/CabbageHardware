@@ -60,7 +60,7 @@ struct HardwareResource
 		this->buffer = other.buffer;
 		this->image = other.image;
 
-		this->pushConstantSize = pushConstantSize;
+		this->pushConstantSize = other.pushConstantSize;
 
 		if (pushConstantData != nullptr)
 		{
