@@ -203,8 +203,6 @@ int main()
 	unsigned char* data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &channels, 0);
 	HardwareImage texture(ktm::uvec2(width, height), ImageFormat::RGBA8_SRGB, ImageUsage::SampledImage, 1, data);
 
-	globalHardwareContext.displayManagers.resize(1);
-
 	HardwareImage finalOutputImage(ktm::uvec2(800, 800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
 
 	RasterizerPipeline rasterizer(readStringFile(shaderPath + "/vert.glsl"), readStringFile(shaderPath + "/frag.glsl"));
@@ -213,15 +211,28 @@ int main()
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 
+	globalHardwareContext.displayManagers.resize(4);
+
 	if (glfwInit() >= 0)
 	{
-		GLFWwindow* window;
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		window = glfwCreateWindow(800, 800, "Cabbage Engine", nullptr, nullptr);
 
-		globalHardwareContext.displayManagers[0].initDisplayManager(glfwGetWin32Window(window));
+		GLFWwindow* window0 = glfwCreateWindow(800, 800, "Cabbage Engine 0", nullptr, nullptr);
+		globalHardwareContext.displayManagers[0].initDisplayManager(glfwGetWin32Window(window0));
 
-		while (!glfwWindowShouldClose(window))
+		GLFWwindow* window1 = glfwCreateWindow(800, 800, "Cabbage Engine 1", nullptr, nullptr);
+		globalHardwareContext.displayManagers[1].initDisplayManager(glfwGetWin32Window(window1));
+
+		GLFWwindow* window2 = glfwCreateWindow(800, 800, "Cabbage Engine 2", nullptr, nullptr);
+		globalHardwareContext.displayManagers[2].initDisplayManager(glfwGetWin32Window(window2));
+
+		GLFWwindow* window3 = glfwCreateWindow(800, 800, "Cabbage Engine 3", nullptr, nullptr);
+		globalHardwareContext.displayManagers[3].initDisplayManager(glfwGetWin32Window(window3));
+
+		while (!glfwWindowShouldClose(window0) && 
+			!glfwWindowShouldClose(window1) &&
+			!glfwWindowShouldClose(window2) &&
+			!glfwWindowShouldClose(window3))
 		{
 			glfwPollEvents();
 
@@ -246,10 +257,16 @@ int main()
 			computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
 			computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
-			globalHardwareContext.displayManagers[0].displayFrame(glfwGetWin32Window(window), finalOutputImage.image);
+			globalHardwareContext.displayManagers[0].displayFrame(glfwGetWin32Window(window0), finalOutputImage.image);
+			globalHardwareContext.displayManagers[1].displayFrame(glfwGetWin32Window(window1), finalOutputImage.image);
+			globalHardwareContext.displayManagers[2].displayFrame(glfwGetWin32Window(window2), finalOutputImage.image);
+			globalHardwareContext.displayManagers[3].displayFrame(glfwGetWin32Window(window3), finalOutputImage.image);
 		}
 
-		glfwDestroyWindow(window);
+		glfwDestroyWindow(window0);
+		glfwDestroyWindow(window1);
+		glfwDestroyWindow(window2);
+		glfwDestroyWindow(window3);
 
 		glfwTerminate();
 	}
