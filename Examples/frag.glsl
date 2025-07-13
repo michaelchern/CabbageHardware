@@ -2,6 +2,7 @@
 
 layout(push_constant) uniform PushConsts
 {
+    uint textureIndex;
     mat4 model;
     mat4 view;
     mat4 proj;
