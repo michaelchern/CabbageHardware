@@ -40,7 +40,8 @@ target_link_options(CabbageDisplayExamples PRIVATE
 )
 
 target_include_directories(CabbageDisplayExamples PRIVATE
-    "${PROJECT_SOURCE_DIR}/Env/glfw/include")
+    "${PROJECT_SOURCE_DIR}/Env/glfw/include"
+    "${PROJECT_SOURCE_DIR}/Env/stb")
 
 target_link_libraries(CabbageDisplayExamples PRIVATE
     glfw
