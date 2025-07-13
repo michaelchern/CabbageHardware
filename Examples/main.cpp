@@ -46,7 +46,7 @@ std::string shaderPath = [] {
 		}
 	}
 	std::replace(resultPath.begin(), resultPath.end(), '\\', '/');
-	return resultPath + "/Examples/TestCase";
+	return resultPath + "/Examples";
 	}();
 
 const std::vector<ktm::fvec3> pos = {
