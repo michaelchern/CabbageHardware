@@ -32,7 +32,7 @@ struct RasterizerPipeline
         return depthImage;
     }
 
-	void executePipeline(std::vector<GeomMeshDrawIndexed> GeomMeshes, HardwareImage depthImage, std::vector<ResourceManager::ImageHardwareWrap> renderTarget);
+	void executePipeline(std::vector<GeomMeshDrawIndexed> GeomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget);
     void executePipeline(ktm::uvec2 imageSize);
 
     std::variant<HardwarePushConstant, HardwareBuffer, HardwareImage> operator[](std::string resourceName)
@@ -104,7 +104,7 @@ private:
 
 	VkFramebuffer frameBuffers;
 
-	std::vector<ResourceManager::ImageHardwareWrap> renderTarget;
+	//std::vector<ResourceManager::ImageHardwareWrap> renderTarget;
     HardwareImage depthImage;
 
 	ShaderCodeModule vertShaderCode;

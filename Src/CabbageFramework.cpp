@@ -39,7 +39,6 @@ bool HardwareBuffer::copyFromBuffer(const HardwareBuffer& inputBuffer, uint64_t 
 
 
 HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage, int arrayLayers, void* imageData)
-	:imageSize(imageSize), imageFormat(imageFormat)
 {
 	VkImageUsageFlags vkImageUsageFlags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
@@ -58,6 +57,7 @@ HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, Imag
 		break;
 	}
 
+	uint32_t pixelSize;
 	VkFormat vkImageFormat;
 	switch (imageFormat)
 	{
@@ -114,6 +114,7 @@ HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, Imag
 	}
 
 	image = globalHardwareContext.resourceManager.createImage(imageSize, vkImageFormat, vkImageUsageFlags, arrayLayers);
+	image.pixelSize = pixelSize;
 
 	if (imageData != nullptr)
 	{
@@ -145,7 +146,7 @@ bool HardwareImage::copyFromBuffer(const HardwareBuffer& buffer)
 
 bool HardwareImage::copyFromData(const void* inputData)
 {
-	HardwareBuffer stagingBuffer = HardwareBuffer(imageSize.x * imageSize.y * pixelSize, BufferUsage::StorageBuffer, inputData);
+	HardwareBuffer stagingBuffer = HardwareBuffer(image.imageSize.x * image.imageSize.y * image.pixelSize, BufferUsage::StorageBuffer, inputData);
 	copyFromBuffer(stagingBuffer);
 	return true;
 }

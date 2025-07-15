@@ -133,15 +133,15 @@ struct HardwareImage
 	bool copyFromBuffer(const HardwareBuffer& buffer);
 	bool copyFromData(const void* inputData);
 
-	ImageFormat imageFormat;
-	ktm::uvec2 imageSize;
-	uint32_t pixelSize;
+	//ImageFormat imageFormat;
+	//ktm::uvec2 imageSize;
+	//uint32_t pixelSize;
 
 	HardwareImage& operator= (const HardwareImage& other)
 	{
-		this->imageFormat = other.imageFormat;
-		this->imageSize = other.imageSize;
-		this->pixelSize = other.pixelSize;
+		//this->imageFormat = other.imageFormat;
+		//this->imageSize = other.imageSize;
+		//this->pixelSize = other.pixelSize;
 		this->image = other.image;
 		return *this;
 	}

@@ -22,6 +22,7 @@ struct ResourceManager
 
 	struct ImageHardwareWrap
 	{
+		uint32_t pixelSize = 0;
 		ktm::uvec2 imageSize = ktm::uvec2(0, 0);
 		VkFormat imageFormat = VK_FORMAT_MAX_ENUM;
 		VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM;

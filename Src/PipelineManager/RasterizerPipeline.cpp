@@ -44,10 +44,10 @@ void RasterizerPipeline::createRenderPass(int multiviewCount)
 	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	for (size_t i = 0; i < renderTarget.size(); i++)
+	for (size_t i = 0; i < renderTargets.size(); i++)
 	{
 		VkAttachmentDescription attachment{};
-		attachment.format = renderTarget[i].imageFormat;
+		attachment.format = renderTargets[i].image.imageFormat;
 		attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 		attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -62,7 +62,7 @@ void RasterizerPipeline::createRenderPass(int multiviewCount)
 
 
 	std::vector<VkAttachmentReference> colorReferences;
-	for (uint32_t i = 0; i < renderTarget.size(); i++)
+	for (uint32_t i = 0; i < renderTargets.size(); i++)
 	{
 		colorReferences.push_back({ i, VK_IMAGE_LAYOUT_GENERAL });
 	}
@@ -246,7 +246,7 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
 	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 	colorBlendAttachment.blendEnable = VK_FALSE;
 
-	for (uint32_t i = 0; i < renderTarget.size(); i++)
+	for (uint32_t i = 0; i < renderTargets.size(); i++)
 	{
 		colorBlendAttachments.push_back(colorBlendAttachment);
 	}
@@ -320,9 +320,9 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
 void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 {
 	std::vector<VkImageView> attachments;
-	for (int i = 0; i < renderTarget.size(); i++)
+	for (int i = 0; i < renderTargets.size(); i++)
 	{
-		//attachments.push_back(renderTarget[i].imageView);
+		attachments.push_back(renderTargets[i].image.imageView);
 	}
 	attachments.push_back(depthImage.image.imageView);
 
@@ -345,20 +345,20 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 
 
 
-void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMeshes, HardwareImage depthImage, std::vector<ResourceManager::ImageHardwareWrap> renderTarget)
+void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget)
 {
 	vkQueueWaitIdle(globalHardwareContext.deviceManager.mainDevice.graphicsQueues[0].vkQueue);
 
 
 	if (this->depthImage)
 	{
-		this->renderTarget = renderTarget;
+		this->renderTargets = renderTarget;
 		this->depthImage = depthImage;
 
 		createRenderPass(multiviewCount);
 
 		createGraphicsPipeline(vertShaderCode, fragShaderCode);
-		createFramebuffers(depthImage.imageSize);
+		createFramebuffers(depthImage.image.imageSize);
 	}
 
 
@@ -367,13 +367,13 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 	renderPassInfo.renderPass = renderPass;
 	renderPassInfo.framebuffer = frameBuffers;
 	renderPassInfo.renderArea.offset = { 0, 0 };
-	renderPassInfo.renderArea.extent.width = depthImage.imageSize.x;
-	renderPassInfo.renderArea.extent.height = depthImage.imageSize.y;
+	renderPassInfo.renderArea.extent.width = depthImage.image.imageSize.x;
+	renderPassInfo.renderArea.extent.height = depthImage.image.imageSize.y;
 
 	std::vector<VkClearValue> clearValues;
 	for (size_t i = 0; i < renderTarget.size(); i++)
 	{
-		clearValues.push_back(renderTarget[i].clearValue);
+		clearValues.push_back(renderTarget[i].image.clearValue);
 	}
 	clearValues.push_back(depthImage.image.clearValue);
 
@@ -396,16 +396,16 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = (float)depthImage.imageSize.x;
-	viewport.height = (float)depthImage.imageSize.y;
+	viewport.width = (float)depthImage.image.imageSize.x;
+	viewport.height = (float)depthImage.image.imageSize.y;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport(globalHardwareContext.deviceManager.mainDevice.commandBuffers, 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = { 0, 0 };
-	scissor.extent.width = depthImage.imageSize.x;
-	scissor.extent.height = depthImage.imageSize.y;
+	scissor.extent.width = depthImage.image.imageSize.x;
+	scissor.extent.height = depthImage.image.imageSize.y;
 	vkCmdSetScissor(globalHardwareContext.deviceManager.mainDevice.commandBuffers, 0, 1, &scissor);
 
 
@@ -472,11 +472,11 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 
 void RasterizerPipeline::executePipeline(ktm::uvec2 imageSize)
 {
-    std::vector<ResourceManager::ImageHardwareWrap> rasterizerPipelineRenderTargets(renderTargets.size());
-    for (size_t i = 0; i < renderTargets.size(); i++)
-    {
-        rasterizerPipelineRenderTargets[i] = renderTargets[i].image;
-    }
+    //std::vector<ResourceManager::ImageHardwareWrap> rasterizerPipelineRenderTargets(renderTargets.size());
+    //for (size_t i = 0; i < renderTargets.size(); i++)
+    //{
+    //    rasterizerPipelineRenderTargets[i] = renderTargets[i].image;
+    //}
 
     std::vector<RasterizerPipeline::GeomMeshDrawIndexed> rasterizerPipelineGeomMeshes(geomMeshes.size());
     for (size_t geomMeshesIndex = 0; geomMeshesIndex < geomMeshes.size(); geomMeshesIndex++)
@@ -499,7 +499,7 @@ void RasterizerPipeline::executePipeline(ktm::uvec2 imageSize)
         depthImage = HardwareImage(imageSize, ImageFormat::D32_FLOAT, ImageUsage::DepthImage);
     }
 
-	executePipeline(rasterizerPipelineGeomMeshes, depthImage, rasterizerPipelineRenderTargets);
+	executePipeline(rasterizerPipelineGeomMeshes, depthImage, renderTargets);
 
     geomMeshes.clear();
 }
