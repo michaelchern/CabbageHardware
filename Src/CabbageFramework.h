@@ -90,6 +90,8 @@ struct HardwareBuffer
 
 	HardwareBuffer& operator= (const HardwareBuffer& other);
 
+	operator bool();
+
 	uint32_t bufferID;
 };
 

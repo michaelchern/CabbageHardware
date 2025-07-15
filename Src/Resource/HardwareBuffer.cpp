@@ -2,16 +2,18 @@
 #include"HardwareContext.h"
 
 
-std::unordered_map<uint32_t, ResourceManager::ImageHardwareWrap> bufferGlobalPool;
+std::unordered_map<uint32_t, ResourceManager::BufferHardwareWrap> bufferGlobalPool;
 uint32_t currentBufferID = 0;
 
-//HardwareBuffer::operator bool()
-//{
-//	return buffer.bufferHandle != VK_NULL_HANDLE;
-//}
+HardwareBuffer::operator bool()
+{
+	return bufferGlobalPool[bufferID].bufferHandle != VK_NULL_HANDLE;
+}
 
 HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const void* data)
 {
+	this->bufferID = currentBufferID++;
+
 	VkBufferUsageFlags vkUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
 	switch (usage)
@@ -32,7 +34,8 @@ HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const voi
 		break;
 	}
 
-	buffer = globalHardwareContext.resourceManager.createBuffer(bufferSize, vkUsage);
+	bufferGlobalPool[bufferID] = globalHardwareContext.resourceManager.createBuffer(bufferSize, vkUsage);
+
 	if (data != nullptr)
 	{
 		copyFromData(data, bufferSize);
@@ -41,40 +44,34 @@ HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const voi
 
 bool HardwareBuffer::copyFromBuffer(const HardwareBuffer& inputBuffer, uint64_t size)
 {
-	globalHardwareContext.resourceManager.copyBuffer(inputBuffer.buffer.bufferHandle, buffer.bufferHandle, size);
+	globalHardwareContext.resourceManager.copyBuffer(bufferGlobalPool[inputBuffer.bufferID].bufferHandle, bufferGlobalPool[bufferID].bufferHandle, size);
 	return true;
 }
 
 uint32_t HardwareBuffer::storeDescriptor()
 {
-	return globalHardwareContext.resourceManager.storeDescriptor(buffer);
+	return globalHardwareContext.resourceManager.storeDescriptor(bufferGlobalPool[bufferID]);
 }
 
-bool copyFromData(const void* inputData, uint64_t size)
+bool HardwareBuffer::copyFromData(const void* inputData, uint64_t size)
 {
-	memcpy(buffer.bufferAllocInfo.pMappedData, inputData, size);
+	memcpy(bufferGlobalPool[bufferID].bufferAllocInfo.pMappedData, inputData, size);
 	return true;
 }
 
-template<typename Type>
-bool copyFromVector(const std::vector<Type>& input)
+
+void* HardwareBuffer::getMappedData()
 {
-	memcpy(buffer.bufferAllocInfo.pMappedData, input.data(), input.size() * sizeof(Type));
-	return true;
+	return bufferGlobalPool[bufferID].bufferAllocInfo.pMappedData;
 }
 
-void* getMappedData()
+uint64_t HardwareBuffer::getBufferSize()
 {
-	return buffer.bufferAllocInfo.pMappedData;
+	return bufferGlobalPool[bufferID].bufferAllocInfo.size;
 }
 
-uint64_t getBufferSize()
+HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
 {
-	return buffer.bufferAllocInfo.size;
-}
-
-HardwareBuffer& operator= (const HardwareBuffer& other)
-{
-	this->buffer = other.buffer;
+	bufferGlobalPool[this->bufferID] = bufferGlobalPool[other.bufferID];
 	return *this;
 }
