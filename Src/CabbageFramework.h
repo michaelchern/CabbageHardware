@@ -7,7 +7,6 @@
 
 #include"Compiler/ShaderCodeCompiler.h"
 
-#include"HardwareContext.h"
 
 
 enum class ImageFormat : uint32_t
@@ -76,42 +75,22 @@ struct HardwareBuffer
 	uint32_t storeDescriptor();
 
 	bool copyFromBuffer(const HardwareBuffer& inputBuffer, uint64_t size);
-	bool copyFromData(const void* inputData, uint64_t size)
-	{
-		memcpy(buffer.bufferAllocInfo.pMappedData, inputData, size);
-		return true;
-	}
+	bool copyFromData(const void* inputData, uint64_t size);
 
 	template<typename Type>
 	bool copyFromVector(const std::vector<Type>& input)
 	{
-		memcpy(buffer.bufferAllocInfo.pMappedData, input.data(), input.size() * sizeof(Type));
+		copyFromData(input.data(), input.size() * sizeof(Type));
 		return true;
 	}
 
-	void* getMappedData()
-	{
-		return buffer.bufferAllocInfo.pMappedData;
-	}
+	void* getMappedData();
 
-	uint64_t getBufferSize()
-	{
-		return buffer.bufferAllocInfo.size;
-	}
+	uint64_t getBufferSize();
 
-	operator bool()
-	{
-		return buffer.bufferHandle != VK_NULL_HANDLE;
-	}
+	HardwareBuffer& operator= (const HardwareBuffer& other);
 
-
-	HardwareBuffer& operator= (const HardwareBuffer& other)
-	{
-		this->buffer = other.buffer;
-		return *this;
-	}
-
-	ResourceManager::BufferHardwareWrap buffer;
+	uint32_t bufferID;
 };
 
 
@@ -133,20 +112,9 @@ struct HardwareImage
 	bool copyFromBuffer(const HardwareBuffer& buffer);
 	bool copyFromData(const void* inputData);
 
-	//ImageFormat imageFormat;
-	//ktm::uvec2 imageSize;
-	//uint32_t pixelSize;
+	HardwareImage& operator= (const HardwareImage& other);
 
-	HardwareImage& operator= (const HardwareImage& other)
-	{
-		//this->imageFormat = other.imageFormat;
-		//this->imageSize = other.imageSize;
-		//this->pixelSize = other.pixelSize;
-		this->image = other.image;
-		return *this;
-	}
-
-	ResourceManager::ImageHardwareWrap image;
+	uint32_t imageID;
 };
 
 

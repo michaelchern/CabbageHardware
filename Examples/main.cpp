@@ -14,6 +14,7 @@
 #include "CabbageFramework.h"
 #include "PipelineManager/ComputePipeline.h"
 #include "PipelineManager/RasterizerPipeline.h"
+#include <HardwareContext.h>
 
 std::string readStringFile(const std::string_view file_path)
 {
@@ -256,10 +257,10 @@ int main()
 			computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
 			computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
-			displayManager0.displayFrame(glfwGetWin32Window(window0), finalOutputImage.image);
-			displayManager1.displayFrame(glfwGetWin32Window(window1), finalOutputImage.image);
-			displayManager2.displayFrame(glfwGetWin32Window(window2), finalOutputImage.image);
-			displayManager3.displayFrame(glfwGetWin32Window(window3), finalOutputImage.image);
+			displayManager0.displayFrame(glfwGetWin32Window(window0), imageGlobalPool[finalOutputImage.imageID]);
+			displayManager1.displayFrame(glfwGetWin32Window(window1), imageGlobalPool[finalOutputImage.imageID]);
+			displayManager2.displayFrame(glfwGetWin32Window(window2), imageGlobalPool[finalOutputImage.imageID]);
+			displayManager3.displayFrame(glfwGetWin32Window(window3), imageGlobalPool[finalOutputImage.imageID]);
 		}
 
 		glfwDestroyWindow(window0);

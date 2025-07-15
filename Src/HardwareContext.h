@@ -85,3 +85,6 @@ struct HardwareContext
 };
 
 extern HardwareContext globalHardwareContext;
+
+extern std::unordered_map<uint32_t, ResourceManager::ImageHardwareWrap> imageGlobalPool;
+extern std::unordered_map<uint32_t, ResourceManager::ImageHardwareWrap> bufferGlobalPool;
