@@ -185,15 +185,16 @@ struct HardwarePushConstant : HardwareResource
 	HardwarePushConstant() = default;
 	~HardwarePushConstant() = default;
 
-	HardwarePushConstant(const HardwarePushConstant& whole, uint64_t offset, uint64_t size)
-	{
-		pushConstantData = (uint8_t*)whole.pushConstantData + offset;
-		pushConstantSize = size;
-	}
-
-	HardwarePushConstant(uint64_t size)
+	HardwarePushConstant(uint64_t size, uint64_t offset, HardwarePushConstant* whole = nullptr)
 	{
 		pushConstantSize = size;
-		pushConstantData = malloc(size);
+		if (whole != nullptr)
+		{
+			pushConstantData = (uint8_t*)(whole->pushConstantData) + offset;
+		}
+		else
+		{
+			pushConstantData = malloc(size);
+		}
 	}
 };

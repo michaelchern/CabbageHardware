@@ -7,7 +7,7 @@ ComputePipeline::ComputePipeline(std::string shaderCode, ShaderLanguage language
     : shaderCodeCompiler(ShaderCodeCompiler(shaderCode, ShaderStage::ComputeShader, language, sourceLocation))
 {
     this->shaderCode = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV);
-    this->pushConstant = HardwarePushConstant(shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantSize);
+    this->pushConstant = HardwarePushConstant(shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantSize, 0);
 }
 
 //ComputePipeline::~ComputePipeline()

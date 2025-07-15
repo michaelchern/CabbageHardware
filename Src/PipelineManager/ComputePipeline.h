@@ -28,7 +28,7 @@ struct ComputePipeline
             ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
             if (resource != nullptr)
             {
-                tempPushConstantMember = HardwarePushConstant(pushConstant, resource->byteOffset, resource->typeSize);
+                tempPushConstantMember = HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant);
                 return tempPushConstantMember;
             }
         }
