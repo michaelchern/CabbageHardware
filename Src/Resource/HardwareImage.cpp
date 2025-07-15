@@ -24,7 +24,7 @@ uint32_t HardwareImage::storeDescriptor()
 
 bool HardwareImage::copyFromBuffer(const HardwareBuffer& buffer)
 {
-	globalHardwareContext.resourceManager.copyBufferToImage(buffer.buffer.bufferHandle, imageGlobalPool[imageID].imageHandle, imageGlobalPool[imageID].imageSize.x, imageGlobalPool[imageID].imageSize.y);
+	globalHardwareContext.resourceManager.copyBufferToImage(bufferGlobalPool[buffer.bufferID].bufferHandle, imageGlobalPool[imageID].imageHandle, imageGlobalPool[imageID].imageSize.x, imageGlobalPool[imageID].imageSize.y);
 	return true;
 }
 

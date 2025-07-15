@@ -483,14 +483,14 @@ void RasterizerPipeline::executePipeline(ktm::uvec2 imageSize)
     {
         rasterizerPipelineGeomMeshes[geomMeshesIndex].pushContastValue = geomMeshes[geomMeshesIndex].pushConstant.pushConstantData;
 
-        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexCount = std::min(uint32_t(geomMeshes[geomMeshesIndex].indexBuffer.buffer.bufferAllocInfo.size / sizeof(uint32_t)), geomMeshes[geomMeshesIndex].indexCount);
+        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexCount = std::min(uint32_t(bufferGlobalPool[geomMeshes[geomMeshesIndex].indexBuffer.bufferID].bufferAllocInfo.size / sizeof(uint32_t)), geomMeshes[geomMeshesIndex].indexCount);
         rasterizerPipelineGeomMeshes[geomMeshesIndex].indexOffset = geomMeshes[geomMeshesIndex].indexOffset;
-        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexBuffer = geomMeshes[geomMeshesIndex].indexBuffer.buffer;
+        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexBuffer = bufferGlobalPool[geomMeshes[geomMeshesIndex].indexBuffer.bufferID];
 
         rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers.resize(geomMeshes[geomMeshesIndex].vertexBuffers.size());
         for (size_t vertexBufferIndex = 0; vertexBufferIndex < geomMeshes[geomMeshesIndex].vertexBuffers.size(); vertexBufferIndex++)
         {
-            rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex] = geomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex].buffer;
+            rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex] = bufferGlobalPool[geomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex].bufferID];
         }
     }
 
