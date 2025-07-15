@@ -28,7 +28,7 @@ struct ComputePipeline
             ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
             if (resource != nullptr)
             {
-                tempPushConstantMember = HardwareResource(pushConstant, resource->byteOffset, resource->typeSize);
+                tempPushConstantMember = HardwarePushConstant(pushConstant, resource->byteOffset, resource->typeSize);
                 return tempPushConstantMember;
             }
         }
@@ -45,7 +45,7 @@ private:
 	VkPipeline pipeline = VK_NULL_HANDLE;
 
 	HardwarePushConstant pushConstant;
-    HardwareResource tempPushConstantMember;
+    HardwarePushConstant tempPushConstantMember;
 
     ShaderCodeCompiler shaderCodeCompiler;
 	ShaderCodeModule shaderCode;

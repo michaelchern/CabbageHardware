@@ -93,12 +93,6 @@ struct HardwareResource
 	void* pushConstantData = nullptr;
 	uint64_t pushConstantSize = 0;
 
-
-	HardwareResource(const HardwareResource& whole, uint64_t offset, uint64_t size)
-	{
-		pushConstantData = (uint8_t*)whole.pushConstantData + offset;
-		pushConstantSize = size;
-	}
 };
 
 template<typename T>
@@ -188,28 +182,18 @@ struct HardwareImage : HardwareResource
 
 struct HardwarePushConstant : HardwareResource
 {
-	HardwarePushConstant()
-	{}
+	HardwarePushConstant() = default;
+	~HardwarePushConstant() = default;
+
+	HardwarePushConstant(const HardwarePushConstant& whole, uint64_t offset, uint64_t size)
+	{
+		pushConstantData = (uint8_t*)whole.pushConstantData + offset;
+		pushConstantSize = size;
+	}
 
 	HardwarePushConstant(uint64_t size)
 	{
 		pushConstantSize = size;
 		pushConstantData = malloc(size);
 	}
-
-	HardwarePushConstant& operator= (const HardwarePushConstant& other)
-	{
-		pushConstantSize = other.pushConstantSize;
-		if (pushConstantData != nullptr)
-		{
-			free(pushConstantData);
-			pushConstantData = nullptr;
-		}
-		pushConstantData = malloc(pushConstantSize);
-		memcpy(this->pushConstantData, other.pushConstantData, pushConstantSize);
-
-		return *this;
-	}
-
-	~HardwarePushConstant() = default;
 };
