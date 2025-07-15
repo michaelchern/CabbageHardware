@@ -35,7 +35,7 @@ struct RasterizerPipeline
 	void executePipeline(std::vector<GeomMeshDrawIndexed> GeomMeshes, HardwareImage depthImage, std::vector<ResourceManager::ImageHardwareWrap> renderTarget);
     void executePipeline(ktm::uvec2 imageSize);
 
-	HardwareResource &operator[](std::string resourceName)
+    std::variant<HardwarePushConstant, HardwareBuffer, HardwareImage> operator[](std::string resourceName)
     {
         std::string pushConstanName = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
         if (resourceName.substr(0, pushConstanName.size() + 1) == pushConstanName + ".")

@@ -322,7 +322,7 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 	std::vector<VkImageView> attachments;
 	for (int i = 0; i < renderTarget.size(); i++)
 	{
-		attachments.push_back(renderTarget[i].imageView);
+		//attachments.push_back(renderTarget[i].imageView);
 	}
 	attachments.push_back(depthImage.image.imageView);
 

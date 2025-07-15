@@ -19,7 +19,7 @@ struct ComputePipeline
     ComputePipeline(std::string shaderCode, ShaderLanguage language = ShaderLanguage::GLSL, const std::source_location &sourceLocation = std::source_location::current());
 
 	
-	HardwareResource &operator[](std::string resourceName)
+    std::variant<HardwarePushConstant> operator[](std::string resourceName)
     {
         std::string pushConstanName = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
         if (resourceName.substr(0, pushConstanName.size() + 1) == pushConstanName + ".")
