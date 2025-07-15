@@ -80,7 +80,7 @@ struct HardwareContext
 
 	DeviceManager deviceManager;
 	ResourceManager resourceManager;
-    std::vector<DisplayManager> displayManagers;
+    //std::vector<DisplayManager> displayManagers;
 
 };
 

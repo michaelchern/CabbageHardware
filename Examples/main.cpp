@@ -211,23 +211,22 @@ int main()
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 
-	globalHardwareContext.displayManagers.resize(4);
 
 	if (glfwInit() >= 0)
 	{
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 		GLFWwindow* window0 = glfwCreateWindow(800, 800, "Cabbage Engine 0", nullptr, nullptr);
-		globalHardwareContext.displayManagers[0].initDisplayManager(glfwGetWin32Window(window0));
+		DisplayManager displayManager0;
 
 		GLFWwindow* window1 = glfwCreateWindow(800, 800, "Cabbage Engine 1", nullptr, nullptr);
-		globalHardwareContext.displayManagers[1].initDisplayManager(glfwGetWin32Window(window1));
+		DisplayManager displayManager1;
 
 		GLFWwindow* window2 = glfwCreateWindow(800, 800, "Cabbage Engine 2", nullptr, nullptr);
-		globalHardwareContext.displayManagers[2].initDisplayManager(glfwGetWin32Window(window2));
+		DisplayManager displayManager2;
 
 		GLFWwindow* window3 = glfwCreateWindow(800, 800, "Cabbage Engine 3", nullptr, nullptr);
-		globalHardwareContext.displayManagers[3].initDisplayManager(glfwGetWin32Window(window3));
+		DisplayManager displayManager3;
 
 		while (!glfwWindowShouldClose(window0) && 
 			!glfwWindowShouldClose(window1) &&
@@ -257,10 +256,10 @@ int main()
 			computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
 			computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
-			globalHardwareContext.displayManagers[0].displayFrame(glfwGetWin32Window(window0), finalOutputImage.image);
-			globalHardwareContext.displayManagers[1].displayFrame(glfwGetWin32Window(window1), finalOutputImage.image);
-			globalHardwareContext.displayManagers[2].displayFrame(glfwGetWin32Window(window2), finalOutputImage.image);
-			globalHardwareContext.displayManagers[3].displayFrame(glfwGetWin32Window(window3), finalOutputImage.image);
+			displayManager0.displayFrame(glfwGetWin32Window(window0), finalOutputImage.image);
+			displayManager1.displayFrame(glfwGetWin32Window(window1), finalOutputImage.image);
+			displayManager2.displayFrame(glfwGetWin32Window(window2), finalOutputImage.image);
+			displayManager3.displayFrame(glfwGetWin32Window(window3), finalOutputImage.image);
 		}
 
 		glfwDestroyWindow(window0);
