@@ -44,16 +44,14 @@ struct RasterizerPipeline
             ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
             if (resource != nullptr)
             {
-                tempPushConstantMember = HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant);
-                return tempPushConstantMember;
+                return HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant);
             }
             else
             {
                 ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
                 if (resource != nullptr)
                 {
-                    tempPushConstantMember = HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant);
-                    return tempPushConstantMember;
+                    return HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant);
                 }
             }
         }
@@ -128,7 +126,6 @@ private:
     std::vector<TriangleGeomMesh> geomMeshes;
 
     HardwarePushConstant tempPushConstant;
-    HardwarePushConstant tempPushConstantMember;
 
     std::vector<HardwareBuffer> tempVertexBuffers;
 };
