@@ -17,7 +17,7 @@ struct RasterizerPipeline
 		ResourceManager::BufferHardwareWrap indexBuffer;
 		std::vector<ResourceManager::BufferHardwareWrap> vertexBuffers;
 
-		void* pushContastValue = nullptr;
+        HardwarePushConstant pushContast;
 	};
 
 	RasterizerPipeline() = default;
