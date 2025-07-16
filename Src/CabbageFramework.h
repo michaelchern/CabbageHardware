@@ -7,10 +7,7 @@
 
 #include"Compiler/ShaderCodeCompiler.h"
 
-#include"HardwareContext.h"
 
-//#include"CabbageFramework/PipelineManager/ComputePipeline.h"
-//#include"CabbageFramework/PipelineManager/RasterizerPipeline.h"
 
 enum class ImageFormat : uint32_t
 {
@@ -46,60 +43,6 @@ enum class BufferUsage : int32_t
 	StorageBuffer = 8,
 };
 
-template <typename Base, typename Derived>
-concept NotDerivedFrom = !std::is_base_of<Base, Derived>::value;
-
-struct HardwareResource
-{
-	HardwareResource() = default;
-	~HardwareResource() = default;
-
-	template<typename Type>
-	HardwareResource& operator= (const Type& other) requires std::is_base_of<HardwareResource, Type>::value
-	{
-		this->buffer = other.buffer;
-		this->image = other.image;
-
-		this->pushConstantSize = other.pushConstantSize;
-
-		if (pushConstantData != nullptr)
-		{
-			free(pushConstantData);
-			pushConstantData = nullptr;
-		}
-		pushConstantData = malloc(pushConstantSize);
-		memcpy(this->pushConstantData, other.pushConstantData, pushConstantSize);
-
-		return *this;
-	}
-
-	template<typename Type>
-	HardwareResource& operator= (Type data) requires NotDerivedFrom<HardwareResource, Type>
-	{
-		memcpy(pushConstantData, &data, pushConstantSize);
-		return *this;
-	}
-
-//protected:
-	friend struct HardwareBuffer;
-	friend struct HardwareImage;
-	friend struct HardwarePushConstant;
-	friend struct HardwareRasterPipeline;
-	friend struct HardwareComputePipeline;
-	friend struct HardwareFrameSurface;
-	ResourceManager::ImageHardwareWrap image;
-	ResourceManager::BufferHardwareWrap buffer;
-
-	void* pushConstantData = nullptr;
-	uint64_t pushConstantSize = 0;
-
-
-	HardwareResource(const HardwareResource& whole, uint64_t offset, uint64_t size)
-	{
-		pushConstantData = (uint8_t*)whole.pushConstantData + offset;
-		pushConstantSize = size;
-	}
-};
 
 template<typename T>
 concept is_container = requires(T a)
@@ -109,14 +52,10 @@ concept is_container = requires(T a)
 	a[0];
 };
 
-struct HardwareBuffer : HardwareResource
+struct HardwareBuffer
 {
-	HardwareBuffer()
-	{}
+	HardwareBuffer();
 
-	//HardwareBuffer(uint32_t size, BufferUsage usage);
-
-	//HardwareBuffer(const HardwareBuffer& inputBuffer, uint32_t bufferSize, BufferUsage usage);
 	HardwareBuffer(uint64_t size, BufferUsage usage, const void* data = nullptr);
 
 	template<typename Type>
@@ -124,52 +63,39 @@ struct HardwareBuffer : HardwareResource
 		: HardwareBuffer(input.size() * sizeof(input[0]), usage, input.data())
 	{}
 
-	~HardwareBuffer()
-	{
-		//globalHardwareContext.resourceManager.destroyBuffer(buffer);
-	}
+	~HardwareBuffer();
 
 	uint32_t storeDescriptor();
 
 	bool copyFromBuffer(const HardwareBuffer& inputBuffer, uint64_t size);
-	bool copyFromData(const void* inputData, uint64_t size)
-	{
-		memcpy(buffer.bufferAllocInfo.pMappedData, inputData, size);
-		return true;
-	}
+	bool copyFromData(const void* inputData, uint64_t size);
 
 	template<typename Type>
 	bool copyFromVector(const std::vector<Type>& input)
 	{
-		memcpy(buffer.bufferAllocInfo.pMappedData, input.data(), input.size() * sizeof(Type));
+		copyFromData(input.data(), input.size() * sizeof(Type));
 		return true;
 	}
 
-	void* getMappedData()
-	{
-		return buffer.bufferAllocInfo.pMappedData;
-	}
+	void* getMappedData();
 
-	uint64_t getBufferSize()
-	{
-		return buffer.bufferAllocInfo.size;
-	}
+	uint64_t getBufferSize();
 
-	operator bool()
-	{
-		return buffer.bufferHandle != VK_NULL_HANDLE;
-	}
+	HardwareBuffer& operator= (const HardwareBuffer& other);
+
+	operator bool();
+
+	uint64_t* bufferID;
 };
 
 
-struct HardwareImage : HardwareResource
+struct HardwareImage
 {
-	HardwareImage()
-	{}
+	HardwareImage();
 
 	HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage = ImageUsage::SampledImage, int arrayLayers = 1, void* imageData = nullptr);
 
-	~HardwareImage() = default;
+	~HardwareImage();
 
 	operator bool();
 
@@ -180,36 +106,30 @@ struct HardwareImage : HardwareResource
 	bool copyFromBuffer(const HardwareBuffer& buffer);
 	bool copyFromData(const void* inputData);
 
-	ImageFormat imageFormat;
-	ktm::uvec2 imageSize;
-	uint32_t pixelSize;
+	HardwareImage& operator= (const HardwareImage& other);
+
+	uint64_t* imageID;
 };
 
 
-struct HardwarePushConstant : HardwareResource
+struct HardwarePushConstant
 {
-	HardwarePushConstant()
-	{}
+	HardwarePushConstant();
+	~HardwarePushConstant();
 
-	HardwarePushConstant(uint64_t size)
+	template<typename Type>
+	HardwarePushConstant(Type data) requires (!std::is_same_v<std::remove_cvref_t<Type>, HardwarePushConstant>)
 	{
-		pushConstantSize = size;
-		pushConstantData = malloc(size);
+		pushConstantSize = (uint64_t*)malloc(sizeof(uint64_t));
+		*pushConstantSize = sizeof(Type);
+		pushConstantData = (uint8_t*)malloc(*pushConstantSize);
+		memcpy(pushConstantData, &data, *pushConstantSize);
 	}
 
-	HardwarePushConstant& operator= (const HardwarePushConstant& other)
-	{
-		pushConstantSize = other.pushConstantSize;
-		if (pushConstantData != nullptr)
-		{
-			free(pushConstantData);
-			pushConstantData = nullptr;
-		}
-		pushConstantData = malloc(pushConstantSize);
-		memcpy(this->pushConstantData, other.pushConstantData, pushConstantSize);
+	HardwarePushConstant(uint64_t size, uint64_t offset, HardwarePushConstant* whole = nullptr);
 
-		return *this;
-	}
+	HardwarePushConstant& operator= (const HardwarePushConstant& other);
 
-	~HardwarePushConstant() = default;
+	uint8_t* pushConstantData = nullptr;
+	uint64_t* pushConstantSize = nullptr;
 };

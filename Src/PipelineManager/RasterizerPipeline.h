@@ -17,7 +17,7 @@ struct RasterizerPipeline
 		ResourceManager::BufferHardwareWrap indexBuffer;
 		std::vector<ResourceManager::BufferHardwareWrap> vertexBuffers;
 
-		void* pushContastValue = nullptr;
+        HardwarePushConstant pushContast;
 	};
 
 	RasterizerPipeline() = default;
@@ -32,10 +32,10 @@ struct RasterizerPipeline
         return depthImage;
     }
 
-	void executePipeline(std::vector<GeomMeshDrawIndexed> GeomMeshes, HardwareImage depthImage, std::vector<ResourceManager::ImageHardwareWrap> renderTarget);
+	void executePipeline(std::vector<GeomMeshDrawIndexed> GeomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget);
     void executePipeline(ktm::uvec2 imageSize);
 
-	HardwareResource &operator[](std::string resourceName)
+    std::variant<HardwarePushConstant, HardwareBuffer, HardwareImage> operator[](std::string resourceName)
     {
         std::string pushConstanName = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
         if (resourceName.substr(0, pushConstanName.size() + 1) == pushConstanName + ".")
@@ -44,16 +44,14 @@ struct RasterizerPipeline
             ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
             if (resource != nullptr)
             {
-                tempPushConstantMember = HardwareResource(tempPushConstant, resource->byteOffset, resource->typeSize);
-                return tempPushConstantMember;
+                return HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant);
             }
             else
             {
                 ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
                 if (resource != nullptr)
                 {
-                    tempPushConstantMember = HardwareResource(tempPushConstant, resource->byteOffset, resource->typeSize);
-                    return tempPushConstantMember;
+                    return HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant);
                 }
             }
         }
@@ -104,7 +102,7 @@ private:
 
 	VkFramebuffer frameBuffers;
 
-	std::vector<ResourceManager::ImageHardwareWrap> renderTarget;
+	//std::vector<ResourceManager::ImageHardwareWrap> renderTarget;
     HardwareImage depthImage;
 
 	ShaderCodeModule vertShaderCode;
@@ -128,6 +126,6 @@ private:
     std::vector<TriangleGeomMesh> geomMeshes;
 
     HardwarePushConstant tempPushConstant;
-    HardwareResource tempPushConstantMember;
+
     std::vector<HardwareBuffer> tempVertexBuffers;
 };

@@ -19,7 +19,7 @@ struct ComputePipeline
     ComputePipeline(std::string shaderCode, ShaderLanguage language = ShaderLanguage::GLSL, const std::source_location &sourceLocation = std::source_location::current());
 
 	
-	HardwareResource &operator[](std::string resourceName)
+    std::variant<HardwarePushConstant> operator[](std::string resourceName)
     {
         std::string pushConstanName = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
         if (resourceName.substr(0, pushConstanName.size() + 1) == pushConstanName + ".")
@@ -28,8 +28,7 @@ struct ComputePipeline
             ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
             if (resource != nullptr)
             {
-                tempPushConstantMember = HardwareResource(pushConstant, resource->byteOffset, resource->typeSize);
-                return tempPushConstantMember;
+                return HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant);
             }
         }
         throw std::runtime_error("failed to find with name!");
@@ -45,7 +44,7 @@ private:
 	VkPipeline pipeline = VK_NULL_HANDLE;
 
 	HardwarePushConstant pushConstant;
-    HardwareResource tempPushConstantMember;
+    //HardwarePushConstant tempPushConstantMember;
 
     ShaderCodeCompiler shaderCodeCompiler;
 	ShaderCodeModule shaderCode;
