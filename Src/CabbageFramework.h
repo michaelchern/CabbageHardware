@@ -114,37 +114,42 @@ struct HardwareImage
 
 struct HardwarePushConstant
 {
-	HardwarePushConstant() = default;
+	HardwarePushConstant()
+	{
+		pushConstantSize = (uint64_t*)malloc(sizeof(uint64_t));
+	}
 	~HardwarePushConstant() = default;
 
 	template<typename Type>
 	HardwarePushConstant(Type data) requires (!std::is_same_v<std::remove_cvref_t<Type>, HardwarePushConstant>)
 	{
-		pushConstantSize = sizeof(Type);
-		pushConstantData = malloc(pushConstantSize);
-		memcpy(pushConstantData, &data, pushConstantSize);
+		pushConstantSize = (uint64_t*)malloc(sizeof(uint64_t));
+		*pushConstantSize = sizeof(Type);
+		pushConstantData = (uint8_t*)malloc(*pushConstantSize);
+		memcpy(pushConstantData, &data, *pushConstantSize);
 	}
 
 	HardwarePushConstant(uint64_t size, uint64_t offset, HardwarePushConstant* whole = nullptr)
 	{
-		pushConstantSize = size;
+		pushConstantSize = (uint64_t*)malloc(sizeof(uint64_t));
+		*pushConstantSize = size;
 		if (whole != nullptr)
 		{
 			pushConstantData = (uint8_t*)(whole->pushConstantData) + offset;
 		}
 		else
 		{
-			pushConstantData = malloc(size);
+			pushConstantData = (uint8_t*)malloc(size);
 		}
 	}
 
 	HardwarePushConstant& operator= (const HardwarePushConstant& other)
 	{
 		this->pushConstantData = other.pushConstantData;
-		this->pushConstantSize = other.pushConstantSize;
+		*(this->pushConstantSize) = *(other.pushConstantSize);
 		return *this;
 	}
 
-	void* pushConstantData = nullptr;
-	uint64_t pushConstantSize = 0;
+	uint8_t* pushConstantData = nullptr;
+	uint64_t* pushConstantSize = nullptr;
 };
