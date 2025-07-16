@@ -2,17 +2,30 @@
 #include"HardwareContext.h"
 
 
-std::unordered_map<uint32_t, ResourceManager::BufferHardwareWrap> bufferGlobalPool;
-uint32_t currentBufferID = 0;
+std::unordered_map<uint64_t, ResourceManager::BufferHardwareWrap> bufferGlobalPool;
+uint64_t currentBufferID = 0;
+
+
+HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
+{
+	*(this->bufferID) = *(other.bufferID);
+	return *this;
+}
+
+HardwareBuffer::HardwareBuffer()
+{
+	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
+}
 
 HardwareBuffer::operator bool()
 {
-	return bufferGlobalPool[bufferID].bufferHandle != VK_NULL_HANDLE;
+	return bufferGlobalPool[*bufferID].bufferHandle != VK_NULL_HANDLE;
 }
 
 HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const void* data)
 {
-	this->bufferID = currentBufferID++;
+	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
+	*(this->bufferID) = currentBufferID++;
 
 	VkBufferUsageFlags vkUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
@@ -34,7 +47,7 @@ HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const voi
 		break;
 	}
 
-	bufferGlobalPool[bufferID] = globalHardwareContext.resourceManager.createBuffer(bufferSize, vkUsage);
+	bufferGlobalPool[*bufferID] = globalHardwareContext.resourceManager.createBuffer(bufferSize, vkUsage);
 
 	if (data != nullptr)
 	{
@@ -44,34 +57,28 @@ HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const voi
 
 bool HardwareBuffer::copyFromBuffer(const HardwareBuffer& inputBuffer, uint64_t size)
 {
-	globalHardwareContext.resourceManager.copyBuffer(bufferGlobalPool[inputBuffer.bufferID].bufferHandle, bufferGlobalPool[bufferID].bufferHandle, size);
+	globalHardwareContext.resourceManager.copyBuffer(bufferGlobalPool[*inputBuffer.bufferID].bufferHandle, bufferGlobalPool[*bufferID].bufferHandle, size);
 	return true;
 }
 
 uint32_t HardwareBuffer::storeDescriptor()
 {
-	return globalHardwareContext.resourceManager.storeDescriptor(bufferGlobalPool[bufferID]);
+	return globalHardwareContext.resourceManager.storeDescriptor(bufferGlobalPool[*bufferID]);
 }
 
 bool HardwareBuffer::copyFromData(const void* inputData, uint64_t size)
 {
-	memcpy(bufferGlobalPool[bufferID].bufferAllocInfo.pMappedData, inputData, size);
+	memcpy(bufferGlobalPool[*bufferID].bufferAllocInfo.pMappedData, inputData, size);
 	return true;
 }
 
 
 void* HardwareBuffer::getMappedData()
 {
-	return bufferGlobalPool[bufferID].bufferAllocInfo.pMappedData;
+	return bufferGlobalPool[*bufferID].bufferAllocInfo.pMappedData;
 }
 
 uint64_t HardwareBuffer::getBufferSize()
 {
-	return bufferGlobalPool[bufferID].bufferAllocInfo.size;
-}
-
-HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
-{
-	this->bufferID = other.bufferID;
-	return *this;
+	return bufferGlobalPool[*bufferID].bufferAllocInfo.size;
 }

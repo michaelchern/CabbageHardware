@@ -1,36 +1,41 @@
 #include"CabbageFramework.h"
 #include"HardwareContext.h"
 
-std::unordered_map<uint32_t, ResourceManager::ImageHardwareWrap> imageGlobalPool;
-uint32_t currentImageID = 0;
+std::unordered_map<uint64_t, ResourceManager::ImageHardwareWrap> imageGlobalPool;
+uint64_t currentImageID = 0;
 
 HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 {
-	this->imageID = other.imageID;
+	*(this->imageID) = *(other.imageID);
 	return *this;
+}
+
+HardwareImage::HardwareImage()
+{
+	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
 }
 
 
 HardwareImage::operator bool()
 {
-	return imageGlobalPool.count(imageID) && imageGlobalPool[imageID].imageHandle != VK_NULL_HANDLE;
+	return imageGlobalPool.count(*imageID) && imageGlobalPool[*imageID].imageHandle != VK_NULL_HANDLE;
 }
 
 uint32_t HardwareImage::storeDescriptor()
 {
-	return globalHardwareContext.resourceManager.storeDescriptor(imageGlobalPool[imageID]);
+	return globalHardwareContext.resourceManager.storeDescriptor(imageGlobalPool[*imageID]);
 }
 
 
 bool HardwareImage::copyFromBuffer(const HardwareBuffer& buffer)
 {
-	globalHardwareContext.resourceManager.copyBufferToImage(bufferGlobalPool[buffer.bufferID].bufferHandle, imageGlobalPool[imageID].imageHandle, imageGlobalPool[imageID].imageSize.x, imageGlobalPool[imageID].imageSize.y);
+	globalHardwareContext.resourceManager.copyBufferToImage(bufferGlobalPool[*buffer.bufferID].bufferHandle, imageGlobalPool[*imageID].imageHandle, imageGlobalPool[*imageID].imageSize.x, imageGlobalPool[*imageID].imageSize.y);
 	return true;
 }
 
 bool HardwareImage::copyFromData(const void* inputData)
 {
-	HardwareBuffer stagingBuffer = HardwareBuffer(imageGlobalPool[imageID].imageSize.x * imageGlobalPool[imageID].imageSize.y * imageGlobalPool[imageID].pixelSize, BufferUsage::StorageBuffer, inputData);
+	HardwareBuffer stagingBuffer = HardwareBuffer(imageGlobalPool[*imageID].imageSize.x * imageGlobalPool[*imageID].imageSize.y * imageGlobalPool[*imageID].pixelSize, BufferUsage::StorageBuffer, inputData);
 	copyFromBuffer(stagingBuffer);
 	return true;
 }
@@ -38,7 +43,8 @@ bool HardwareImage::copyFromData(const void* inputData)
 
 HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage, int arrayLayers, void* imageData)
 {
-	this->imageID = currentImageID++;
+	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
+	*(this->imageID) = currentImageID++;
 
 	VkImageUsageFlags vkImageUsageFlags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
@@ -113,8 +119,8 @@ HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, Imag
 		break;
 	}
 
-	imageGlobalPool[imageID] = globalHardwareContext.resourceManager.createImage(imageSize, vkImageFormat, vkImageUsageFlags, arrayLayers);
-	imageGlobalPool[imageID].pixelSize = pixelSize;
+	imageGlobalPool[*imageID] = globalHardwareContext.resourceManager.createImage(imageSize, vkImageFormat, vkImageUsageFlags, arrayLayers);
+	imageGlobalPool[*imageID].pixelSize = pixelSize;
 
 	if (imageData != nullptr)
 	{

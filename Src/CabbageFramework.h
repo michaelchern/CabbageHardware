@@ -54,12 +54,8 @@ concept is_container = requires(T a)
 
 struct HardwareBuffer
 {
-	HardwareBuffer()
-	{}
+	HardwareBuffer();
 
-	//HardwareBuffer(uint32_t size, BufferUsage usage);
-
-	//HardwareBuffer(const HardwareBuffer& inputBuffer, uint32_t bufferSize, BufferUsage usage);
 	HardwareBuffer(uint64_t size, BufferUsage usage, const void* data = nullptr);
 
 	template<typename Type>
@@ -92,14 +88,13 @@ struct HardwareBuffer
 
 	operator bool();
 
-	uint32_t bufferID;
+	uint64_t* bufferID;
 };
 
 
 struct HardwareImage
 {
-	HardwareImage()
-	{}
+	HardwareImage();
 
 	HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage = ImageUsage::SampledImage, int arrayLayers = 1, void* imageData = nullptr);
 
@@ -116,7 +111,7 @@ struct HardwareImage
 
 	HardwareImage& operator= (const HardwareImage& other);
 
-	uint32_t imageID;
+	uint64_t* imageID;
 };
 
 

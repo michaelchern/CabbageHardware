@@ -47,7 +47,7 @@ void RasterizerPipeline::createRenderPass(int multiviewCount)
 	for (size_t i = 0; i < renderTargets.size(); i++)
 	{
 		VkAttachmentDescription attachment{};
-		attachment.format = imageGlobalPool[renderTargets[i].imageID].imageFormat;
+		attachment.format = imageGlobalPool[*renderTargets[i].imageID].imageFormat;
 		attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 		attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -322,9 +322,9 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 	std::vector<VkImageView> attachments;
 	for (int i = 0; i < renderTargets.size(); i++)
 	{
-		attachments.push_back(imageGlobalPool[renderTargets[i].imageID].imageView);
+		attachments.push_back(imageGlobalPool[*renderTargets[i].imageID].imageView);
 	}
-	attachments.push_back(imageGlobalPool[depthImage.imageID].imageView);
+	attachments.push_back(imageGlobalPool[*depthImage.imageID].imageView);
 
 
 	VkFramebufferCreateInfo framebufferInfo{};
@@ -358,7 +358,7 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 		createRenderPass(multiviewCount);
 
 		createGraphicsPipeline(vertShaderCode, fragShaderCode);
-		createFramebuffers(imageGlobalPool[depthImage.imageID].imageSize);
+		createFramebuffers(imageGlobalPool[*depthImage.imageID].imageSize);
 	}
 
 
@@ -367,15 +367,15 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 	renderPassInfo.renderPass = renderPass;
 	renderPassInfo.framebuffer = frameBuffers;
 	renderPassInfo.renderArea.offset = { 0, 0 };
-	renderPassInfo.renderArea.extent.width = imageGlobalPool[depthImage.imageID].imageSize.x;
-	renderPassInfo.renderArea.extent.height = imageGlobalPool[depthImage.imageID].imageSize.y;
+	renderPassInfo.renderArea.extent.width = imageGlobalPool[*depthImage.imageID].imageSize.x;
+	renderPassInfo.renderArea.extent.height = imageGlobalPool[*depthImage.imageID].imageSize.y;
 
 	std::vector<VkClearValue> clearValues;
 	for (size_t i = 0; i < renderTarget.size(); i++)
 	{
-		clearValues.push_back(imageGlobalPool[renderTarget[i].imageID].clearValue);
+		clearValues.push_back(imageGlobalPool[*renderTarget[i].imageID].clearValue);
 	}
-	clearValues.push_back(imageGlobalPool[depthImage.imageID].clearValue);
+	clearValues.push_back(imageGlobalPool[*depthImage.imageID].clearValue);
 
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
@@ -396,16 +396,16 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = (float)imageGlobalPool[depthImage.imageID].imageSize.x;
-	viewport.height = (float)imageGlobalPool[depthImage.imageID].imageSize.y;
+	viewport.width = (float)imageGlobalPool[*depthImage.imageID].imageSize.x;
+	viewport.height = (float)imageGlobalPool[*depthImage.imageID].imageSize.y;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport(globalHardwareContext.deviceManager.mainDevice.commandBuffers, 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = { 0, 0 };
-	scissor.extent.width = imageGlobalPool[depthImage.imageID].imageSize.x;
-	scissor.extent.height = imageGlobalPool[depthImage.imageID].imageSize.y;
+	scissor.extent.width = imageGlobalPool[*depthImage.imageID].imageSize.x;
+	scissor.extent.height = imageGlobalPool[*depthImage.imageID].imageSize.y;
 	vkCmdSetScissor(globalHardwareContext.deviceManager.mainDevice.commandBuffers, 0, 1, &scissor);
 
 
@@ -483,14 +483,14 @@ void RasterizerPipeline::executePipeline(ktm::uvec2 imageSize)
     {
         rasterizerPipelineGeomMeshes[geomMeshesIndex].pushContastValue = geomMeshes[geomMeshesIndex].pushConstant.pushConstantData;
 
-        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexCount = std::min(uint32_t(bufferGlobalPool[geomMeshes[geomMeshesIndex].indexBuffer.bufferID].bufferAllocInfo.size / sizeof(uint32_t)), geomMeshes[geomMeshesIndex].indexCount);
+        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexCount = std::min(uint32_t(bufferGlobalPool[*geomMeshes[geomMeshesIndex].indexBuffer.bufferID].bufferAllocInfo.size / sizeof(uint32_t)), geomMeshes[geomMeshesIndex].indexCount);
         rasterizerPipelineGeomMeshes[geomMeshesIndex].indexOffset = geomMeshes[geomMeshesIndex].indexOffset;
-        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexBuffer = bufferGlobalPool[geomMeshes[geomMeshesIndex].indexBuffer.bufferID];
+        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexBuffer = bufferGlobalPool[*geomMeshes[geomMeshesIndex].indexBuffer.bufferID];
 
         rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers.resize(geomMeshes[geomMeshesIndex].vertexBuffers.size());
         for (size_t vertexBufferIndex = 0; vertexBufferIndex < geomMeshes[geomMeshesIndex].vertexBuffers.size(); vertexBufferIndex++)
         {
-            rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex] = bufferGlobalPool[geomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex].bufferID];
+            rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex] = bufferGlobalPool[*geomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex].bufferID];
         }
     }
 
