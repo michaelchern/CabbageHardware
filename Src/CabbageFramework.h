@@ -143,12 +143,12 @@ struct HardwarePushConstant
 		}
 	}
 
-	HardwarePushConstant& operator= (const HardwarePushConstant& other)
-	{
-		this->pushConstantData = other.pushConstantData;
-		*(this->pushConstantSize) = *(other.pushConstantSize);
-		return *this;
-	}
+	//HardwarePushConstant& operator= (const HardwarePushConstant& other)
+	//{
+	//	this->pushConstantData = other.pushConstantData;
+	//	*(this->pushConstantSize) = *(other.pushConstantSize);
+	//	return *this;
+	//}
 
 	uint8_t* pushConstantData = nullptr;
 	uint64_t* pushConstantSize = nullptr;
