@@ -72,6 +72,6 @@ uint64_t HardwareBuffer::getBufferSize()
 
 HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
 {
-	bufferGlobalPool[this->bufferID] = bufferGlobalPool[other.bufferID];
+	this->bufferID = other.bufferID;
 	return *this;
 }
