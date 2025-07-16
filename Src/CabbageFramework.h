@@ -63,10 +63,7 @@ struct HardwareBuffer
 		: HardwareBuffer(input.size() * sizeof(input[0]), usage, input.data())
 	{}
 
-	~HardwareBuffer()
-	{
-		//globalHardwareContext.resourceManager.destroyBuffer(buffer);
-	}
+	~HardwareBuffer();
 
 	uint32_t storeDescriptor();
 
@@ -98,7 +95,7 @@ struct HardwareImage
 
 	HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage = ImageUsage::SampledImage, int arrayLayers = 1, void* imageData = nullptr);
 
-	~HardwareImage() = default;
+	~HardwareImage();
 
 	operator bool();
 

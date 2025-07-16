@@ -17,6 +17,12 @@ HardwareBuffer::HardwareBuffer()
 	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
 }
 
+
+HardwareBuffer::~HardwareBuffer()
+{
+	//free(this->bufferID);
+}
+
 HardwareBuffer::operator bool()
 {
 	return bufferGlobalPool[*bufferID].bufferHandle != VK_NULL_HANDLE;

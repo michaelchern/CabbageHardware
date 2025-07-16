@@ -15,6 +15,10 @@ HardwareImage::HardwareImage()
 	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
 }
 
+HardwareImage::~HardwareImage()
+{
+	//free(this->imageID);
+}
 
 HardwareImage::operator bool()
 {
