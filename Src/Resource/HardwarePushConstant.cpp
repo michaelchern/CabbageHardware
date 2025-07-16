@@ -12,8 +12,15 @@ HardwarePushConstant::~HardwarePushConstant()
 
 HardwarePushConstant& HardwarePushConstant::operator= (const HardwarePushConstant& other)
 {
-	this->pushConstantData = other.pushConstantData;
 	*(this->pushConstantSize) = *(other.pushConstantSize);
+	if (this->pushConstantData != nullptr)
+	{
+		memcpy(this->pushConstantData, other.pushConstantData, *(this->pushConstantSize));
+	}
+	else
+	{
+		this->pushConstantData = other.pushConstantData;
+	}
 	return *this;
 }
 

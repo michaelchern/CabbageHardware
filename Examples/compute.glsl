@@ -31,5 +31,5 @@ vec3 acesFilmicToneMapInverse(vec3 x)
 void main()
 {
     vec4 color = imageLoad(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy));
-    imageStore(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy), vec4(acesFilmicToneMapCurve(color.xyz + vec3(0.5)), 1.0));
+    imageStore(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy), vec4(acesFilmicToneMapCurve(color.xyz + vec3(0.1)), 1.0));
 }
