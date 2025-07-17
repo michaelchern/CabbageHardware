@@ -14,18 +14,23 @@ HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
 
 HardwareBuffer::HardwareBuffer()
 {
-	//this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
 }
 
 
 HardwareBuffer::~HardwareBuffer()
 {
-	//free(this->bufferID);
+    // if (*this && imageID.use_count() == 1)
+    //{
+    //    globalHardwareContext.resourceManager.destroyImage(imageGlobalPool[*imageID]);
+    //    imageGlobalPool.erase(*imageID);
+    //}
 }
 
 HardwareBuffer::operator bool()
 {
-	return bufferGlobalPool[*bufferID].bufferHandle != VK_NULL_HANDLE;
+    return *bufferID != std::numeric_limits<uint64_t>::max() &&
+           bufferGlobalPool.count(*bufferID) &&
+           bufferGlobalPool[*bufferID].bufferHandle != VK_NULL_HANDLE;
 }
 
 HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const void* data)

@@ -12,17 +12,22 @@ HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 
 HardwareImage::HardwareImage()
 {
-	//this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
 }
 
 HardwareImage::~HardwareImage()
 {
-	//free(this->imageID);
+    //if (*this && imageID.use_count() == 1)
+    //{
+    //    globalHardwareContext.resourceManager.destroyImage(imageGlobalPool[*imageID]);
+    //    imageGlobalPool.erase(*imageID);
+    //}
 }
 
 HardwareImage::operator bool()
 {
-	return imageGlobalPool.count(*imageID) && imageGlobalPool[*imageID].imageHandle != VK_NULL_HANDLE;
+	return *imageID != std::numeric_limits<uint64_t>::max() && 
+		imageGlobalPool.count(*imageID) && 
+		imageGlobalPool[*imageID].imageHandle != VK_NULL_HANDLE;
 }
 
 uint32_t HardwareImage::storeDescriptor()
