@@ -14,7 +14,7 @@ HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
 
 HardwareBuffer::HardwareBuffer()
 {
-	//this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
+	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
 }
 
 
@@ -30,7 +30,7 @@ HardwareBuffer::operator bool()
 
 HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const void* data)
 {
-	//this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
+	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
 	*(this->bufferID) = currentBufferID++;
 
 	VkBufferUsageFlags vkUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
