@@ -17,12 +17,18 @@ HardwareImage::HardwareImage()
 
 HardwareImage::~HardwareImage()
 {
-	//free(this->imageID);
+    // if (*this && imageID.use_count() == 1)
+    //{
+    //     globalHardwareContext.resourceManager.destroyImage(imageGlobalPool[*imageID]);
+    //     imageGlobalPool.erase(*imageID);
+    // }
 }
 
 HardwareImage::operator bool()
 {
-	return imageGlobalPool.count(*imageID) && imageGlobalPool[*imageID].imageHandle != VK_NULL_HANDLE;
+    return imageID != nullptr &&
+           imageGlobalPool.count(*imageID) &&
+           imageGlobalPool[*imageID].imageHandle != VK_NULL_HANDLE;
 }
 
 uint32_t HardwareImage::storeDescriptor()

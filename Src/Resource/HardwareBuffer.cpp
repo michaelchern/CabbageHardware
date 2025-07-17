@@ -20,12 +20,18 @@ HardwareBuffer::HardwareBuffer()
 
 HardwareBuffer::~HardwareBuffer()
 {
-	//free(this->bufferID);
+    // if (*this && imageID.use_count() == 1)
+    //{
+    //    globalHardwareContext.resourceManager.destroyImage(imageGlobalPool[*imageID]);
+    //    imageGlobalPool.erase(*imageID);
+    //}
 }
 
 HardwareBuffer::operator bool()
 {
-	return bufferGlobalPool[*bufferID].bufferHandle != VK_NULL_HANDLE;
+    return bufferID != nullptr &&
+           bufferGlobalPool.count(*bufferID) &&
+           bufferGlobalPool[*bufferID].bufferHandle != VK_NULL_HANDLE;
 }
 
 HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const void* data)
