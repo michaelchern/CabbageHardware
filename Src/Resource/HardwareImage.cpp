@@ -12,7 +12,7 @@ HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 
 HardwareImage::HardwareImage()
 {
-	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
+	//this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
 }
 
 HardwareImage::~HardwareImage()
@@ -47,7 +47,7 @@ bool HardwareImage::copyFromData(const void* inputData)
 
 HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage, int arrayLayers, void* imageData)
 {
-	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
+	//this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
 	*(this->imageID) = currentImageID++;
 
 	VkImageUsageFlags vkImageUsageFlags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;

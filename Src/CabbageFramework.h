@@ -1,7 +1,9 @@
 #pragma once
 
-#include <type_traits>
+#include <memory>
+#include <cstdint>
 #include <algorithm>
+#include <type_traits>
 
 #include <ktm/ktm.h>
 
@@ -85,7 +87,7 @@ struct HardwareBuffer
 
 	operator bool();
 
-	uint64_t* bufferID;
+	std::shared_ptr<uint64_t> bufferID = std::make_shared<uint64_t>(std::numeric_limits<uint64_t>::max());
 };
 
 
@@ -108,7 +110,7 @@ struct HardwareImage
 
 	HardwareImage& operator= (const HardwareImage& other);
 
-	uint64_t* imageID;
+	std::shared_ptr<uint64_t> imageID = std::make_shared<uint64_t>(std::numeric_limits<uint64_t>::max());
 };
 
 
