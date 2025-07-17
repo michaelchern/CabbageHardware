@@ -6,6 +6,7 @@
 
 #include"DeviceManager.h"
 
+#include<CabbageFramework.h>
 
 
 class DisplayManager
@@ -17,7 +18,7 @@ public:
 
 	bool initDisplayManager(void* surface);
 
-	bool displayFrame(void *surface, ResourceManager::ImageHardwareWrap &displayImage);
+	bool displayFrame(void *surface, HardwareImage displayImage);
 
 
 	static std::set<const char*> checkInstanceExtensionRequirements(const VkInstance& instance, const VkPhysicalDevice& device);

@@ -300,7 +300,7 @@ void DisplayManager::createSwapChain()
 
 
 
-bool DisplayManager::displayFrame(void *displaySurface, ResourceManager::ImageHardwareWrap &displayImage)
+bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayImage)
 {
     if (displaySurface != nullptr)
     {
@@ -340,7 +340,7 @@ bool DisplayManager::displayFrame(void *displaySurface, ResourceManager::ImageHa
 
             auto runCommand = [&](VkCommandBuffer &commandBuffer) {
                 // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-                globalHardwareContext.resourceManager.transitionImageLayoutUnblocked(commandBuffer, displayImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+                globalHardwareContext.resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
                 // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
                 globalHardwareContext.resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -350,7 +350,7 @@ bool DisplayManager::displayFrame(void *displaySurface, ResourceManager::ImageHa
                 imageBlit.dstOffsets[1] = VkOffset3D{int32_t(swapChainImages[imageIndex].imageSize.x), int32_t(swapChainImages[imageIndex].imageSize.y), 1};
 
                 imageBlit.srcOffsets[0] = VkOffset3D{0, 0, 0};
-                imageBlit.srcOffsets[1] = VkOffset3D{int32_t(displayImage.imageSize.x), int32_t(displayImage.imageSize.y), 1};
+                imageBlit.srcOffsets[1] = VkOffset3D{int32_t(imageGlobalPool[*displayImage.imageID].imageSize.x), int32_t(imageGlobalPool[*displayImage.imageID].imageSize.y), 1};
 
                 imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -364,7 +364,7 @@ bool DisplayManager::displayFrame(void *displaySurface, ResourceManager::ImageHa
                 imageBlit.dstSubresource.mipLevel = 0;
                 imageBlit.srcSubresource.mipLevel = 0;
 
-                vkCmdBlitImage(commandBuffer, displayImage.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                vkCmdBlitImage(commandBuffer, imageGlobalPool[*displayImage.imageID].imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                swapChainImages[imageIndex].imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
                                &imageBlit, VK_FILTER_LINEAR);
 

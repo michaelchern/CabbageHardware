@@ -257,10 +257,10 @@ int main()
 			computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
 			computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
-			displayManager0.displayFrame(glfwGetWin32Window(window0), imageGlobalPool[*finalOutputImage.imageID]);
-			displayManager1.displayFrame(glfwGetWin32Window(window1), imageGlobalPool[*finalOutputImage.imageID]);
-			displayManager2.displayFrame(glfwGetWin32Window(window2), imageGlobalPool[*finalOutputImage.imageID]);
-			displayManager3.displayFrame(glfwGetWin32Window(window3), imageGlobalPool[*finalOutputImage.imageID]);
+			displayManager0.displayFrame(glfwGetWin32Window(window0), finalOutputImage);
+			displayManager1.displayFrame(glfwGetWin32Window(window1), finalOutputImage);
+			displayManager2.displayFrame(glfwGetWin32Window(window2), finalOutputImage);
+			displayManager3.displayFrame(glfwGetWin32Window(window3), finalOutputImage);
 		}
 
 		glfwDestroyWindow(window0);
