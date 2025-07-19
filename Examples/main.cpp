@@ -218,16 +218,16 @@ int main()
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 		GLFWwindow* window0 = glfwCreateWindow(800, 800, "Cabbage Engine 0", nullptr, nullptr);
-		DisplayManager displayManager0;
+        HardwareDisplayer displayManager0(glfwGetWin32Window(window0));
 
 		GLFWwindow* window1 = glfwCreateWindow(800, 800, "Cabbage Engine 1", nullptr, nullptr);
-		DisplayManager displayManager1;
+        HardwareDisplayer displayManager1(glfwGetWin32Window(window1));
 
 		GLFWwindow* window2 = glfwCreateWindow(800, 800, "Cabbage Engine 2", nullptr, nullptr);
-		DisplayManager displayManager2;
+        HardwareDisplayer displayManager2(glfwGetWin32Window(window2));
 
 		GLFWwindow* window3 = glfwCreateWindow(800, 800, "Cabbage Engine 3", nullptr, nullptr);
-		DisplayManager displayManager3;
+        HardwareDisplayer displayManager3(glfwGetWin32Window(window3));
 
 		while (!glfwWindowShouldClose(window0) && 
 			!glfwWindowShouldClose(window1) &&
@@ -257,10 +257,10 @@ int main()
 			computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
 			computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
-			displayManager0.displayFrame(glfwGetWin32Window(window0), finalOutputImage);
-			displayManager1.displayFrame(glfwGetWin32Window(window1), finalOutputImage);
-			displayManager2.displayFrame(glfwGetWin32Window(window2), finalOutputImage);
-			displayManager3.displayFrame(glfwGetWin32Window(window3), finalOutputImage);
+			displayManager0 = finalOutputImage;
+            displayManager1 = finalOutputImage;
+            displayManager2 = finalOutputImage;
+            displayManager3 = finalOutputImage;
 		}
 
 		glfwDestroyWindow(window0);

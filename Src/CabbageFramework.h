@@ -138,12 +138,10 @@ struct HardwarePushConstant
 struct HardwareDisplayer
 {
     HardwareDisplayer(void *surface = nullptr);
-    ~HardwareDisplayer() = default;
+    ~HardwareDisplayer();
 
-	HardwareDisplayer &operator=(const HardwareImage &other);
+	HardwareDisplayer &operator=(const HardwareImage &image);
     HardwareDisplayer &operator=(const HardwareDisplayer &other);
 
-	operator HardwareImage();
-
-    uint64_t displayerID;
+    void *surface;
 };
