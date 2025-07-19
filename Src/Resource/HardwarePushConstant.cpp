@@ -1,5 +1,5 @@
-﻿#include"CabbageFramework.h"
-#include"HardwareContext.h"
+﻿#include "CabbageFramework.h"
+#include "HardwareContext.h"
 
 struct PushConstant
 {
@@ -53,7 +53,7 @@ uint8_t* HardwarePushConstant::getData() const
 
 void HardwarePushConstant::copyFromRaw(const void* src, uint64_t size)
 {
-    pushConstantID = new uint64_t(++currentPushConstantID);
+    pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
     PushConstant pc;
     pc.size = size;
     pc.data = new uint8_t[size];

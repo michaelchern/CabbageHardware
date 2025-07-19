@@ -129,11 +129,7 @@ struct HardwarePushConstant
 
 	uint8_t* getData() const;
 
-	//uint8_t* pushConstantData = nullptr;
-	//uint64_t* pushConstantSize = nullptr;
-
-	uint64_t *pushConstantID = nullptr;
-
   private:
     void copyFromRaw(const void *src, uint64_t size);
+	uint64_t *pushConstantID = nullptr;
 };
