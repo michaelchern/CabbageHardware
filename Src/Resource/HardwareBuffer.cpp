@@ -1,5 +1,5 @@
 #include"CabbageFramework.h"
-#include"HardwareContext.h"
+#include<HardwareManager/GlobalContext.h>
 
 
 std::unordered_map<uint64_t, ResourceManager::BufferHardwareWrap> bufferGlobalPool;

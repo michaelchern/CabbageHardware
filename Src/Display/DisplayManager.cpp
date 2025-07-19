@@ -4,7 +4,7 @@
 
 #include<Volk/volk.h>
 
-#include"../HardwareContext.h"
+#include<HardwareManager/GlobalContext.h>
 
 
 //#if _WIN32 || _WIN64

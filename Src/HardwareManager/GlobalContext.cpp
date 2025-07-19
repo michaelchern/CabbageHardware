@@ -1,3 +1,3 @@
-#include "HardwareContext.h"
+#include<HardwareManager/GlobalContext.h>
 
 HardwareContext globalHardwareContext;

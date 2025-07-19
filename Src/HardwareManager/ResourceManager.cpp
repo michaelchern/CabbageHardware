@@ -6,7 +6,7 @@
 #include<vk_mem_alloc.h>
 
 
-#include"../HardwareContext.h"
+#include<HardwareManager/GlobalContext.h>
 
 
 ResourceManager::ResourceManager()
