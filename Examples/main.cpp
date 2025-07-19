@@ -35,13 +35,13 @@ std::string shaderPath = [] {
 	std::string resultPath = "";
 	std::string runtimePath = std::filesystem::current_path().string();
 	// std::replace(runtimePath.begin(), runtimePath.end(), '\\', '/');
-	std::regex pattern(R"((.*)CabbageDisplay\b)");
+	std::regex pattern(R"((.*)CabbageDisplayer\b)");
 	std::smatch matches;
 	if (std::regex_search(runtimePath, matches, pattern))
 	{
 		if (matches.size() > 1)
 		{
-			resultPath = matches[1].str() + "CabbageDisplay";
+			resultPath = matches[1].str() + "CabbageDisplayer";
 		}
 		else
 		{
