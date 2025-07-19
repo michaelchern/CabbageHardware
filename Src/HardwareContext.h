@@ -2,10 +2,7 @@
 
 
 #include"HardwareManager/DeviceManager.h"
-#include"HardwareManager/DisplayManager.h"
 #include"HardwareManager/ResourceManager.h"
-
-
 
 
 struct HardwareContext
@@ -16,17 +13,26 @@ struct HardwareContext
 
 		hardwareCreateInfos.requiredInstanceExtensions = [&](const VkInstance& instance, const VkPhysicalDevice& device)
 			{
-				std::set<const char *> requiredExtensions = DisplayManager::checkInstanceExtensionRequirements(instance, device);
+				std::set<const char *> requiredExtensions;
+				requiredExtensions.insert("VK_KHR_surface");
 				requiredExtensions.insert(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-#if __APPLE__
-				requiredExtensions.insert(VK_MVK_MOLTENVK_EXTENSION_NAME);
+
+#if _WIN32 || _WIN64
+                requiredExtensions.insert(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+#elif __APPLE__
+                requiredExtensions.insert(VK_MVK_MOLTENVK_EXTENSION_NAME);
+                requiredExtensions.insert(VK_MVK_MACOS_SURFACE_EXTENSION_NAME);
+#elif __linux__
+                requiredExtensions.insert(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #endif
 				return requiredExtensions;
 			};
 
 		hardwareCreateInfos.requiredDeviceExtensions = [&](const VkInstance& instance, const VkPhysicalDevice& device)
 			{
-				std::set<const char *> requiredExtensions = DisplayManager::checkDeviceExtensionRequirements(instance, device);
+				std::set<const char *> requiredExtensions;
+				requiredExtensions.insert(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+
 				requiredExtensions.insert(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
 				requiredExtensions.insert(VK_KHR_MULTIVIEW_EXTENSION_NAME);
 				requiredExtensions.insert(VK_AMD_GPU_SHADER_HALF_FLOAT_EXTENSION_NAME);

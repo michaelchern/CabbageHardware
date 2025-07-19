@@ -88,31 +88,6 @@ bool DisplayManager::initDisplayManager(void* surface)
 }
 
 
-std::set<const char*> DisplayManager::checkInstanceExtensionRequirements(const VkInstance& instance, const VkPhysicalDevice& device)
-{
-	std::set<const char*> requiredExtensions;
-	requiredExtensions.insert("VK_KHR_surface");
-
-#if _WIN32 || _WIN64
-	requiredExtensions.insert(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif __APPLE__
-	requiredExtensions.insert(VK_MVK_MACOS_SURFACE_EXTENSION_NAME);
-#elif __linux__
-	requiredExtensions.insert(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#endif
-
-	return requiredExtensions;
-}
-
-
-std::set<const char*> DisplayManager::checkDeviceExtensionRequirements(const VkInstance& instance, const VkPhysicalDevice& device)
-{
-	std::set<const char*> requiredExtensions;
-	requiredExtensions.insert(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-	return requiredExtensions;
-}
-
-
 void DisplayManager::createFrameFence()
 {
 	VkSemaphoreCreateInfo semaphoreInfo{};

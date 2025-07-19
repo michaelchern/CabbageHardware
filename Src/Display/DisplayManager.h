@@ -2,9 +2,9 @@
 
 #include <chrono>  
 
-#include"ResourceManager.h"
+#include "HardwareManager/DeviceManager.h"
 
-#include"DeviceManager.h"
+#include "HardwareManager/ResourceManager.h"
 
 #include<CabbageFramework.h>
 
@@ -19,11 +19,6 @@ public:
 	bool initDisplayManager(void* surface);
 
 	bool displayFrame(void *surface, HardwareImage displayImage);
-
-
-	static std::set<const char*> checkInstanceExtensionRequirements(const VkInstance& instance, const VkPhysicalDevice& device);
-	static std::set<const char*> checkDeviceExtensionRequirements(const VkInstance& instance, const VkPhysicalDevice& device);
-
 
 	VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
 	VkSwapchainKHR swapChain = VK_NULL_HANDLE;
