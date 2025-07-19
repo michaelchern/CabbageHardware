@@ -1,6 +1,16 @@
 #include"CabbageFramework.h"
 #include"HardwareContext.h"
 
+struct PushConstant
+{
+    uint8_t *data = nullptr;
+    uint64_t *size = nullptr;
+};
+
+std::unordered_map<uint64_t, PushConstant> pushConstantGlobalPool;
+uint64_t currentPushConstantID = 0;
+
+
 HardwarePushConstant::HardwarePushConstant()
 {
 	pushConstantSize = (uint64_t*)malloc(sizeof(uint64_t));
