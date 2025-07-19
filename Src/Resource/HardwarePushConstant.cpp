@@ -1,4 +1,4 @@
-#include"CabbageFramework.h"
+﻿#include"CabbageFramework.h"
 #include"HardwareContext.h"
 
 struct PushConstant
@@ -13,7 +13,7 @@ uint64_t currentPushConstantID = 0;
 
 HardwarePushConstant::HardwarePushConstant()
 {
-	pushConstantSize = (uint64_t*)malloc(sizeof(uint64_t));
+	this->pushConstantID = (uint64_t*)malloc(sizeof(uint64_t));
 }
 
 HardwarePushConstant::~HardwarePushConstant()
@@ -22,28 +22,30 @@ HardwarePushConstant::~HardwarePushConstant()
 
 HardwarePushConstant& HardwarePushConstant::operator= (const HardwarePushConstant& other)
 {
-	*(this->pushConstantSize) = *(other.pushConstantSize);
-	if (this->pushConstantData != nullptr)
+	*(this->pushConstantID) = *(other.pushConstantID);
+	if (this->pushConstantID != nullptr)
 	{
-		memcpy(this->pushConstantData, other.pushConstantData, *(this->pushConstantSize));
+        memcpy(this->pushConstantID, other.pushConstantID, *(this->pushConstantID));
 	}
 	else
 	{
-		this->pushConstantData = other.pushConstantData;
+        this->pushConstantID = other.pushConstantID;
 	}
 	return *this;
 }
 
 HardwarePushConstant::HardwarePushConstant(uint64_t size, uint64_t offset, HardwarePushConstant* whole)
 {
-	pushConstantSize = (uint64_t*)malloc(sizeof(uint64_t));
-	*pushConstantSize = size;
+    this->pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
+    *(this->pushConstantID) = currentPushConstantID++;
 	if (whole != nullptr)
 	{
-		pushConstantData = (uint8_t*)(whole->pushConstantData) + offset;
+        pushConstantGlobalPool[*pushConstantID] = PushConstant();
+        pushConstantGlobalPool[*pushConstantID].size = (uint64_t*)size ;
+        pushConstantGlobalPool[*pushConstantID].data = (uint8_t *)offset;
 	}
 	else
 	{
-		pushConstantData = (uint8_t*)malloc(size);
+        pushConstantGlobalPool[*pushConstantID].data = (uint8_t *)malloc(size);
 	}
 }

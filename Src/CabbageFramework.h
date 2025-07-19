@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <type_traits>
 #include <algorithm>
@@ -120,16 +120,20 @@ struct HardwarePushConstant
 	template<typename Type>
 	HardwarePushConstant(Type data) requires (!std::is_same_v<std::remove_cvref_t<Type>, HardwarePushConstant>)
 	{
-		pushConstantSize = (uint64_t*)malloc(sizeof(uint64_t));
-		*pushConstantSize = sizeof(Type);
-		pushConstantData = (uint8_t*)malloc(*pushConstantSize);
-		memcpy(pushConstantData, &data, *pushConstantSize);
+        pushConstantID = new uint64_t(++currentPushConstantID);
+        PushConstant pc;
+        pc.size = new uint64_t(sizeof(Type));
+        pc.data = new uint8_t[*pc.size];
+        memcpy(pc.data, &data, *pc.size);
+        pushConstantGlobalPool[*pushConstantID] = pc;
 	}
 
 	HardwarePushConstant(uint64_t size, uint64_t offset, HardwarePushConstant* whole = nullptr);
 
 	HardwarePushConstant& operator= (const HardwarePushConstant& other);
 
-	uint8_t* pushConstantData = nullptr;
-	uint64_t* pushConstantSize = nullptr;
+	//uint8_t* pushConstantData = nullptr;
+	//uint64_t* pushConstantSize = nullptr;
+
+	uint64_t *pushConstantID = nullptr;
 };
