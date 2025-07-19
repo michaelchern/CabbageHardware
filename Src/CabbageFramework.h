@@ -120,20 +120,20 @@ struct HardwarePushConstant
 	template<typename Type>
 	HardwarePushConstant(Type data) requires (!std::is_same_v<std::remove_cvref_t<Type>, HardwarePushConstant>)
 	{
-        pushConstantID = new uint64_t(++currentPushConstantID);
-        PushConstant pc;
-        pc.size = new uint64_t(sizeof(Type));
-        pc.data = new uint8_t[*pc.size];
-        memcpy(pc.data, &data, *pc.size);
-        pushConstantGlobalPool[*pushConstantID] = pc;
+        copyFromRaw(&data, sizeof(Type));
 	}
 
 	HardwarePushConstant(uint64_t size, uint64_t offset, HardwarePushConstant* whole = nullptr);
 
 	HardwarePushConstant& operator= (const HardwarePushConstant& other);
 
+	uint8_t* getData() const;
+
 	//uint8_t* pushConstantData = nullptr;
 	//uint64_t* pushConstantSize = nullptr;
 
 	uint64_t *pushConstantID = nullptr;
+
+  private:
+    void copyFromRaw(const void *src, uint64_t size);
 };

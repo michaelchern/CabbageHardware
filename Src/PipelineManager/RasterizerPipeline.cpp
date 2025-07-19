@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include"RasterizerPipeline.h"
 
@@ -427,7 +427,8 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 
 		vkCmdBindDescriptorSets(globalHardwareContext.deviceManager.mainDevice.commandBuffers, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &globalHardwareContext.resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
 
-		vkCmdPushConstants(globalHardwareContext.deviceManager.mainDevice.commandBuffers, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, pushConstantSize, geomMeshes[index].pushContast.pushConstantData);
+		void *data = geomMeshes[index].pushContast.getData();
+		vkCmdPushConstants(globalHardwareContext.deviceManager.mainDevice.commandBuffers, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, pushConstantSize, data);
 
 		vkCmdDrawIndexed(globalHardwareContext.deviceManager.mainDevice.commandBuffers, geomMeshes[index].indexCount, 1, 0, 0, 0);
 	}
