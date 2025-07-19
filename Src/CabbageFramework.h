@@ -133,3 +133,17 @@ struct HardwarePushConstant
 	uint8_t* pushConstantData = nullptr;
 	uint64_t* pushConstantSize = nullptr;
 };
+
+
+struct HardwareDisplayer
+{
+    HardwareDisplayer(void *surface = nullptr);
+    ~HardwareDisplayer() = default;
+
+	HardwareDisplayer &operator=(const HardwareImage &other);
+    HardwareDisplayer &operator=(const HardwareDisplayer &other);
+
+	operator HardwareImage();
+
+    uint64_t displayerID;
+};
