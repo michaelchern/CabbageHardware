@@ -5,18 +5,18 @@ file(GLOB_RECURSE EXAMPLES_SOURCE_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${EXAMPLES_SOURCE_FILES})
-add_executable(CabbageDisplayExamples ${EXAMPLES_SOURCE_FILES})
+add_executable(CabbageDisplayerExamples ${EXAMPLES_SOURCE_FILES})
 
 # 设置VS启动项目
-set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT CabbageDisplayExamples)
+set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT CabbageDisplayerExamples)
 
-set_target_properties(CabbageDisplayExamples PROPERTIES
+set_target_properties(CabbageDisplayerExamples PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/$<CONFIG>
     PDB_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/$<CONFIG>
-    VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:CabbageDisplayExamples>
+    VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:CabbageDisplayerExamples>
 )
 
-target_compile_options(CabbageDisplayExamples PRIVATE
+target_compile_options(CabbageDisplayerExamples PRIVATE
     $<$<AND:$<CONFIG:RelWithDebInfo>,$<NOT:$<CXX_COMPILER_ID:MSVC>>>:-fno-omit-frame-pointer -g>
     $<$<AND:$<CONFIG:MinSizeRel>,$<NOT:$<CXX_COMPILER_ID:MSVC>>>:-ffunction-sections -fdata-sections>
     $<$<AND:$<CONFIG:MinSizeRel>,$<CXX_COMPILER_ID:Clang>>:-Oz>
@@ -24,7 +24,7 @@ target_compile_options(CabbageDisplayExamples PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W1 /source-charset:utf-8 /execution-charset:utf-8>
 )
 
-target_compile_definitions(CabbageDisplayExamples PRIVATE
+target_compile_definitions(CabbageDisplayerExamples PRIVATE
     $<$<CONFIG:RelWithDebInfo>:ENABLE_DETAILED_LOGGING=1>
     $<$<CONFIG:RelWithDebInfo>:CABBAGE_ENGINE_DEBUG>
     $<$<CONFIG:MinSizeRel>:DISABLE_EXTRA_FEATURES=1>
@@ -33,16 +33,16 @@ target_compile_definitions(CabbageDisplayExamples PRIVATE
     NOMINMAX
 )
 
-target_link_options(CabbageDisplayExamples PRIVATE
+target_link_options(CabbageDisplayerExamples PRIVATE
     $<$<AND:$<CONFIG:MinSizeRel>,$<PLATFORM_ID:Linux>,$<NOT:$<CXX_COMPILER_ID:MSVC>>>:LINKER:--gc-sections>
     $<$<AND:$<CONFIG:MinSizeRel>,$<PLATFORM_ID:Darwin>>:-dead_strip>
     $<$<AND:$<CONFIG:MinSizeRel>,$<CXX_COMPILER_ID:MSVC>>:/LTCG;/OPT:REF;/OPT:ICF>
 )
 
-target_include_directories(CabbageDisplayExamples PRIVATE
+target_include_directories(CabbageDisplayerExamples PRIVATE
     "${PROJECT_SOURCE_DIR}/Env/glfw/include"
     "${PROJECT_SOURCE_DIR}/Env/stb")
 
-target_link_libraries(CabbageDisplayExamples PRIVATE
+target_link_libraries(CabbageDisplayerExamples PRIVATE
     glfw
-    CabbageDisplay)
+    CabbageDisplayer)
