@@ -17,6 +17,9 @@ endif()
 add_compile_definitions(
     $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
     NOMINMAX
+
+    $<$<CONFIG:Debug>:CABBAGE_ENGINE_DEBUG>
+    $<$<CONFIG:RelWithDebInfo>:CABBAGE_ENGINE_DEBUG>
 )
 
 # ==== 子仓库与第三方库 ====
