@@ -32,26 +32,12 @@ HardwarePushConstant::~HardwarePushConstant()
 
 HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant &other)
 {
-
+    PushConstant &otherPC = pushConstantGlobalPool[*other.pushConstantID];
     PushConstant &selfPC = pushConstantGlobalPool[*this->pushConstantID];
 
-    if (selfPC.size == otherSize && selfPC.data != nullptr && otherData != nullptr)
+    if (selfPC.size == otherPC.size && selfPC.data != nullptr && otherPC.data != nullptr)
     {
-        memcpy(selfPC.data, otherData, otherSize);
-    }
-    else
-    {
-        if (selfPC.data)
-        {
-            free(selfPC.data);
-            selfPC.data = nullptr;
-        }
-        selfPC.data = (uint8_t *)malloc(otherSize);
-        selfPC.size = otherSize;
-        if (otherData)
-        {
-            memcpy(selfPC.data, otherData, otherSize);
-        }
+        memcpy(selfPC.data, otherPC.data, otherPC.size);
     }
 
     *(this->pushConstantID) = *(other.pushConstantID);
