@@ -32,16 +32,11 @@ HardwarePushConstant::~HardwarePushConstant()
 
 HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant &other)
 {
-    PushConstant &otherPC = pushConstantGlobalPool[*other.pushConstantID];
-    PushConstant &selfPC = pushConstantGlobalPool[*this->pushConstantID];
-
-    if (selfPC.size == otherPC.size && selfPC.data != nullptr && otherPC.data != nullptr)
+    if (pushConstantGlobalPool[*this->pushConstantID].size == pushConstantGlobalPool[*other.pushConstantID].size && pushConstantGlobalPool[*this->pushConstantID].data != nullptr && pushConstantGlobalPool[*other.pushConstantID].data != nullptr)
     {
-        memcpy(selfPC.data, otherPC.data, otherPC.size);
+        memcpy(pushConstantGlobalPool[*this->pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].size);
     }
-
     *(this->pushConstantID) = *(other.pushConstantID);
-
     return *this;
 }
 
@@ -75,9 +70,9 @@ void HardwarePushConstant::copyFromRaw(const void* src, uint64_t size)
 {
     pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
     *this->pushConstantID = currentPushConstantID++;
-    PushConstant pc;
-    pc.size = size;
-    pc.data = (uint8_t*)malloc(size);
-    memcpy(pc.data, src, size);
-    pushConstantGlobalPool[*pushConstantID] = pc;
+    PushConstant pushConstant;
+    pushConstant.size = size;
+    pushConstant.data = (uint8_t *)malloc(size);
+    memcpy(pushConstant.data, src, size);
+    pushConstantGlobalPool[*pushConstantID] = pushConstant;
 }
