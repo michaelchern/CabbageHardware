@@ -1,5 +1,4 @@
 # TODO
-- VMA创建image会寄（debug下）
 - BUG：mutiview初始化黑屏
 - 内存泄漏问题
 - 重构pass间同步
