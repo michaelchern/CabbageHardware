@@ -128,6 +128,7 @@ struct HardwarePushConstant
 	HardwarePushConstant& operator= (const HardwarePushConstant& other);
 
 	uint8_t* getData() const;
+    uint64_t getSize() const;
 
   private:
     void copyFromRaw(const void *src, uint64_t size);

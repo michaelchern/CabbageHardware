@@ -32,8 +32,6 @@ HardwarePushConstant::~HardwarePushConstant()
 
 HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant &other)
 {
-    uint64_t otherSize = pushConstantGlobalPool[*other.pushConstantID].size;
-    uint8_t *otherData = pushConstantGlobalPool[*other.pushConstantID].data;
 
     PushConstant &selfPC = pushConstantGlobalPool[*this->pushConstantID];
 
@@ -80,6 +78,11 @@ HardwarePushConstant::HardwarePushConstant(uint64_t size, uint64_t offset, Hardw
 uint8_t* HardwarePushConstant::getData() const
 {
     return pushConstantGlobalPool.at(*pushConstantID).data;
+}
+
+uint64_t HardwarePushConstant::getSize() const
+{
+    return pushConstantGlobalPool.at(*pushConstantID).size;
 }
 
 void HardwarePushConstant::copyFromRaw(const void* src, uint64_t size)
