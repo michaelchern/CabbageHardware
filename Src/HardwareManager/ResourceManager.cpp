@@ -288,7 +288,6 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
 
 		VmaAllocationCreateInfo imageAllocCreateInfo = {};
 		imageAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
-		imageAllocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
 		vmaCreateImage(g_hAllocator, &imageInfo, &imageAllocCreateInfo, &resultImage.imageHandle, &resultImage.imageAlloc, &resultImage.imageAllocInfo);
 
