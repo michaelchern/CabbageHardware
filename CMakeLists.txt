@@ -14,6 +14,11 @@ else()
     option(CABBAGE_RASTERIZER_BUILD_EXAMPLES "是否构建 CabbageDisplayer 示例" OFF)
 endif()
 
+add_compile_definitions(
+    $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+    NOMINMAX
+)
+
 # ==== 子仓库与第三方库 ====
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(Env/Helicon EXCLUDE_FROM_ALL)
