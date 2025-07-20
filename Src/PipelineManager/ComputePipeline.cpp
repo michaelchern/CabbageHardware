@@ -1,4 +1,4 @@
-#include"ComputePipeline.h"
+﻿#include"ComputePipeline.h"
 
 #include<HardwareManager/GlobalContext.h>
 
@@ -70,10 +70,10 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &globalHardwareContext.resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
 
 				//void* pushContastValue = EmbededShader::testAst.getFinalPushConstBytes();
-
-				if (pushConstant.pushConstantData != nullptr)
+                void* data = pushConstant.getData();
+				if (data != nullptr)
 				{
-                    vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, shaderCode.shaderResources.pushConstantSize, pushConstant.pushConstantData);
+                    vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, shaderCode.shaderResources.pushConstantSize, data);
 				}
 
 				vkCmdDispatch(commandBuffer, groupCount.x, groupCount.y, groupCount.z);
