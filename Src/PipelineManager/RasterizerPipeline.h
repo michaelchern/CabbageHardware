@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include"../HardwareManager/DeviceManager.h"
 #include"../HardwareManager/ResourceManager.h"
@@ -17,7 +17,7 @@ struct RasterizerPipeline
 		ResourceManager::BufferHardwareWrap indexBuffer;
 		std::vector<ResourceManager::BufferHardwareWrap> vertexBuffers;
 
-        HardwarePushConstant pushContast;
+        HardwarePushConstant pushConstant;
 	};
 
 	RasterizerPipeline() = default;

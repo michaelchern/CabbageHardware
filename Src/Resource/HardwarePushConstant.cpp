@@ -23,6 +23,14 @@ HardwarePushConstant::~HardwarePushConstant()
 HardwarePushConstant& HardwarePushConstant::operator= (const HardwarePushConstant& other)
 {
 	*(this->pushConstantID) = *(other.pushConstantID);
+    if (this != nullptr)
+    {
+        memcpy(pushConstantGlobalPool[*this->pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].data, pushConstantGlobalPool[*this->pushConstantID].size);
+    }
+    else
+    {
+        pushConstantGlobalPool[*this->pushConstantID].data = pushConstantGlobalPool[*other.pushConstantID].data;
+    }
 	return *this;
 }
 
