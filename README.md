@@ -7,3 +7,4 @@
 - 独立显卡不一定能display，只能通过核显display（临时方案：禁用核显，再次开启时独显会变成默认的display）（永久方案：显示时device异步拷贝画面）
 - Intel核显（6600T、7700HQ）：bindless会导致纹理错位
 - AMD核显：bindless创建时，查询到的数量和实际数量不符
+- MacOS、AMD核显：bindless创建时，同一个Pool不同descriptorCount会寄
