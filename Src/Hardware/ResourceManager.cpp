@@ -43,7 +43,7 @@ void ResourceManager::CreateVmaAllocator()
 
 	allocatorInfo.physicalDevice = globalHardwareContext.deviceManager.mainDevice.physicalDevice;
     allocatorInfo.device = globalHardwareContext.deviceManager.mainDevice.logicalDevice;
-    allocatorInfo.instance = globalHardwareContext.deviceManager.getVulkanInstance();
+    allocatorInfo.instance = globalHardwareContext.getVulkanInstance();
 	allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_4;
 
 	if (VK_KHR_dedicated_allocation_enabled)

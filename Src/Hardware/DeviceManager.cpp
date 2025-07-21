@@ -1,8 +1,5 @@
 #include "DeviceManager.h"
 
-#define VOLK_IMPLEMENTATION
-#include<Volk/volk.h>
-
 
 DeviceManager::DeviceManager()
 {
@@ -15,18 +12,9 @@ DeviceManager::~DeviceManager()
 }
 
 
-void DeviceManager::initDeviceManager(const CreateCallback& createCallback)
+void DeviceManager::initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance)
 {
-	if (volkInitialize() != VK_SUCCESS)
-	{
-		throw std::runtime_error("Failed volkInitialize!");
-	}
-
-	createVkInstance(createCallback);
-
-	volkLoadInstance(vkInstance);
-
-	createDevices(createCallback);
+    createDevices(createCallback, vkInstance);
 
 	choosePresentQueueFamily();
 
@@ -56,166 +44,9 @@ void DeviceManager::createTimelineSemaphore()
 }
 
 
-VkInstance DeviceManager::getVulkanInstance()
-{ 
-	return vkInstance; 
-}
 
 
-void DeviceManager::createVkInstance(const CreateCallback& initInfo)
-{
-	std::set<const char*> inputExtensions = initInfo.requiredInstanceExtensions(vkInstance, nullptr);
-
-	std::vector<const char*> requiredExtensions(inputExtensions.begin(), inputExtensions.end());
-	std::vector<const char*> requiredLayers{};
-
-#ifdef CABBAGE_ENGINE_DEBUG
-	bool enableDebugLayer = false;
-
-	uint32_t layerCount;
-	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-	std::vector<VkLayerProperties> availableLayers(layerCount);
-	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-	for (const auto& layerProperties : availableLayers)
-	{
-		if (strcmp("VK_LAYER_KHRONOS_validation", layerProperties.layerName) == 0)
-		{
-			enableDebugLayer = true;
-
-			requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-			requiredExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-			requiredLayers.push_back("VK_LAYER_KHRONOS_validation");
-			break;
-		}
-	}
-#endif
-
-
-	{
-		uint32_t extensionCount = 0;
-		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, availableExtensions.data());
-
-		for (size_t i = 0; i < requiredExtensions.size(); i++)
-		{
-			bool extensionSupported = false;
-			for (size_t j = 0; j < availableExtensions.size(); j++)
-			{
-				if (strcmp(requiredExtensions[i], availableExtensions[j].extensionName) == 0)
-				{
-					extensionSupported = true;
-					break;
-				}
-			}
-			if (!extensionSupported)
-			{
-				std::cerr << " ---------- Extensions Warning ---------- Instance not support : " << requiredExtensions[i] << std::endl;
-
-				requiredExtensions.erase(requiredExtensions.begin() + i);
-				i--;
-			}
-		}
-	}
-
-
-	{
-		uint32_t layerCount = 0;
-		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-		std::vector<VkLayerProperties> availableLayers(layerCount);
-		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-		for (size_t i = 0; i < requiredLayers.size(); i++)
-		{
-			bool extensionSupported = false;
-			for (size_t j = 0; j < availableLayers.size(); j++)
-			{
-				if (strcmp(requiredLayers[i], availableLayers[j].layerName) == 0)
-				{
-					extensionSupported = true;
-					break;
-				}
-			}
-			if (!extensionSupported)
-			{
-				std::cerr << " ---------- Extensions Warning ---------- Instance not support : " << requiredLayers[i] << std::endl;
-
-				requiredLayers.erase(requiredLayers.begin() + i);
-				i--;
-			}
-		}
-	}
-
-
-	VkApplicationInfo appInfo{};
-	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.apiVersion = VK_API_VERSION_1_4;
-
-	VkInstanceCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	createInfo.pApplicationInfo = &appInfo;
-	createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
-	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
-	createInfo.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size());
-	createInfo.ppEnabledLayerNames = requiredLayers.data();
-	createInfo.pNext = nullptr;
-
-
-#ifdef CABBAGE_ENGINE_DEBUG
-	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-	if (enableDebugLayer)
-	{
-		debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-		debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		debugCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-		auto debugCallback = [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)->VkBool32
-		{
-			std::cerr << " ---------- Vulkan Validation Layer ------ \n" << pCallbackData->pMessage << std::endl;
-			return VK_FALSE;
-		};
-
-		debugCreateInfo.pfnUserCallback = debugCallback;
-
-		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
-	}
-#endif
-
-	VkResult result = vkCreateInstance(&createInfo, nullptr, &vkInstance);
-	if (result != VK_SUCCESS)
-	{
-		throw std::runtime_error("failed to create instance!");
-	}
-
-
-#ifdef CABBAGE_ENGINE_DEBUG
-	if (enableDebugLayer)
-	{
-		auto CreateDebugUtilsMessengerEXT = [](VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)->VkResult
-		{
-			auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-			if (func != nullptr)
-			{
-				return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-			}
-			else
-			{
-				return VK_ERROR_EXTENSION_NOT_PRESENT;
-			}
-		};
-
-		if (CreateDebugUtilsMessengerEXT(vkInstance, &debugCreateInfo, nullptr, &debugMessenger) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to set up debug messenger!");
-		}
-	}
-#endif
-
-}
-
-
-void DeviceManager::createDevices(const CreateCallback& initInfo)
+void DeviceManager::createDevices(const CreateCallback &initInfo, const VkInstance &vkInstance)
 {
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);

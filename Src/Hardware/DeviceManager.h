@@ -74,9 +74,8 @@ public:
 
 	~DeviceManager();
 
-	void initDeviceManager(const CreateCallback& createCallback);
+	void initDeviceManager(const CreateCallback &createCallback, const VkInstance& vkInstance);
 
-	VkInstance getVulkanInstance();
 
 	void createTimelineSemaphore();
 
@@ -91,9 +90,7 @@ public:
 
 private:
 
-	void createVkInstance(const CreateCallback& createInfo);
-
-	void createDevices(const CreateCallback& createInfo);
+	void createDevices(const CreateCallback &createInfo, const VkInstance &vkInstance);
 
 	void chooseMainDevice();
 
@@ -101,8 +98,6 @@ private:
 
 	bool createCommandBuffers();
 
-	VkInstance vkInstance = VK_NULL_HANDLE;
-	VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
 
 	uint64_t semaphoreValue = 0;
 	VkSemaphore timelineSemaphore;

@@ -53,7 +53,7 @@ void DisplayManager::cleaarupDisplayManager()
 		}
 		if (vkSurface != VK_NULL_HANDLE)
 		{
-            vkDestroySurfaceKHR(globalHardwareContext.deviceManager.getVulkanInstance(), vkSurface, nullptr);
+            vkDestroySurfaceKHR(globalHardwareContext.getVulkanInstance(), vkSurface, nullptr);
 			vkSurface = VK_NULL_HANDLE;
 		}
 		//if (frameFence != VK_NULL_HANDLE)
@@ -112,7 +112,7 @@ void DisplayManager::createVkSurface(void* surface)
 	createInfo.hwnd = (HWND)(surface);
 	createInfo.hinstance = GetModuleHandle(NULL);
 
-	if (vkCreateWin32SurfaceKHR(globalHardwareContext.deviceManager.getVulkanInstance(), &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
+	if (vkCreateWin32SurfaceKHR(globalHardwareContext.getVulkanInstance(), &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create window surface!");
 	}
