@@ -36,6 +36,8 @@ HardwarePushConstant::~HardwarePushConstant()
 
 HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant &other)
 {
+    if (this == &other) return *this;
+
     if (pushConstantGlobalPool[*this->pushConstantID].size == pushConstantGlobalPool[*other.pushConstantID].size && pushConstantGlobalPool[*this->pushConstantID].data != nullptr && pushConstantGlobalPool[*other.pushConstantID].data != nullptr)
     {
         memcpy(pushConstantGlobalPool[*this->pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].size);
