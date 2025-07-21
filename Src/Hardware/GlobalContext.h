@@ -11,7 +11,10 @@ struct HardwareContext
 
     DeviceManager deviceManager;
     ResourceManager resourceManager;
-    // std::vector<DisplayManager> displayManagers;
+
+private:
+    void prepareFeaturesChain();
+    CreateCallback hardwareCreateInfos{};
 };
 
 extern HardwareContext globalHardwareContext;

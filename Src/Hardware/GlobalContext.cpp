@@ -4,8 +4,13 @@ HardwareContext globalHardwareContext;
 
 HardwareContext::HardwareContext() 
 {
-    CreateCallback hardwareCreateInfos{};
+    prepareFeaturesChain();
+    deviceManager.initDeviceManager(hardwareCreateInfos);
+    resourceManager.initResourceManager();
+}
 
+void HardwareContext::prepareFeaturesChain()
+{
     hardwareCreateInfos.requiredInstanceExtensions = [&](const VkInstance &instance, const VkPhysicalDevice &device) {
         std::set<const char *> requiredExtensions;
         requiredExtensions.insert("VK_KHR_surface");
@@ -69,7 +74,4 @@ HardwareContext::HardwareContext()
 
         return (DeviceFeaturesChain() | deviceFeatures | deviceFeatures13 | deviceFeatures12 | deviceFeatures11);
     };
-
-    deviceManager.initDeviceManager(hardwareCreateInfos);
-    resourceManager.initResourceManager();
 }
