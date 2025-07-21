@@ -391,19 +391,19 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
         }
         else
         {
-            //if (source.device == destination.device)
+            if (source.device == destination.device)
             {
                 // 同 device，使用 vkCmdBlitImage
                 auto runCommand = [&](VkCommandBuffer &commandBuffer) {
                     VkImageBlit imageBlit{};
-                    imageBlit.srcSubresource.aspectMask = source.aspectMask;
+                    imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                     imageBlit.srcSubresource.mipLevel = 0;
                     imageBlit.srcSubresource.baseArrayLayer = 0;
                     imageBlit.srcSubresource.layerCount = 1;
                     imageBlit.srcOffsets[0] = {0, 0, 0};
                     imageBlit.srcOffsets[1] = {int32_t(source.imageSize.x), int32_t(source.imageSize.y), 1};
 
-                    imageBlit.dstSubresource.aspectMask = destination.aspectMask;
+                    imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                     imageBlit.dstSubresource.mipLevel = 0;
                     imageBlit.dstSubresource.baseArrayLayer = 0;
                     imageBlit.dstSubresource.layerCount = 1;
@@ -418,61 +418,61 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
                 source.device->executeSingleTimeCommands(runCommand);
                 return true;
             }
-            //else
-            //{
-            //    // device 不同，使用 staging buffer
-            //    VkDeviceSize srcSize = source.imageSize.x * source.imageSize.y * source.pixelSize;
-            //    VkDeviceSize dstSize = destination.imageSize.x * destination.imageSize.y * destination.pixelSize;
+            else
+            {
+                // device 不同，使用 staging buffer
+                VkDeviceSize srcSize = source.imageSize.x * source.imageSize.y * source.pixelSize;
+                VkDeviceSize dstSize = destination.imageSize.x * destination.imageSize.y * destination.pixelSize;
 
-            //    // 1. 源 device：image -> buffer
-            //    BufferHardwareWrap srcStaging = source.resourceManager->createBuffer(srcSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-            //    auto srcCopyCmd = [&](VkCommandBuffer commandBuffer) {
-            //        VkBufferImageCopy region{};
-            //        region.bufferOffset = 0;
-            //        region.bufferRowLength = 0;
-            //        region.bufferImageHeight = 0;
-            //        region.imageSubresource.aspectMask = source.aspectMask;
-            //        region.imageSubresource.mipLevel = 0;
-            //        region.imageSubresource.baseArrayLayer = 0;
-            //        region.imageSubresource.layerCount = 1;
-            //        region.imageOffset = {0, 0, 0};
-            //        region.imageExtent = {source.imageSize.x, source.imageSize.y, 1};
-            //        vkCmdCopyImageToBuffer(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, srcStaging.bufferHandle, 1, &region);
-            //    };
-            //    source.device->executeSingleTimeCommands(srcCopyCmd);
+                // 1. 源 device：image -> buffer
+                BufferHardwareWrap srcStaging = source.resourceManager->createBuffer(srcSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+                auto srcCopyCmd = [&](VkCommandBuffer commandBuffer) {
+                    VkBufferImageCopy region{};
+                    region.bufferOffset = 0;
+                    region.bufferRowLength = 0;
+                    region.bufferImageHeight = 0;
+                    region.imageSubresource.aspectMask = source.aspectMask;
+                    region.imageSubresource.mipLevel = 0;
+                    region.imageSubresource.baseArrayLayer = 0;
+                    region.imageSubresource.layerCount = 1;
+                    region.imageOffset = {0, 0, 0};
+                    region.imageExtent = {source.imageSize.x, source.imageSize.y, 1};
+                    vkCmdCopyImageToBuffer(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, srcStaging.bufferHandle, 1, &region);
+                };
+                source.device->executeSingleTimeCommands(srcCopyCmd);
 
-            //    // 2. host 拷贝
-            //    void *mappedData = nullptr;
-            //    vmaMapMemory(source.resourceManager->g_hAllocator, srcStaging.bufferAlloc, &mappedData);
+                // 2. host 拷贝
+                void *mappedData = nullptr;
+                vmaMapMemory(source.resourceManager->g_hAllocator, srcStaging.bufferAlloc, &mappedData);
 
-            //    // 3. 目标 device：buffer -> image
-            //    BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(dstSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-            //    void *dstMappedData = nullptr;
-            //    vmaMapMemory(destination.resourceManager->g_hAllocator, dstStaging.bufferAlloc, &dstMappedData);
-            //    memcpy(dstMappedData, mappedData, std::min(srcSize, dstSize));
-            //    vmaUnmapMemory(source.resourceManager->g_hAllocator, srcStaging.bufferAlloc);
-            //    vmaUnmapMemory(destination.resourceManager->g_hAllocator, dstStaging.bufferAlloc);
+                // 3. 目标 device：buffer -> image
+                BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(dstSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+                void *dstMappedData = nullptr;
+                vmaMapMemory(destination.resourceManager->g_hAllocator, dstStaging.bufferAlloc, &dstMappedData);
+                memcpy(dstMappedData, mappedData, std::min(srcSize, dstSize));
+                vmaUnmapMemory(source.resourceManager->g_hAllocator, srcStaging.bufferAlloc);
+                vmaUnmapMemory(destination.resourceManager->g_hAllocator, dstStaging.bufferAlloc);
 
-            //    auto dstCopyCmd = [&](VkCommandBuffer commandBuffer) {
-            //        VkBufferImageCopy region{};
-            //        region.bufferOffset = 0;
-            //        region.bufferRowLength = 0;
-            //        region.bufferImageHeight = 0;
-            //        region.imageSubresource.aspectMask = destination.aspectMask;
-            //        region.imageSubresource.mipLevel = 0;
-            //        region.imageSubresource.baseArrayLayer = 0;
-            //        region.imageSubresource.layerCount = 1;
-            //        region.imageOffset = {0, 0, 0};
-            //        region.imageExtent = {destination.imageSize.x, destination.imageSize.y, 1};
-            //        vkCmdCopyBufferToImage(commandBuffer, dstStaging.bufferHandle, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
-            //    };
-            //    destination.device->executeSingleTimeCommands(dstCopyCmd);
+                auto dstCopyCmd = [&](VkCommandBuffer commandBuffer) {
+                    VkBufferImageCopy region{};
+                    region.bufferOffset = 0;
+                    region.bufferRowLength = 0;
+                    region.bufferImageHeight = 0;
+                    region.imageSubresource.aspectMask = destination.aspectMask;
+                    region.imageSubresource.mipLevel = 0;
+                    region.imageSubresource.baseArrayLayer = 0;
+                    region.imageSubresource.layerCount = 1;
+                    region.imageOffset = {0, 0, 0};
+                    region.imageExtent = {destination.imageSize.x, destination.imageSize.y, 1};
+                    vkCmdCopyBufferToImage(commandBuffer, dstStaging.bufferHandle, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
+                };
+                destination.device->executeSingleTimeCommands(dstCopyCmd);
 
-            //    source.resourceManager->destroyBuffer(srcStaging);
-            //    destination.resourceManager->destroyBuffer(dstStaging);
+                source.resourceManager->destroyBuffer(srcStaging);
+                destination.resourceManager->destroyBuffer(dstStaging);
 
-            //    return true;
-            //}
+                return true;
+            }
         }
     }
     else
