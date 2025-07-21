@@ -26,15 +26,16 @@ HardwarePushConstant::HardwarePushConstant()
 
 HardwarePushConstant::~HardwarePushConstant()
 {
+    pushConstantRefCount[*this->pushConstantID]--;
     if (pushConstantRefCount[*this->pushConstantID] == 0)
     {
-        free(pushConstantGlobalPool[*this->pushConstantID].data);
+        if (pushConstantGlobalPool[*this->pushConstantID].data != nullptr)
+        {
+            free(pushConstantGlobalPool[*this->pushConstantID].data);
+            pushConstantGlobalPool[*this->pushConstantID].data = nullptr;
+        }
         pushConstantGlobalPool.erase(*this->pushConstantID);
         pushConstantRefCount.erase(*this->pushConstantID);
-    }
-    else if (pushConstantRefCount[*this->pushConstantID] > 1)
-    {
-        pushConstantRefCount[*this->pushConstantID]--;
     }
 }
 
