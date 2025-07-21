@@ -27,16 +27,19 @@ HardwarePushConstant::HardwarePushConstant()
 
 HardwarePushConstant::~HardwarePushConstant()
 {
-    pushConstantRefCount[*pushConstantID]--;
-    if (pushConstantRefCount[*pushConstantID] == 1)
+    if (pushConstantRefCount[*pushConstantID] > 0)
     {
-        if (pushConstantGlobalPool[*pushConstantID].data != nullptr && pushConstantGlobalPool[*pushConstantID].isSub !=true)
+        pushConstantRefCount[*pushConstantID]--;
+        if (pushConstantRefCount[*pushConstantID] == 1)
         {
-            free(pushConstantGlobalPool[*pushConstantID].data);
-            pushConstantGlobalPool[*pushConstantID].data = nullptr;
+            if (pushConstantGlobalPool[*pushConstantID].data != nullptr && pushConstantGlobalPool[*pushConstantID].isSub !=true)
+            {
+                free(pushConstantGlobalPool[*pushConstantID].data);
+                pushConstantGlobalPool[*pushConstantID].data = nullptr;
+            }
+            pushConstantGlobalPool.erase(*pushConstantID);
+            pushConstantRefCount.erase(*pushConstantID);
         }
-        pushConstantGlobalPool.erase(*pushConstantID);
-        pushConstantRefCount.erase(*pushConstantID);
     }
 }
 
