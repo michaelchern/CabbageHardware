@@ -16,48 +16,49 @@ uint64_t currentPushConstantID = 0;
 HardwarePushConstant::HardwarePushConstant()
 {
 	this->pushConstantID = (uint64_t*)malloc(sizeof(uint64_t));
-    *this->pushConstantID = currentPushConstantID++;
+    *pushConstantID = currentPushConstantID++;
 
-    pushConstantRefCount[*this->pushConstantID] = 1;
+    pushConstantRefCount[*pushConstantID] = 1;
 
-    pushConstantGlobalPool[*this->pushConstantID] = PushConstant();
-    pushConstantGlobalPool[*this->pushConstantID].size = 0;
-    pushConstantGlobalPool[*this->pushConstantID].data = nullptr;
+    pushConstantGlobalPool[*pushConstantID] = PushConstant();
+    pushConstantGlobalPool[*pushConstantID].size = 0;
+    pushConstantGlobalPool[*pushConstantID].data = nullptr;
 }
 
 HardwarePushConstant::~HardwarePushConstant()
 {
-    pushConstantRefCount[*this->pushConstantID]--;
-    if (pushConstantRefCount[*this->pushConstantID] == 0)
+    pushConstantRefCount[*pushConstantID]--;
+    if (pushConstantRefCount[*pushConstantID] == 0)
     {
-        if (pushConstantGlobalPool[*this->pushConstantID].data != nullptr)
+        if (pushConstantGlobalPool[*pushConstantID].data != nullptr && pushConstantGlobalPool[*pushConstantID].isSub !=true)
         {
-            //free(pushConstantGlobalPool[*this->pushConstantID].data);
-            //pushConstantGlobalPool[*this->pushConstantID].data = nullptr;
+            free(pushConstantGlobalPool[*pushConstantID].data);
+            pushConstantGlobalPool[*pushConstantID].data = nullptr;
         }
-        //pushConstantGlobalPool.erase(*this->pushConstantID);
-        //pushConstantRefCount.erase(*this->pushConstantID);
+        pushConstantGlobalPool.erase(*pushConstantID);
+        pushConstantRefCount.erase(*pushConstantID);
     }
 }
 
 HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant &other)
 {   
-    if (pushConstantGlobalPool[*this->pushConstantID].size != pushConstantGlobalPool[*other.pushConstantID].size || pushConstantGlobalPool[*this->pushConstantID].data == nullptr)
+    if (pushConstantGlobalPool[*pushConstantID].size != pushConstantGlobalPool[*other.pushConstantID].size || pushConstantGlobalPool[*pushConstantID].data == nullptr)
     {
-        if (pushConstantGlobalPool[*this->pushConstantID].data != nullptr && pushConstantGlobalPool[*this->pushConstantID].isSub != true)
+        if (pushConstantGlobalPool[*pushConstantID].data != nullptr && pushConstantGlobalPool[*pushConstantID].isSub != true)
         {
-            free(pushConstantGlobalPool[*this->pushConstantID].data);
+            free(pushConstantGlobalPool[*pushConstantID].data);
         }
-        pushConstantGlobalPool[*this->pushConstantID].size = pushConstantGlobalPool[*other.pushConstantID].size;
-        pushConstantGlobalPool[*this->pushConstantID].data = (uint8_t *)malloc(pushConstantGlobalPool[*other.pushConstantID].size);
+        pushConstantGlobalPool[*pushConstantID].size = pushConstantGlobalPool[*other.pushConstantID].size;
+        pushConstantGlobalPool[*pushConstantID].data = (uint8_t *)malloc(pushConstantGlobalPool[*other.pushConstantID].size);
     }
 
     if (pushConstantGlobalPool[*other.pushConstantID].data != nullptr)
     {
-        memcpy(pushConstantGlobalPool[*this->pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].size);
+        memcpy(pushConstantGlobalPool[*pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].size);
     }
 
-    pushConstantRefCount[*this->pushConstantID]++; 
+    //*this->pushConstantID = *(other.pushConstantID);
+    pushConstantRefCount[*pushConstantID]++; 
     return *this;
 }
 
