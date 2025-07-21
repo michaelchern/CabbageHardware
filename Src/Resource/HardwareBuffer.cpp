@@ -64,7 +64,7 @@ HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const voi
 		break;
 	}
 
-	bufferGlobalPool[*bufferID] = globalHardwareContext.resourceManager.createBuffer(bufferSize, vkUsage);
+	bufferGlobalPool[*bufferID] = globalHardwareContext.mainDevice->resourceManager.createBuffer(bufferSize, vkUsage);
 
 	if (data != nullptr)
 	{
@@ -74,13 +74,13 @@ HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const voi
 
 bool HardwareBuffer::copyFromBuffer(const HardwareBuffer& inputBuffer, uint64_t size)
 {
-	globalHardwareContext.resourceManager.copyBuffer(bufferGlobalPool[*inputBuffer.bufferID].bufferHandle, bufferGlobalPool[*bufferID].bufferHandle, size);
+    globalHardwareContext.mainDevice->resourceManager.copyBuffer(bufferGlobalPool[*inputBuffer.bufferID].bufferHandle, bufferGlobalPool[*bufferID].bufferHandle, size);
 	return true;
 }
 
 uint32_t HardwareBuffer::storeDescriptor()
 {
-	return globalHardwareContext.resourceManager.storeDescriptor(bufferGlobalPool[*bufferID]);
+    return globalHardwareContext.mainDevice->resourceManager.storeDescriptor(bufferGlobalPool[*bufferID]);
 }
 
 bool HardwareBuffer::copyFromData(const void* inputData, uint64_t size)

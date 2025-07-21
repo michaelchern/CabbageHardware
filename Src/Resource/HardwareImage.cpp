@@ -36,13 +36,13 @@ HardwareImage::operator bool()
 
 uint32_t HardwareImage::storeDescriptor()
 {
-	return globalHardwareContext.resourceManager.storeDescriptor(imageGlobalPool[*imageID]);
+    return globalHardwareContext.mainDevice->resourceManager.storeDescriptor(imageGlobalPool[*imageID]);
 }
 
 
 bool HardwareImage::copyFromBuffer(const HardwareBuffer& buffer)
 {
-	globalHardwareContext.resourceManager.copyBufferToImage(bufferGlobalPool[*buffer.bufferID].bufferHandle, imageGlobalPool[*imageID].imageHandle, imageGlobalPool[*imageID].imageSize.x, imageGlobalPool[*imageID].imageSize.y);
+    globalHardwareContext.mainDevice->resourceManager.copyBufferToImage(bufferGlobalPool[*buffer.bufferID].bufferHandle, imageGlobalPool[*imageID].imageHandle, imageGlobalPool[*imageID].imageSize.x, imageGlobalPool[*imageID].imageSize.y);
 	return true;
 }
 
@@ -134,7 +134,7 @@ HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, Imag
 		break;
 	}
 
-	imageGlobalPool[*imageID] = globalHardwareContext.resourceManager.createImage(imageSize, vkImageFormat, vkImageUsageFlags, arrayLayers);
+	imageGlobalPool[*imageID] = globalHardwareContext.mainDevice->resourceManager.createImage(imageSize, vkImageFormat, vkImageUsageFlags, arrayLayers);
 	imageGlobalPool[*imageID].pixelSize = pixelSize;
 
 	if (imageData != nullptr)
