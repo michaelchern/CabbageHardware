@@ -40,6 +40,7 @@ HardwarePushConstant::~HardwarePushConstant()
             pushConstantGlobalPool.erase(*pushConstantID);
             pushConstantRefCount.erase(*pushConstantID);
         }
+        free(pushConstantID);
     }
 }
 
