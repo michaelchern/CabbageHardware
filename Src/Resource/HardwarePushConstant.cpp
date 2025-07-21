@@ -17,7 +17,7 @@ HardwarePushConstant::HardwarePushConstant()
 	this->pushConstantID = (uint64_t*)malloc(sizeof(uint64_t));
     *this->pushConstantID = currentPushConstantID++;
 
-    pushConstantRefCount[*this->pushConstantID] = 0;
+    pushConstantRefCount[*this->pushConstantID] = 1;
 
     pushConstantGlobalPool[*this->pushConstantID] = PushConstant();
     pushConstantGlobalPool[*this->pushConstantID].size = 0;
@@ -26,21 +26,29 @@ HardwarePushConstant::HardwarePushConstant()
 
 HardwarePushConstant::~HardwarePushConstant()
 {
-    //if (pushConstantGlobalPool.find(*pushConstantID) != pushConstantGlobalPool.end())
-    //{
-    //    free(pushConstantGlobalPool[*pushConstantID].data);
-    //    pushConstantGlobalPool.erase(*pushConstantID);
-    //}
-    //free(pushConstantID);
+    if (pushConstantRefCount[*this->pushConstantID] == 1)
+    {
+        free(pushConstantGlobalPool[*this->pushConstantID].data);
+        pushConstantGlobalPool.erase(*this->pushConstantID);
+        pushConstantRefCount.erase(*this->pushConstantID);
+    }
+    else if (pushConstantRefCount[*this->pushConstantID] > 1)
+    {
+        pushConstantRefCount[*this->pushConstantID]--;
+    }
+    free(this->pushConstantID);
 }
 
 HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant &other)
-{
+{   
+    pushConstantRefCount[*this->pushConstantID]++;
+
     if (pushConstantGlobalPool[*this->pushConstantID].size == pushConstantGlobalPool[*other.pushConstantID].size && pushConstantGlobalPool[*this->pushConstantID].data != nullptr && pushConstantGlobalPool[*other.pushConstantID].data != nullptr)
     {
         memcpy(pushConstantGlobalPool[*this->pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].size);
     }
-    *(this->pushConstantID) = *(other.pushConstantID);
+
+    *this->pushConstantID = *(other.pushConstantID);
     return *this;
 }
 
@@ -49,7 +57,7 @@ HardwarePushConstant::HardwarePushConstant(uint64_t size, uint64_t offset, Hardw
     this->pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
     *this->pushConstantID = currentPushConstantID++;
 
-    pushConstantRefCount[*this->pushConstantID] = 0;
+    pushConstantRefCount[*this->pushConstantID] = 1;
 
     pushConstantGlobalPool[*this->pushConstantID] = PushConstant();
     pushConstantGlobalPool[*this->pushConstantID].size = size;
@@ -77,6 +85,9 @@ void HardwarePushConstant::copyFromRaw(const void* src, uint64_t size)
 {
     pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
     *this->pushConstantID = currentPushConstantID++;
+
+    pushConstantRefCount[*this->pushConstantID] = 1;
+
     PushConstant pushConstant;
     pushConstant.size = size;
     pushConstant.data = (uint8_t *)malloc(size);
