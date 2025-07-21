@@ -4,7 +4,7 @@ HardwareContext globalHardwareContext;
 
 HardwareContext::HardwareContext() 
 {
-    DeviceManager::CreateCallback hardwareCreateInfos{};
+    CreateCallback hardwareCreateInfos{};
 
     hardwareCreateInfos.requiredInstanceExtensions = [&](const VkInstance &instance, const VkPhysicalDevice &device) {
         std::set<const char *> requiredExtensions;
@@ -67,7 +67,7 @@ HardwareContext::HardwareContext()
         deviceFeatures11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES_KHR;
         deviceFeatures11.multiview = VK_TRUE;
 
-        return (DeviceManager::DeviceFeaturesChain() | deviceFeatures | deviceFeatures13 | deviceFeatures12 | deviceFeatures11);
+        return (DeviceFeaturesChain() | deviceFeatures | deviceFeatures13 | deviceFeatures12 | deviceFeatures11);
     };
 
     deviceManager.initDeviceManager(hardwareCreateInfos);

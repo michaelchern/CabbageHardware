@@ -1,7 +1,7 @@
-#include "DeviceManager.h"
+#include "FeaturesChain.h"
 
 
-DeviceManager::DeviceFeaturesChain::DeviceFeaturesChain()
+DeviceFeaturesChain::DeviceFeaturesChain()
 {
 	//rayQueryFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
 	//rayQueryFeatures.pNext = nullptr;
@@ -29,37 +29,37 @@ DeviceManager::DeviceFeaturesChain::DeviceFeaturesChain()
 }
 
 
-VkPhysicalDeviceFeatures2* DeviceManager::DeviceFeaturesChain::getChainHead()
+VkPhysicalDeviceFeatures2* DeviceFeaturesChain::getChainHead()
 {
 	return &deviceFeatures2;
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&(DeviceFeaturesChain features)
+DeviceFeaturesChain DeviceFeaturesChain::operator&(DeviceFeaturesChain features)
 {
 	return (*this & features.deviceFeatures2 & features.deviceFeatures11 & features.deviceFeatures12 & features.deviceFeatures13);
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|(DeviceFeaturesChain features)
+DeviceFeaturesChain DeviceFeaturesChain::operator|(DeviceFeaturesChain features)
 {
 	return (*this | features.deviceFeatures2 | features.deviceFeatures11 | features.deviceFeatures12 | features.deviceFeatures13);
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&(VkPhysicalDeviceFeatures2 features)
+DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceFeatures2 features)
 {
 	return (*this & features.features);
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|(VkPhysicalDeviceFeatures2 features)
+DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceFeatures2 features)
 {
 	return (*this | features.features);
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&(VkPhysicalDeviceVulkan11Features features)
+DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceVulkan11Features features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.deviceFeatures11.storageBuffer16BitAccess &= features.storageBuffer16BitAccess;
@@ -78,7 +78,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&(VkPhysicalDeviceVulkan12Features features)
+DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceVulkan12Features features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.deviceFeatures12.samplerMirrorClampToEdge &= features.samplerMirrorClampToEdge;
@@ -132,7 +132,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&(VkPhysicalDeviceVulkan13Features features)
+DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceVulkan13Features features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.deviceFeatures13.robustImageAccess &= features.robustImageAccess;
@@ -154,7 +154,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&(VkPhysicalDeviceFeatures features)
+DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceFeatures features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.deviceFeatures2.features.robustBufferAccess &= features.robustBufferAccess;
@@ -215,7 +215,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&
 	return resultFeaturesChain;
 }
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&(VkPhysicalDeviceAccelerationStructureFeaturesKHR features)
+DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceAccelerationStructureFeaturesKHR features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.accelerationStructureFeatures.accelerationStructure &= features.accelerationStructure;
@@ -226,7 +226,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&
 	return resultFeaturesChain;
 }
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&(VkPhysicalDeviceRayTracingPipelineFeaturesKHR features)
+DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceRayTracingPipelineFeaturesKHR features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.rayTracingPipelineFeatures.rayTracingPipeline &= features.rayTracingPipeline;
@@ -237,7 +237,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&
 	return resultFeaturesChain;
 }
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&(VkPhysicalDeviceRayQueryFeaturesKHR features)
+DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceRayQueryFeaturesKHR features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.rayQueryFeatures.rayQuery &= features.rayQuery;
@@ -246,7 +246,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator&
 
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|(VkPhysicalDeviceVulkan11Features features)
+DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceVulkan11Features features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.deviceFeatures11.storageBuffer16BitAccess |= features.storageBuffer16BitAccess;
@@ -265,7 +265,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|(VkPhysicalDeviceVulkan12Features features)
+DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceVulkan12Features features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.deviceFeatures12.samplerMirrorClampToEdge |= features.samplerMirrorClampToEdge;
@@ -319,7 +319,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|(VkPhysicalDeviceVulkan13Features features)
+DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceVulkan13Features features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.deviceFeatures13.robustImageAccess |= features.robustImageAccess;
@@ -341,7 +341,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|(VkPhysicalDeviceFeatures features)
+DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceFeatures features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.deviceFeatures2.features.robustBufferAccess |= features.robustBufferAccess;
@@ -403,7 +403,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|
 }
 
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|(VkPhysicalDeviceAccelerationStructureFeaturesKHR features)
+DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceAccelerationStructureFeaturesKHR features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.accelerationStructureFeatures.accelerationStructure |= features.accelerationStructure;
@@ -414,7 +414,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|
 	return resultFeaturesChain;
 }
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|(VkPhysicalDeviceRayTracingPipelineFeaturesKHR features)
+DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceRayTracingPipelineFeaturesKHR features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.rayTracingPipelineFeatures.rayTracingPipeline |= features.rayTracingPipeline;
@@ -425,7 +425,7 @@ DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|
 	return resultFeaturesChain;
 }
 
-DeviceManager::DeviceFeaturesChain DeviceManager::DeviceFeaturesChain::operator|(VkPhysicalDeviceRayQueryFeaturesKHR features)
+DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceRayQueryFeaturesKHR features)
 {
 	DeviceFeaturesChain resultFeaturesChain = *this;
 	resultFeaturesChain.rayQueryFeatures.rayQuery |= features.rayQuery;
