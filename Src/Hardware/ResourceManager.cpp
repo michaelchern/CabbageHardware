@@ -324,7 +324,7 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
         return false;
     }
 
-    //if (source.device != destination.device)
+    if (source.device != destination.device)
     {
         // 1. 获取源 image 的 VkDeviceMemory
         VmaAllocationInfo srcAllocInfo = {};
@@ -386,26 +386,26 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
 
         return true;
     }
- //   else
-	//{
-	//	auto runCommand = [&](VkCommandBuffer& commandBuffer)
-	//		{
-	//			VkImageCopy imageCopyRegion{};
-	//			imageCopyRegion.srcSubresource.aspectMask = source.aspectMask;
-	//			imageCopyRegion.srcSubresource.layerCount = 1;
-	//			imageCopyRegion.dstSubresource.aspectMask = destination.aspectMask;
-	//			imageCopyRegion.dstSubresource.layerCount = 1;
-	//			imageCopyRegion.extent.width = source.imageSize.x;
-	//			imageCopyRegion.extent.height = source.imageSize.y;
-	//			imageCopyRegion.extent.depth = 1;
+    else
+	{
+		auto runCommand = [&](VkCommandBuffer& commandBuffer)
+			{
+				VkImageCopy imageCopyRegion{};
+				imageCopyRegion.srcSubresource.aspectMask = source.aspectMask;
+				imageCopyRegion.srcSubresource.layerCount = 1;
+				imageCopyRegion.dstSubresource.aspectMask = destination.aspectMask;
+				imageCopyRegion.dstSubresource.layerCount = 1;
+				imageCopyRegion.extent.width = source.imageSize.x;
+				imageCopyRegion.extent.height = source.imageSize.y;
+				imageCopyRegion.extent.depth = 1;
 
-	//			vkCmdCopyImage(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &imageCopyRegion);
-	//		};
+				vkCmdCopyImage(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &imageCopyRegion);
+			};
 
-	//	globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand);
+		globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand);
 
-	//	return true;
-	//}
+		return true;
+	}
 }
 
 
