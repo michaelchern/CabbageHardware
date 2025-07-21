@@ -13,9 +13,9 @@
 #include <stb_image.h>
 
 #include "CabbageFramework.h"
-#include "PipelineManager/ComputePipeline.h"
-#include "PipelineManager/RasterizerPipeline.h"
-#include <HardwareManager/GlobalContext.h>
+#include "Pipeline/ComputePipeline.h"
+#include "Pipeline/RasterizerPipeline.h"
+#include <Hardware/GlobalContext.h>
 
 std::string readStringFile(const std::string_view file_path)
 {
