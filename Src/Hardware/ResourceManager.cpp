@@ -14,8 +14,10 @@ ResourceManager::ResourceManager()
 }
 
 
-void ResourceManager::initResourceManager()
+void ResourceManager::initResourceManager(DeviceManager::DeviceUtils &device)
 {
+    this->device = &device;
+
 	CreateVmaAllocator();
 	createTextureSampler();
 	createBindlessDescriptorSet();
@@ -41,8 +43,8 @@ void ResourceManager::CreateVmaAllocator()
 	bool VK_KHR_maintenance5_enabled = false;
 	bool g_SparseBindingEnabled = false;
 
-	allocatorInfo.physicalDevice = globalHardwareContext.deviceManager.mainDevice.physicalDevice;
-    allocatorInfo.device = globalHardwareContext.deviceManager.mainDevice.logicalDevice;
+	allocatorInfo.physicalDevice = this->device->physicalDevice;
+    allocatorInfo.device = this->device->logicalDevice;
     allocatorInfo.instance = globalHardwareContext.getVulkanInstance();
 	allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_4;
 
@@ -139,7 +141,7 @@ void ResourceManager::createTextureSampler()
 	samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	samplerInfo.anisotropyEnable = false;
-    samplerInfo.maxAnisotropy = globalHardwareContext.deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxSamplerAnisotropy;
+    samplerInfo.maxAnisotropy = this->device->deviceFeaturesUtils.supportedProperties.properties.limits.maxSamplerAnisotropy;
 	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 	samplerInfo.unnormalizedCoordinates = VK_FALSE;
 	samplerInfo.compareEnable = VK_FALSE;
@@ -149,7 +151,7 @@ void ResourceManager::createTextureSampler()
 	samplerInfo.maxLod = static_cast<float>(1);
 	samplerInfo.mipLodBias = 0.0f;
 
-	if (vkCreateSampler(globalHardwareContext.deviceManager.mainDevice.logicalDevice, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
+	if (vkCreateSampler(this->device->logicalDevice, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
     {
 		throw std::runtime_error("failed to create texture sampler!");
 	}
@@ -189,7 +191,7 @@ void ResourceManager::destroyImage(ImageHardwareWrap& image)
 {
 	if (image.imageView != VK_NULL_HANDLE)
 	{
-        vkDestroyImageView(globalHardwareContext.deviceManager.mainDevice.logicalDevice, image.imageView, nullptr);
+        vkDestroyImageView(this->device->logicalDevice, image.imageView, nullptr);
 	}
 	if (image.imageAlloc != VK_NULL_HANDLE && image.imageHandle != VK_NULL_HANDLE)
 	{
@@ -220,7 +222,7 @@ VkImageView ResourceManager::createImageView(ImageHardwareWrap& image)
 	viewInfo.subresourceRange.layerCount = image.arrayLayers;
 	viewInfo.flags = 0;
 
-	if (vkCreateImageView(globalHardwareContext.deviceManager.mainDevice.logicalDevice, &viewInfo, nullptr, &image.imageView) != VK_SUCCESS)
+	if (vkCreateImageView(this->device->logicalDevice, &viewInfo, nullptr, &image.imageView) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create texture image view!");
 		return VK_NULL_HANDLE;
@@ -590,7 +592,7 @@ void ResourceManager::createBindlessDescriptorSet()
 	createInfo.pNext = &bindingFlags;
 
 	// Create layout
-    VkResult result = vkCreateDescriptorSetLayout(globalHardwareContext.deviceManager.mainDevice.logicalDevice, &createInfo, nullptr, &bindlessDescriptor.descriptorSetLayout);
+    VkResult result = vkCreateDescriptorSetLayout(this->device->logicalDevice, &createInfo, nullptr, &bindlessDescriptor.descriptorSetLayout);
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create descriptor set layout!");
@@ -618,7 +620,7 @@ void ResourceManager::createBindlessDescriptorSet()
 		poolInfo.maxSets = k_max_bindless_resources[0] + k_max_bindless_resources[1] + k_max_bindless_resources[2] + k_max_bindless_resources[3];
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 
-		if (vkCreateDescriptorPool(globalHardwareContext.deviceManager.mainDevice.logicalDevice, &poolInfo, nullptr, &bindlessDescriptor.descriptorPool) != VK_SUCCESS)
+		if (vkCreateDescriptorPool(this->device->logicalDevice, &poolInfo, nullptr, &bindlessDescriptor.descriptorPool) != VK_SUCCESS)
         {
 			throw std::runtime_error("failed to create descriptor pool!");
 		}
@@ -641,7 +643,7 @@ void ResourceManager::createBindlessDescriptorSet()
 		allocInfo.pNext = &count_info;
 
 		//uboDescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-        VkResult result = vkAllocateDescriptorSets(globalHardwareContext.deviceManager.mainDevice.logicalDevice, &allocInfo, &bindlessDescriptor.descriptorSet);
+        VkResult result = vkAllocateDescriptorSets(this->device->logicalDevice, &allocInfo, &bindlessDescriptor.descriptorSet);
 		if (result != VK_SUCCESS) {
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
@@ -712,7 +714,7 @@ uint32_t ResourceManager::storeDescriptor(ImageHardwareWrap image)
 		write.dstBinding = StorageImageBinding;
 	}
 
-	vkUpdateDescriptorSets(globalHardwareContext.deviceManager.mainDevice.logicalDevice, 1, &write, 0, nullptr);
+	vkUpdateDescriptorSets(this->device->logicalDevice, 1, &write, 0, nullptr);
 
 	return textureIndex;
 }
@@ -775,7 +777,7 @@ uint32_t ResourceManager::storeDescriptor(BufferHardwareWrap buffer)
 		writes.dstBinding = StorageBufferBinding;
 	}
 
-	vkUpdateDescriptorSets(globalHardwareContext.deviceManager.mainDevice.logicalDevice, 1, &writes, 0, nullptr);
+	vkUpdateDescriptorSets(this->device->logicalDevice, 1, &writes, 0, nullptr);
 
 	return bufferIndex;
 }
@@ -828,7 +830,7 @@ VkShaderModule ResourceManager::createShaderModule(const std::vector<unsigned in
 	createInfo.pCode = code.data();
 
 	VkShaderModule shaderModule;
-    if (vkCreateShaderModule(globalHardwareContext.deviceManager.mainDevice.logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+    if (vkCreateShaderModule(this->device->logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
     {
 		throw std::runtime_error("failed to create shader module!");
 	}

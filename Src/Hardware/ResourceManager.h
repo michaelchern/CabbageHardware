@@ -51,7 +51,7 @@ struct ResourceManager
 
 
 	ResourceManager();
-	void initResourceManager();
+    void initResourceManager(DeviceManager::DeviceUtils &device);
 
 
 	void destroyImage(ImageHardwareWrap& image);
@@ -126,4 +126,6 @@ private:
 	uint64_t deviceMemorySize = 0;
 	uint64_t hostSharedMemorySize = 0;
 	uint64_t mutiInstanceMemorySize = 0;
+
+	DeviceManager::DeviceUtils* device;
 };

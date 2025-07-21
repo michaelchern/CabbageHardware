@@ -19,7 +19,7 @@ HardwareContext::HardwareContext()
     volkLoadInstance(vkInstance);
 
     deviceManager.initDeviceManager(hardwareCreateInfos,vkInstance);
-    resourceManager.initResourceManager();
+    resourceManager.initResourceManager(deviceManager.mainDevice);
 }
 
 
