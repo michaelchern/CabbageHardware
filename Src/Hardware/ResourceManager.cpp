@@ -240,9 +240,11 @@ VkImageView ResourceManager::createImageView(ImageHardwareWrap& image)
 	}
 }
 
-ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 imageSize, VkFormat imageFormat, VkImageUsageFlags imageUsage, int arrayLayers, int mipLevels)
+ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 imageSize, VkFormat imageFormat, uint32_t pixelSize, VkImageUsageFlags imageUsage, int arrayLayers, int mipLevels)
 {
 	ImageHardwareWrap resultImage;
+
+	resultImage.pixelSize = pixelSize;
 
     resultImage.device = this->device;
     resultImage.resourceManager = this;

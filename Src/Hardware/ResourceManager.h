@@ -62,7 +62,7 @@ struct ResourceManager
 
 	void destroyImage(ImageHardwareWrap& image);
 	VkImageView createImageView(ImageHardwareWrap& image);
-	ImageHardwareWrap createImage(ktm::uvec2 imageSize, VkFormat imageFormat,
+    ImageHardwareWrap createImage(ktm::uvec2 imageSize, VkFormat imageFormat, uint32_t pixelSize,
 		VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 		int arrayLayers = 1, int mipLevels = 1);
 

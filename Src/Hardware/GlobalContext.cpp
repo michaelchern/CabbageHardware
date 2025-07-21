@@ -40,8 +40,8 @@ HardwareContext::HardwareContext()
     // demo of mutilple devices
     if (hardwareUtils.size()>1)
     {
-        ResourceManager::ImageHardwareWrap a = hardwareUtils[0].resourceManager.createImage(ktm::uvec2(800, 800), VK_FORMAT_R8G8B8A8_UINT, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-        ResourceManager::ImageHardwareWrap b = hardwareUtils[1].resourceManager.createImage(ktm::uvec2(800, 800), VK_FORMAT_R8G8B8A8_UINT, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+        ResourceManager::ImageHardwareWrap a = hardwareUtils[0].resourceManager.createImage(ktm::uvec2(800, 800), VK_FORMAT_R8G8B8A8_UINT, 4, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+        ResourceManager::ImageHardwareWrap b = hardwareUtils[1].resourceManager.createImage(ktm::uvec2(800, 800), VK_FORMAT_R8G8B8A8_UINT, 4, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
         hardwareUtils[0].resourceManager.copyImageMemory(a, b);
         hardwareUtils[0].resourceManager.copyImageMemory(b, a);
