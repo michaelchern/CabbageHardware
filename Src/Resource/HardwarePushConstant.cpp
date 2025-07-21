@@ -48,6 +48,9 @@ HardwarePushConstant::HardwarePushConstant(uint64_t size, uint64_t offset, Hardw
 {
     this->pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
     *this->pushConstantID = currentPushConstantID++;
+
+    pushConstantRefCount[*this->pushConstantID] = 0;
+
     pushConstantGlobalPool[*this->pushConstantID] = PushConstant();
     pushConstantGlobalPool[*this->pushConstantID].size = size;
     if (whole != nullptr)
