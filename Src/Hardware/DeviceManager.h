@@ -69,7 +69,7 @@ public:
 
 		uint64_t semaphoreValue = 0;
         VkSemaphore timelineSemaphore;
-	};
+    } deviceUtils;
 
 
 
@@ -77,7 +77,7 @@ public:
 
 	~DeviceManager();
 
-	void initDeviceManager(const CreateCallback &createCallback, const VkInstance& vkInstance);
+	void initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice);
 
 
 	void createTimelineSemaphore();
@@ -87,9 +87,9 @@ public:
 
 	bool executeSingleTimeCommands(std::function<void(VkCommandBuffer& commandBuffer)> commandsFunction);
 
-	DeviceUtils mainDevice;
+	//DeviceUtils mainDevice;
 
-	std::vector<DeviceUtils> userDevices;
+	//std::vector<DeviceUtils> userDevices;
 
 private:
 

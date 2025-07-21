@@ -18,8 +18,24 @@ HardwareContext::HardwareContext()
 
     volkLoadInstance(vkInstance);
 
-    deviceManager.initDeviceManager(hardwareCreateInfos,vkInstance);
-    resourceManager.initResourceManager(deviceManager.mainDevice);
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
+
+    if (deviceCount <= 0)
+    {
+        throw std::runtime_error("Failed to find GPUs! Please buy a GPU!");
+    }
+
+    hardwareUtils.resize(devices.size());
+    for (size_t i = 0; i < devices.size(); i++)
+    {
+        hardwareUtils[i].deviceManager.initDeviceManager(hardwareCreateInfos, vkInstance, devices[i]);
+        hardwareUtils[i].resourceManager.initResourceManager(hardwareUtils[i].deviceManager.deviceUtils);
+    }
+
+    chooseMainDevice();
 }
 
 
@@ -241,4 +257,53 @@ void HardwareContext::createVkInstance(const CreateCallback &initInfo)
         }
     }
 #endif
+}
+
+
+void HardwareContext::chooseMainDevice()
+{
+    for (size_t i = 0; i < hardwareUtils.size(); i++)
+    {
+        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceName[0] == 'N')
+        {
+            mainDevice = &hardwareUtils[i];
+            return;
+        }
+    }
+
+    for (size_t i = 0; i < hardwareUtils.size(); i++)
+    {
+        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+        {
+            mainDevice = &hardwareUtils[i];
+            return;
+        }
+    }
+
+    for (size_t i = 0; i < hardwareUtils.size(); i++)
+    {
+        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_OTHER)
+        {
+            mainDevice = &hardwareUtils[i];
+            return;
+        }
+    }
+
+    for (size_t i = 0; i < hardwareUtils.size(); i++)
+    {
+        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
+        {
+            mainDevice = &hardwareUtils[i];
+            return;
+        }
+    }
+
+    if (hardwareUtils.size() > 0)
+    {
+        mainDevice = &hardwareUtils[0];
+    }
+    else
+    {
+        throw std::runtime_error("Failed to find GPUs! Please buy a GPU!");
+    }
 }

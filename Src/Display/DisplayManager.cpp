@@ -42,7 +42,7 @@ void DisplayManager::cleaarupDisplayManager()
 
 		for (size_t i = 0; i < swapChainImages.size(); i++)
 		{
-            globalHardwareContext.resourceManager.destroyImage(swapChainImages[i]);
+            globalHardwareContext.mainDevice->resourceManager.destroyImage(swapChainImages[i]);
 		}
 		swapChainImages.clear();
 
@@ -167,8 +167,8 @@ void DisplayManager::choosePresentDevice()
 	//		break;
 	//	}
 	//}
-    displayDevice = globalHardwareContext.deviceManager.mainDevice;
-    presentQueues = globalHardwareContext.deviceManager.userDevices[0].graphicsQueues;
+    displayDevice = globalHardwareContext.mainDevice->deviceManager.deviceUtils;
+    presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues;
 }
 
 
@@ -269,7 +269,7 @@ void DisplayManager::createSwapChain()
 		swapChainImages[i].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		swapChainImages[i].arrayLayers = 1;
 		swapChainImages[i].mipLevels = 1;
-        swapChainImages[i].imageView = globalHardwareContext.resourceManager.createImageView(swapChainImages[i]);
+        swapChainImages[i].imageView = globalHardwareContext.mainDevice->resourceManager.createImageView(swapChainImages[i]);
 	}
 }
 
@@ -300,7 +300,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
             for (auto &image : swapChainImages)
             {
-                globalHardwareContext.resourceManager.destroyImage(image);
+                globalHardwareContext.mainDevice->resourceManager.destroyImage(image);
             }
 
             createSwapChain();
@@ -315,10 +315,10 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
             auto runCommand = [&](VkCommandBuffer &commandBuffer) {
                 // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-                globalHardwareContext.resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+                globalHardwareContext.mainDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
                 // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-                globalHardwareContext.resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+                globalHardwareContext.mainDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
                 VkImageBlit imageBlit;
                 imageBlit.dstOffsets[0] = VkOffset3D{0, 0, 0};
@@ -344,12 +344,12 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                                &imageBlit, VK_FILTER_LINEAR);
 
                 // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-                globalHardwareContext.resourceManager.transitionImageLayoutUnblocked(
+                globalHardwareContext.mainDevice->resourceManager.transitionImageLayoutUnblocked(
                     commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
                     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
-            globalHardwareContext.deviceManager.executeSingleTimeCommands(runCommand);
+            globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand);
 
             VkPresentInfoKHR presentInfo{};
             presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

@@ -9,8 +9,15 @@ struct HardwareContext
 
     ~HardwareContext() = default;
 
-    DeviceManager deviceManager;
-    ResourceManager resourceManager;
+    struct HardwareUtils
+    {
+        DeviceManager deviceManager;
+        ResourceManager resourceManager;
+    };
+
+    std::vector<HardwareUtils> hardwareUtils;
+
+    HardwareUtils* mainDevice;
 
     VkInstance getVulkanInstance();
 
@@ -22,6 +29,8 @@ private:
 
     VkInstance vkInstance = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
+
+    void chooseMainDevice();
 };
 
 extern HardwareContext globalHardwareContext;

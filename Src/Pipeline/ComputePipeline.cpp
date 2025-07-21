@@ -27,7 +27,7 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 		VkComputePipelineCreateInfo computePipelineCreateInfo{};
 		computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 
-		VkShaderModule shaderModule = globalHardwareContext.resourceManager.createShaderModule(shaderCode);
+		VkShaderModule shaderModule = globalHardwareContext.mainDevice->resourceManager.createShaderModule(shaderCode);
 
 		computePipelineCreateInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		//computePipelineCreateInfo.stage.flags = VK_SHADER_STAGE_COMPUTE_BIT;
@@ -45,21 +45,22 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = 1;
-		pipelineLayoutInfo.pSetLayouts = &globalHardwareContext.resourceManager.bindlessDescriptor.descriptorSetLayout;
+        pipelineLayoutInfo.pSetLayouts = &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSetLayout;
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
 
-		if (vkCreatePipelineLayout(globalHardwareContext.deviceManager.mainDevice.logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+		if (vkCreatePipelineLayout(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+        {
 			throw std::runtime_error("failed to create pipeline layout!");
 		}
 		computePipelineCreateInfo.layout = pipelineLayout;
 
-		VkResult result = vkCreateComputePipelines(globalHardwareContext.deviceManager.mainDevice.logicalDevice, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &pipeline);
+		VkResult result = vkCreateComputePipelines(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &pipeline);
 		if ( result != VK_SUCCESS) {
 			throw std::runtime_error("failed to create compute pipeline!");
 		}
 
-		vkDestroyShaderModule(globalHardwareContext.deviceManager.mainDevice.logicalDevice, shaderModule, nullptr);
+		vkDestroyShaderModule(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, shaderModule, nullptr);
 	}
 
 	if (pipelineLayout != VK_NULL_HANDLE && pipeline != VK_NULL_HANDLE)
@@ -67,7 +68,7 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 		auto runCommand = [&](VkCommandBuffer& commandBuffer)
 			{
 				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &globalHardwareContext.resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
 
 				//void* pushContastValue = EmbededShader::testAst.getFinalPushConstBytes();
                 void* data = pushConstant.getData();
@@ -79,6 +80,6 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 				vkCmdDispatch(commandBuffer, groupCount.x, groupCount.y, groupCount.z);
 			};
 
-		globalHardwareContext.deviceManager.executeSingleTimeCommands(runCommand);
+		globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand);
 	}
 }
