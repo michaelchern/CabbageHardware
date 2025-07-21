@@ -269,6 +269,10 @@ void DisplayManager::createSwapChain()
 		swapChainImages[i].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		swapChainImages[i].arrayLayers = 1;
 		swapChainImages[i].mipLevels = 1;
+
+        swapChainImages[i].device = &displayDevice->deviceManager;
+        swapChainImages[i].resourceManager = &displayDevice->resourceManager;
+
         swapChainImages[i].imageView =displayDevice->resourceManager.createImageView(swapChainImages[i]);
 	}
 }
