@@ -66,6 +66,9 @@ public:
 		{
 			return physicalDevice == other.physicalDevice && logicalDevice == other.logicalDevice;
 		}
+
+		uint64_t semaphoreValue = 0;
+        VkSemaphore timelineSemaphore;
 	};
 
 
@@ -97,9 +100,4 @@ private:
 	void choosePresentQueueFamily();
 
 	bool createCommandBuffers();
-
-
-	uint64_t semaphoreValue = 0;
-	VkSemaphore timelineSemaphore;
-
 };

@@ -18,29 +18,32 @@ void DeviceManager::initDeviceManager(const CreateCallback &createCallback, cons
 
 	choosePresentQueueFamily();
 
-	chooseMainDevice();
-
 	createCommandBuffers();
 
 	createTimelineSemaphore();
+
+	chooseMainDevice();
 }
 
 
 void DeviceManager::createTimelineSemaphore()
 {
-	VkSemaphoreTypeCreateInfo type_create_info{};
-	type_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO_KHR;
-	type_create_info.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE_KHR;
-	type_create_info.initialValue = 0;
+    for (size_t i = 0; i < userDevices.size(); i++)
+    {
+        VkSemaphoreTypeCreateInfo type_create_info{};
+        type_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO_KHR;
+        type_create_info.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE_KHR;
+        type_create_info.initialValue = 0;
 
-	VkSemaphoreCreateInfo semaphoreInfo{};
-	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-	semaphoreInfo.pNext = &type_create_info;
+        VkSemaphoreCreateInfo semaphoreInfo{};
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        semaphoreInfo.pNext = &type_create_info;
 
-	if (vkCreateSemaphore(mainDevice.logicalDevice, &semaphoreInfo, nullptr, &timelineSemaphore) != VK_SUCCESS)
-	{
-		throw std::runtime_error("failed to create synchronization objects for a frame!");
-	}
+        if (vkCreateSemaphore(userDevices[i].logicalDevice, &semaphoreInfo, nullptr, &userDevices[i].timelineSemaphore) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create synchronization objects for a frame!");
+        }
+    }
 }
 
 
@@ -258,13 +261,13 @@ void DeviceManager::chooseMainDevice()
 
 bool DeviceManager::createCommandBuffers()
 {
-	//for (auto& device: userDevices)
+    for (size_t i = 0; i < userDevices.size(); i++)
 	{
 		VkCommandPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		poolInfo.queueFamilyIndex = mainDevice.graphicsQueues[0].queueFamilyIndex;
-		VkResult result = vkCreateCommandPool(mainDevice.logicalDevice, &poolInfo, nullptr, &mainDevice.commandPool);
+        poolInfo.queueFamilyIndex = userDevices[i].graphicsQueues[0].queueFamilyIndex;
+        VkResult result = vkCreateCommandPool(userDevices[i].logicalDevice, &poolInfo, nullptr, &userDevices[i].commandPool);
 		if  (result!= VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create graphics command pool!");
@@ -273,11 +276,11 @@ bool DeviceManager::createCommandBuffers()
 
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = mainDevice.commandPool;
+        allocInfo.commandPool = userDevices[i].commandPool;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = 1;
 
-		result = vkAllocateCommandBuffers(mainDevice.logicalDevice, &allocInfo, &mainDevice.commandBuffers);
+		result = vkAllocateCommandBuffers(userDevices[i].logicalDevice, &allocInfo, &userDevices[i].commandBuffers);
 		if (result != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to allocate command buffers!");
@@ -371,14 +374,14 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer
 
 	VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo{};
 	waitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-	waitSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-	waitSemaphoreSubmitInfo.value = semaphoreValue++;
+    waitSemaphoreSubmitInfo.semaphore = mainDevice.timelineSemaphore;
+    waitSemaphoreSubmitInfo.value = mainDevice.semaphoreValue++;
 	waitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
 
 	VkSemaphoreSubmitInfo signalSemaphoreSubmitInfo{};
 	signalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-	signalSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-	signalSemaphoreSubmitInfo.value = semaphoreValue;
+    signalSemaphoreSubmitInfo.semaphore = mainDevice.timelineSemaphore;
+    signalSemaphoreSubmitInfo.value = mainDevice.semaphoreValue;
 	signalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
 
 	VkSubmitInfo2 submitInfo{};
