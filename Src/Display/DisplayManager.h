@@ -6,7 +6,7 @@
 
 #include "Hardware/ResourceManager.h"
 
-#include<CabbageFramework.h>
+#include<CabbageDisplayer.h>
 
 
 class DisplayManager

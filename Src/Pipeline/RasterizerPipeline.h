@@ -5,7 +5,7 @@
 
 #include"Compiler/ShaderCodeCompiler.h"
 
-#include "../CabbageFramework.h"
+#include "../CabbageDisplayer.h"
 
 
 struct RasterizerPipeline
