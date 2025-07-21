@@ -326,63 +326,59 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
 
     if (source.device != destination.device)
     {
-        // 1. 获取源 image 的 VkDeviceMemory
-        VmaAllocationInfo srcAllocInfo = {};
-        vmaGetAllocationInfo(g_hAllocator, source.imageAlloc, &srcAllocInfo);
-        VkDeviceMemory srcMemory = srcAllocInfo.deviceMemory;
+        VkDeviceSize imageSizeBytes = source.imageSize.x * source.imageSize.y * 4; // 需根据format实际计算
 
-        // 2. 导出 Win32 handle
-        VkMemoryGetWin32HandleInfoKHR getHandleInfo{};
-        getHandleInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
-        getHandleInfo.memory = srcMemory;
-        getHandleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+        // 1. 在source device上创建host可访问staging buffer
+        ResourceManager::BufferHardwareWrap srcStaging = createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+        // 2. 拷贝source image到staging buffer
+        auto srcCopyCmd = [&](VkCommandBuffer commandBuffer) {
+            VkBufferImageCopy region{};
+            region.bufferOffset = 0;
+            region.bufferRowLength = 0;
+            region.bufferImageHeight = 0;
+            region.imageSubresource.aspectMask = source.aspectMask;
+            region.imageSubresource.mipLevel = 0;
+            region.imageSubresource.baseArrayLayer = 0;
+            region.imageSubresource.layerCount = 1;
+            region.imageOffset = {0, 0, 0};
+            region.imageExtent = {source.imageSize.x, source.imageSize.y, 1};
+            vkCmdCopyImageToBuffer(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, srcStaging.bufferHandle, 1, &region);
+        };
+        source.device->executeSingleTimeCommands(srcCopyCmd);
 
-        HANDLE win32Handle = nullptr;
-        auto vkGetMemoryWin32HandleKHR = reinterpret_cast<PFN_vkGetMemoryWin32HandleKHR>(
-            vkGetDeviceProcAddr(source.device->deviceUtils.logicalDevice, "vkGetMemoryWin32HandleKHR"));
-        if (!vkGetMemoryWin32HandleKHR)
-            return false;
-        if (vkGetMemoryWin32HandleKHR(source.device->deviceUtils.logicalDevice, &getHandleInfo, &win32Handle) != VK_SUCCESS)
-            return false;
+        // 3. 映射staging buffer，读取数据
+        void *mappedData = nullptr;
+        vmaMapMemory(g_hAllocator, srcStaging.bufferAlloc, &mappedData);
 
-        // 3. 在 destination device 上导入该 handle
-        VkImportMemoryWin32HandleInfoKHR importInfo{};
-        importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
-        importInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-        importInfo.handle = win32Handle;
+        // 4. 在destination device上创建host可访问staging buffer
+        ResourceManager::BufferHardwareWrap dstStaging = createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-        VkMemoryRequirements memReqs;
-        vkGetImageMemoryRequirements(destination.device->deviceUtils.logicalDevice, destination.imageHandle, &memReqs);
+        // 5. 映射destination staging buffer，写入数据
+        void *dstMappedData = nullptr;
+        vmaMapMemory(g_hAllocator, dstStaging.bufferAlloc, &dstMappedData);
+        memcpy(dstMappedData, mappedData, imageSizeBytes);
+        vmaUnmapMemory(g_hAllocator, srcStaging.bufferAlloc);
+        vmaUnmapMemory(g_hAllocator, dstStaging.bufferAlloc);
 
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memReqs.size;
-        allocInfo.memoryTypeIndex = 0; // 需根据 memReqs.memoryTypeBits 选择合适类型
-        allocInfo.pNext = &importInfo;
+        // 6. 拷贝destination staging buffer到destination image
+        auto dstCopyCmd = [&](VkCommandBuffer commandBuffer) {
+            VkBufferImageCopy region{};
+            region.bufferOffset = 0;
+            region.bufferRowLength = 0;
+            region.bufferImageHeight = 0;
+            region.imageSubresource.aspectMask = destination.aspectMask;
+            region.imageSubresource.mipLevel = 0;
+            region.imageSubresource.baseArrayLayer = 0;
+            region.imageSubresource.layerCount = 1;
+            region.imageOffset = {0, 0, 0};
+            region.imageExtent = {destination.imageSize.x, destination.imageSize.y, 1};
+            vkCmdCopyBufferToImage(commandBuffer, dstStaging.bufferHandle, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
+        };
+        destination.device->executeSingleTimeCommands(dstCopyCmd);
 
-        // 选择合适的 memoryTypeIndex
-        VkPhysicalDeviceMemoryProperties memProps;
-        vkGetPhysicalDeviceMemoryProperties(destination.device->deviceUtils.physicalDevice, &memProps);
-        for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i)
-        {
-            if ((memReqs.memoryTypeBits & (1 << i)) &&
-                (memProps.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT))
-            {
-                allocInfo.memoryTypeIndex = i;
-                break;
-            }
-        }
-
-        VkDeviceMemory importedMemory = VK_NULL_HANDLE;
-        if (vkAllocateMemory(destination.device->deviceUtils.logicalDevice, &allocInfo, nullptr, &importedMemory) != VK_SUCCESS)
-            return false;
-
-        // 4. 重新绑定 destination image 的显存（注意：原有显存会泄漏，建议先 destroyImage）
-        if (vkBindImageMemory(destination.device->deviceUtils.logicalDevice, destination.imageHandle, importedMemory, 0) != VK_SUCCESS)
-            return false;
-
-        // 5. destination image 现在和 source image 共享同一块物理显存
-        // 你可以根据需要刷新 imageView 或 layout
+        // 7. 销毁staging buffer
+        destroyBuffer(srcStaging);
+        destroyBuffer(dstStaging);
 
         return true;
     }
