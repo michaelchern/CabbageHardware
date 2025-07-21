@@ -31,4 +31,3 @@ if(CABBAGE_RASTERIZER_BUILD_EXAMPLES)
     add_subdirectory(Env/glfw EXCLUDE_FROM_ALL)
     add_subdirectory(Examples)
 endif()
-

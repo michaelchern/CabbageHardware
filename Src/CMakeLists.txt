@@ -8,7 +8,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})
 add_library(CabbageDisplayer STATIC ${SOURCE_FILES})
 
 set_target_properties(CabbageDisplayer PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/libs
+    ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib/$<CONFIG>
 )
 
 target_include_directories(CabbageDisplayer PUBLIC
