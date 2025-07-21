@@ -1,4 +1,4 @@
-#include"DisplayManager.h"
+﻿#include"DisplayManager.h"
 
 #include <algorithm>
 
@@ -267,7 +267,7 @@ void DisplayManager::createSwapChain()
 		swapChainImages[i].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		swapChainImages[i].arrayLayers = 1;
 		swapChainImages[i].mipLevels = 1;
-        swapChainImages[i].imageView = globalHardwareContext.mainDevice->resourceManager.createImageView(swapChainImages[i]);
+        swapChainImages[i].imageView = displayDevice->resourceManager.createImageView(swapChainImages[i]);
 	}
 }
 
