@@ -14,7 +14,7 @@ ResourceManager::ResourceManager()
 }
 
 
-void ResourceManager::initResourceManager(DeviceManager::DeviceUtils &device)
+void ResourceManager::initResourceManager(DeviceManager &device)
 {
     this->device = &device;
 
@@ -48,8 +48,8 @@ void ResourceManager::CreateVmaAllocator()
 	bool VK_KHR_maintenance5_enabled = false;
 	bool g_SparseBindingEnabled = false;
 
-	allocatorInfo.physicalDevice = this->device->physicalDevice;
-    allocatorInfo.device = this->device->logicalDevice;
+	allocatorInfo.physicalDevice = this->device->deviceUtils.physicalDevice;
+    allocatorInfo.device = this->device->deviceUtils.logicalDevice;
     allocatorInfo.instance = globalHardwareContext.getVulkanInstance();
 	allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_4;
 
@@ -146,7 +146,7 @@ void ResourceManager::createTextureSampler()
 	samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	samplerInfo.anisotropyEnable = false;
-    samplerInfo.maxAnisotropy = this->device->deviceFeaturesUtils.supportedProperties.properties.limits.maxSamplerAnisotropy;
+    samplerInfo.maxAnisotropy = this->device->deviceUtils.deviceFeaturesUtils.supportedProperties.properties.limits.maxSamplerAnisotropy;
 	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 	samplerInfo.unnormalizedCoordinates = VK_FALSE;
 	samplerInfo.compareEnable = VK_FALSE;
@@ -156,7 +156,7 @@ void ResourceManager::createTextureSampler()
 	samplerInfo.maxLod = static_cast<float>(1);
 	samplerInfo.mipLodBias = 0.0f;
 
-	if (vkCreateSampler(this->device->logicalDevice, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
+	if (vkCreateSampler(this->device->deviceUtils.logicalDevice, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
     {
 		throw std::runtime_error("failed to create texture sampler!");
 	}
@@ -171,6 +171,7 @@ void ResourceManager::destroyBuffer(BufferHardwareWrap& buffer)
 ResourceManager::BufferHardwareWrap  ResourceManager::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage)
 {
 	BufferHardwareWrap resultBuffer;
+    resultBuffer.device = this->device;
 
 	if (size > 0)
 	{
@@ -196,7 +197,7 @@ void ResourceManager::destroyImage(ImageHardwareWrap& image)
 {
 	if (image.imageView != VK_NULL_HANDLE)
 	{
-        vkDestroyImageView(this->device->logicalDevice, image.imageView, nullptr);
+        vkDestroyImageView(this->device->deviceUtils.logicalDevice, image.imageView, nullptr);
 	}
 	if (image.imageAlloc != VK_NULL_HANDLE && image.imageHandle != VK_NULL_HANDLE)
 	{
@@ -227,7 +228,7 @@ VkImageView ResourceManager::createImageView(ImageHardwareWrap& image)
 	viewInfo.subresourceRange.layerCount = image.arrayLayers;
 	viewInfo.flags = 0;
 
-	if (vkCreateImageView(this->device->logicalDevice, &viewInfo, nullptr, &image.imageView) != VK_SUCCESS)
+	if (vkCreateImageView(this->device->deviceUtils.logicalDevice, &viewInfo, nullptr, &image.imageView) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create texture image view!");
 		return VK_NULL_HANDLE;
@@ -241,6 +242,9 @@ VkImageView ResourceManager::createImageView(ImageHardwareWrap& image)
 ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 imageSize, VkFormat imageFormat, VkImageUsageFlags imageUsage, int arrayLayers, int mipLevels)
 {
 	ImageHardwareWrap resultImage;
+
+    resultImage.device = this->device;
+
 	resultImage.imageSize = imageSize;
 	resultImage.imageFormat = imageFormat;
 	resultImage.arrayLayers = arrayLayers;
@@ -315,7 +319,72 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
 
 bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWrap& destination)
 {
-	if (source.imageSize == destination.imageSize)
+    if (source.imageSize != destination.imageSize)
+    {
+        return false;
+    }
+
+    if (source.device != destination.device)
+    {
+        // 1. 在source device上创建staging buffer
+        VkDeviceSize imageSizeBytes = source.imageSize.x * source.imageSize.y * 4; // 假设4字节像素，实际需根据format计算
+        ResourceManager::BufferHardwareWrap srcStaging = createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+
+        // 2. 把source image内容拷贝到staging buffer
+        auto srcCopyCmd = [&](VkCommandBuffer commandBuffer) {
+            VkBufferImageCopy region{};
+            region.bufferOffset = 0;
+            region.bufferRowLength = 0;
+            region.bufferImageHeight = 0;
+            region.imageSubresource.aspectMask = source.aspectMask;
+            region.imageSubresource.mipLevel = 0;
+            region.imageSubresource.baseArrayLayer = 0;
+            region.imageSubresource.layerCount = 1;
+            region.imageOffset = {0, 0, 0};
+            region.imageExtent = {source.imageSize.x, source.imageSize.y, 1};
+
+            vkCmdCopyImageToBuffer(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, srcStaging.bufferHandle, 1, &region);
+        };
+        source.device->executeSingleTimeCommands(srcCopyCmd);
+
+        // 3. 映射staging buffer，读取数据
+        void *mappedData = nullptr;
+        vmaMapMemory(g_hAllocator, srcStaging.bufferAlloc, &mappedData);
+
+        // 4. 在destination device上创建staging buffer
+        ResourceManager::BufferHardwareWrap dstStaging = createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+
+        // 5. 映射destination staging buffer，写入数据
+        void *dstMappedData = nullptr;
+        vmaMapMemory(g_hAllocator, dstStaging.bufferAlloc, &dstMappedData);
+        memcpy(dstMappedData, mappedData, imageSizeBytes);
+        vmaUnmapMemory(g_hAllocator, srcStaging.bufferAlloc);
+        vmaUnmapMemory(g_hAllocator, dstStaging.bufferAlloc);
+
+        // 6. 把destination staging buffer内容拷贝到destination image
+        auto dstCopyCmd = [&](VkCommandBuffer commandBuffer) {
+            VkBufferImageCopy region{};
+            region.bufferOffset = 0;
+            region.bufferRowLength = 0;
+            region.bufferImageHeight = 0;
+            region.imageSubresource.aspectMask = destination.aspectMask;
+            region.imageSubresource.mipLevel = 0;
+            region.imageSubresource.baseArrayLayer = 0;
+            region.imageSubresource.layerCount = 1;
+            region.imageOffset = {0, 0, 0};
+            region.imageExtent = {destination.imageSize.x, destination.imageSize.y, 1};
+
+            vkCmdCopyBufferToImage(commandBuffer, dstStaging.bufferHandle, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
+        };
+        destination.device->executeSingleTimeCommands(dstCopyCmd);
+
+        // 7. 销毁staging buffer
+        destroyBuffer(srcStaging);
+        destroyBuffer(dstStaging);
+
+        return true;
+    }
+    else
 	{
 		auto runCommand = [&](VkCommandBuffer& commandBuffer)
 			{
@@ -334,10 +403,6 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
 		globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand);
 
 		return true;
-	}
-	else
-	{
-		return false;
 	}
 }
 
@@ -606,7 +671,7 @@ void ResourceManager::createBindlessDescriptorSet()
 	createInfo.pNext = &bindingFlags;
 
 	// Create layout
-    VkResult result = vkCreateDescriptorSetLayout(this->device->logicalDevice, &createInfo, nullptr, &bindlessDescriptor.descriptorSetLayout);
+    VkResult result = vkCreateDescriptorSetLayout(this->device->deviceUtils.logicalDevice, &createInfo, nullptr, &bindlessDescriptor.descriptorSetLayout);
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create descriptor set layout!");
@@ -634,7 +699,7 @@ void ResourceManager::createBindlessDescriptorSet()
 		poolInfo.maxSets = k_max_bindless_resources[0] + k_max_bindless_resources[1] + k_max_bindless_resources[2] + k_max_bindless_resources[3];
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 
-		if (vkCreateDescriptorPool(this->device->logicalDevice, &poolInfo, nullptr, &bindlessDescriptor.descriptorPool) != VK_SUCCESS)
+		if (vkCreateDescriptorPool(this->device->deviceUtils.logicalDevice, &poolInfo, nullptr, &bindlessDescriptor.descriptorPool) != VK_SUCCESS)
         {
 			throw std::runtime_error("failed to create descriptor pool!");
 		}
@@ -657,7 +722,7 @@ void ResourceManager::createBindlessDescriptorSet()
 		allocInfo.pNext = &count_info;
 
 		//uboDescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-        VkResult result = vkAllocateDescriptorSets(this->device->logicalDevice, &allocInfo, &bindlessDescriptor.descriptorSet);
+        VkResult result = vkAllocateDescriptorSets(this->device->deviceUtils.logicalDevice, &allocInfo, &bindlessDescriptor.descriptorSet);
 		if (result != VK_SUCCESS) {
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
@@ -728,7 +793,7 @@ uint32_t ResourceManager::storeDescriptor(ImageHardwareWrap image)
 		write.dstBinding = StorageImageBinding;
 	}
 
-	vkUpdateDescriptorSets(this->device->logicalDevice, 1, &write, 0, nullptr);
+	vkUpdateDescriptorSets(this->device->deviceUtils.logicalDevice, 1, &write, 0, nullptr);
 
 	return textureIndex;
 }
@@ -791,7 +856,7 @@ uint32_t ResourceManager::storeDescriptor(BufferHardwareWrap buffer)
 		writes.dstBinding = StorageBufferBinding;
 	}
 
-	vkUpdateDescriptorSets(this->device->logicalDevice, 1, &writes, 0, nullptr);
+	vkUpdateDescriptorSets(this->device->deviceUtils.logicalDevice, 1, &writes, 0, nullptr);
 
 	return bufferIndex;
 }
@@ -844,7 +909,7 @@ VkShaderModule ResourceManager::createShaderModule(const std::vector<unsigned in
 	createInfo.pCode = code.data();
 
 	VkShaderModule shaderModule;
-    if (vkCreateShaderModule(this->device->logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+    if (vkCreateShaderModule(this->device->deviceUtils.logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
     {
 		throw std::runtime_error("failed to create shader module!");
 	}

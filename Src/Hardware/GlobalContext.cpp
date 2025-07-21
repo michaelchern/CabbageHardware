@@ -32,7 +32,7 @@ HardwareContext::HardwareContext()
     for (size_t i = 0; i < devices.size(); i++)
     {
         hardwareUtils[i].deviceManager.initDeviceManager(hardwareCreateInfos, vkInstance, devices[i]);
-        hardwareUtils[i].resourceManager.initResourceManager(hardwareUtils[i].deviceManager.deviceUtils);
+        hardwareUtils[i].resourceManager.initResourceManager(hardwareUtils[i].deviceManager);
     }
 
     chooseMainDevice();

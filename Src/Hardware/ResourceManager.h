@@ -18,6 +18,8 @@ struct ResourceManager
 		VmaAllocation bufferAlloc = VK_NULL_HANDLE;
 		VmaAllocationInfo bufferAllocInfo = {};
 		VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
+
+        DeviceManager *device;
 	};
 
 	struct ImageHardwareWrap
@@ -39,6 +41,8 @@ struct ResourceManager
 
 		VkImage imageHandle = VK_NULL_HANDLE;
 		VkImageView imageView = VK_NULL_HANDLE;
+
+		DeviceManager *device;
 	};
 
 
@@ -51,7 +55,7 @@ struct ResourceManager
 
 
 	ResourceManager();
-    void initResourceManager(DeviceManager::DeviceUtils &device);
+    void initResourceManager(DeviceManager &device);
 
 
 	void destroyImage(ImageHardwareWrap& image);
@@ -127,5 +131,5 @@ private:
 	uint64_t hostSharedMemorySize = 0;
 	uint64_t mutiInstanceMemorySize = 0;
 
-	DeviceManager::DeviceUtils* device;
+	DeviceManager *device;
 };
