@@ -321,14 +321,14 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
 
 bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWrap& destination)
 {
-    if (source.imageSize != destination.imageSize)
+    if (source.imageSize != destination.imageSize || source.pixelSize != destination.pixelSize)
     {
         return false;
     }
 
     if (source.device != destination.device)
     {
-        VkDeviceSize imageSizeBytes = source.imageSize.x * source.imageSize.y * 4; // 需根据format实际计算
+        VkDeviceSize imageSizeBytes = source.imageSize.x * source.imageSize.y * source.pixelSize;
 
         ResourceManager::BufferHardwareWrap srcStaging = source.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
         ResourceManager::BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
