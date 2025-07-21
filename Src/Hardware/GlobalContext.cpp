@@ -1,4 +1,4 @@
-#include<HardwareManager/GlobalContext.h>
+#include<Hardware/GlobalContext.h>
 
 HardwareContext globalHardwareContext;
 

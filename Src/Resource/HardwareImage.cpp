@@ -1,5 +1,5 @@
 ﻿#include"CabbageFramework.h"
-#include<HardwareManager/GlobalContext.h>
+#include<Hardware/GlobalContext.h>
 
 std::unordered_map<uint64_t, ResourceManager::ImageHardwareWrap> imageGlobalPool;
 std::unordered_map<uint64_t, uint64_t> imageRefCount;

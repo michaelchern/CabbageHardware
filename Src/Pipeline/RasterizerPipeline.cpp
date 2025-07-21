@@ -2,7 +2,7 @@
 
 #include"RasterizerPipeline.h"
 
-#include<HardwareManager/GlobalContext.h>
+#include<Hardware/GlobalContext.h>
 
 RasterizerPipeline::RasterizerPipeline(std::string vertexShaderCode, std::string fragmentShaderCode, uint32_t multiviewCount,
                                        ShaderLanguage vertexShaderLanguage, ShaderLanguage fragmentShaderLanguage, const std::source_location &sourceLocation)

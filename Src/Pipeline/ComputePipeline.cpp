@@ -1,6 +1,6 @@
 ﻿#include"ComputePipeline.h"
 
-#include<HardwareManager/GlobalContext.h>
+#include<Hardware/GlobalContext.h>
 
 
 ComputePipeline::ComputePipeline(std::string shaderCode, ShaderLanguage language, const std::source_location &sourceLocation)

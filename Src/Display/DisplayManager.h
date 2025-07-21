@@ -2,9 +2,9 @@
 
 #include <chrono>  
 
-#include "HardwareManager/DeviceManager.h"
+#include "Hardware/DeviceManager.h"
 
-#include "HardwareManager/ResourceManager.h"
+#include "Hardware/ResourceManager.h"
 
 #include<CabbageFramework.h>
 

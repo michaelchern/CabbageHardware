@@ -1,7 +1,7 @@
 #pragma once
 
-#include "HardwareManager/DeviceManager.h"
-#include "HardwareManager/ResourceManager.h"
+#include "Hardware/DeviceManager.h"
+#include "Hardware/ResourceManager.h"
 
 struct HardwareContext
 {

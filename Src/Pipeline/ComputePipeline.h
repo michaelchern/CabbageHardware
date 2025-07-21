@@ -2,8 +2,8 @@
 
 #include <ktm/ktm.h>
 
-#include"../HardwareManager/DeviceManager.h"
-#include"../HardwareManager/ResourceManager.h"
+#include"../Hardware/DeviceManager.h"
+#include"../Hardware/ResourceManager.h"
 
 #include"Compiler/ShaderCodeCompiler.h"
 

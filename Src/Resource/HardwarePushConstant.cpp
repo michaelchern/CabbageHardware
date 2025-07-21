@@ -1,5 +1,5 @@
 ﻿#include"CabbageFramework.h"
-#include<HardwareManager/GlobalContext.h>
+#include<Hardware/GlobalContext.h>
 
 struct PushConstant
 {
