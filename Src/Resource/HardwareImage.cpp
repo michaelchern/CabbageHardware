@@ -134,8 +134,7 @@ HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, Imag
 		break;
 	}
 
-	imageGlobalPool[*imageID] = globalHardwareContext.mainDevice->resourceManager.createImage(imageSize, vkImageFormat, vkImageUsageFlags, arrayLayers);
-	imageGlobalPool[*imageID].pixelSize = pixelSize;
+	imageGlobalPool[*imageID] = globalHardwareContext.mainDevice->resourceManager.createImage(imageSize, vkImageFormat, pixelSize, vkImageUsageFlags, arrayLayers);
 
 	if (imageData != nullptr)
 	{

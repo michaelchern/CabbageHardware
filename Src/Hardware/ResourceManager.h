@@ -18,6 +18,9 @@ struct ResourceManager
 		VmaAllocation bufferAlloc = VK_NULL_HANDLE;
 		VmaAllocationInfo bufferAllocInfo = {};
 		VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
+
+        DeviceManager *device;
+        ResourceManager *resourceManager;
 	};
 
 	struct ImageHardwareWrap
@@ -39,6 +42,9 @@ struct ResourceManager
 
 		VkImage imageHandle = VK_NULL_HANDLE;
 		VkImageView imageView = VK_NULL_HANDLE;
+
+		DeviceManager *device;
+        ResourceManager *resourceManager;
 	};
 
 
@@ -51,12 +57,12 @@ struct ResourceManager
 
 
 	ResourceManager();
-    void initResourceManager(DeviceManager::DeviceUtils &device);
+    void initResourceManager(DeviceManager &device);
 
 
 	void destroyImage(ImageHardwareWrap& image);
 	VkImageView createImageView(ImageHardwareWrap& image);
-	ImageHardwareWrap createImage(ktm::uvec2 imageSize, VkFormat imageFormat,
+    ImageHardwareWrap createImage(ktm::uvec2 imageSize, VkFormat imageFormat, uint32_t pixelSize,
 		VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 		int arrayLayers = 1, int mipLevels = 1);
 
@@ -127,5 +133,5 @@ private:
 	uint64_t hostSharedMemorySize = 0;
 	uint64_t mutiInstanceMemorySize = 0;
 
-	DeviceManager::DeviceUtils* device;
+	DeviceManager *device;
 };

@@ -2,9 +2,7 @@
 
 #include <chrono>  
 
-#include "Hardware/DeviceManager.h"
-
-#include "Hardware/ResourceManager.h"
+#include<Hardware/GlobalContext.h>
 
 #include<CabbageDisplayer.h>
 
@@ -30,7 +28,7 @@ public:
 	std::vector<VkSemaphore> swapchainSemaphore;
 
 	std::vector<DeviceManager::DeviceUtils::QueueUtils> presentQueues;
-	DeviceManager::DeviceUtils displayDevice;
+    HardwareContext::HardwareUtils *displayDevice;
 
 //private:
 	VkSurfaceFormatKHR surfaceFormat;

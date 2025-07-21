@@ -1,4 +1,4 @@
-#include"DisplayManager.h"
+﻿#include"DisplayManager.h"
 
 #include <algorithm>
 
@@ -36,26 +36,26 @@ DisplayManager::~DisplayManager()
 
 void DisplayManager::cleaarupDisplayManager()
 {
-	if (displayDevice.logicalDevice != VK_NULL_HANDLE)
-	{
-		//vkDeviceWaitIdle(displayDevice.logicalDevice);
+	//if (displayDevice.logicalDevice != VK_NULL_HANDLE)
+	//{
+	//	//vkDeviceWaitIdle(displayDevice.logicalDevice);
 
-		for (size_t i = 0; i < swapChainImages.size(); i++)
-		{
-            globalHardwareContext.mainDevice->resourceManager.destroyImage(swapChainImages[i]);
-		}
-		swapChainImages.clear();
+	//	for (size_t i = 0; i < swapChainImages.size(); i++)
+	//	{
+ //          displayDevice->deviceManager.deviceUtils->resourceManager.destroyImage(swapChainImages[i]);
+	//	}
+	//	swapChainImages.clear();
 
-		if (swapChain != VK_NULL_HANDLE)
-		{
-			vkDestroySwapchainKHR(displayDevice.logicalDevice, swapChain, nullptr);
-			swapChain = VK_NULL_HANDLE;
-		}
-		if (vkSurface != VK_NULL_HANDLE)
-		{
-            vkDestroySurfaceKHR(globalHardwareContext.getVulkanInstance(), vkSurface, nullptr);
-			vkSurface = VK_NULL_HANDLE;
-		}
+	//	if (swapChain != VK_NULL_HANDLE)
+	//	{
+	//		vkDestroySwapchainKHR(displayDevice.logicalDevice, swapChain, nullptr);
+	//		swapChain = VK_NULL_HANDLE;
+	//	}
+	//	if (vkSurface != VK_NULL_HANDLE)
+	//	{
+ //           vkDestroySurfaceKHR(globalHardwareContext.getVulkanInstance(), vkSurface, nullptr);
+	//		vkSurface = VK_NULL_HANDLE;
+	//	}
 		//if (frameFence != VK_NULL_HANDLE)
 		//{
 		//	vkDestroyFence(displayDevice.logicalDevice, frameFence, nullptr);
@@ -65,7 +65,7 @@ void DisplayManager::cleaarupDisplayManager()
 		//{
 		//	vkDestroyFence(displayDevice.logicalDevice, frameFence, nullptr);
 		//}
-	}
+	//}
 }
 
 
@@ -96,7 +96,7 @@ void DisplayManager::createFrameFence()
 	swapchainSemaphore.resize(swapChainImages.size());
 	for (size_t i = 0; i < swapChainImages.size(); i++)
 	{
-		if (vkCreateSemaphore(displayDevice.logicalDevice, &semaphoreInfo, nullptr, &swapchainSemaphore[i]) != VK_SUCCESS)
+		if (vkCreateSemaphore(displayDevice->deviceManager.deviceUtils.logicalDevice, &semaphoreInfo, nullptr, &swapchainSemaphore[i]) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create synchronization objects for a frame!");
 		}
@@ -136,46 +136,44 @@ void DisplayManager::createVkSurface(void* surface)
 
 void DisplayManager::choosePresentDevice()
 {
-	//for (int i = 0; i < deviceManager.userDevices.size(); i++)
-	//{
-    for (int j = 0; j < globalHardwareContext.mainDevice->deviceManager.deviceUtils.queueFamilies.size(); j++)
+    for (int i = 0; i < globalHardwareContext.hardwareUtils.size(); i++)
+	{
+        for (int j = 0; j < globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.queueFamilies.size(); j++)
 		{
 			VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.mainDevice->deviceManager.deviceUtils.physicalDevice, j, vkSurface, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.physicalDevice, j, vkSurface, &presentSupport);
 
 			if (presentSupport)
 			{ 
-				displayDevice = globalHardwareContext.mainDevice->deviceManager.deviceUtils;
+				displayDevice = &globalHardwareContext.hardwareUtils[i];
 
-				if (globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues[0].queueFamilyIndex == j)
+				if (globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.graphicsQueues[0].queueFamilyIndex == j)
 				{
-					presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues;
+                    presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.graphicsQueues;
 				}
-				if (globalHardwareContext.mainDevice->deviceManager.deviceUtils.computeQueues[0].queueFamilyIndex == j)
+                if (globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.computeQueues[0].queueFamilyIndex == j)
 				{
-					presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.computeQueues;
+                    presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.computeQueues;
 				}
-				if (globalHardwareContext.mainDevice->deviceManager.deviceUtils.transferQueues[0].queueFamilyIndex == j)
+                if (globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.transferQueues[0].queueFamilyIndex == j)
 				{
-					presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.transferQueues;
+                    presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.transferQueues;
 				}
 			}
 		}
 
-		//if (deviceManager.mainDevice != displayDevice)
-		//{
-		//	break;
-		//}
-	//}
-    //displayDevice = globalHardwareContext.mainDevice->deviceManager.deviceUtils;
-    //presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues;
+		if (globalHardwareContext.mainDevice != displayDevice)
+		{
+			break;
+		}
+	}
 }
 
 
 void DisplayManager::createSwapChain()
 {
 	VkSurfaceCapabilitiesKHR capabilities;
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(displayDevice.physicalDevice, vkSurface, &capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(displayDevice->deviceManager.deviceUtils.physicalDevice, vkSurface, &capabilities);
 
 	this->displaySize = ktm::uvec2{
         std::clamp(capabilities.currentExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
@@ -184,11 +182,11 @@ void DisplayManager::createSwapChain()
 
 
 	uint32_t formatCount;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(displayDevice.physicalDevice, vkSurface, &formatCount, nullptr);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(displayDevice->deviceManager.deviceUtils.physicalDevice, vkSurface, &formatCount, nullptr);
 	std::vector<VkSurfaceFormatKHR> formats(formatCount);
 	if (formatCount != 0) 
 	{
-		vkGetPhysicalDeviceSurfaceFormatsKHR(displayDevice.physicalDevice, vkSurface, &formatCount, formats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(displayDevice->deviceManager.deviceUtils.physicalDevice, vkSurface, &formatCount, formats.data());
 
 		surfaceFormat = formats[0];
 		for (const auto& availableFormat : formats)
@@ -204,11 +202,11 @@ void DisplayManager::createSwapChain()
 
 	VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 	uint32_t presentModeCount;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(displayDevice.physicalDevice, vkSurface, &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(displayDevice->deviceManager.deviceUtils.physicalDevice, vkSurface, &presentModeCount, nullptr);
 	std::vector<VkPresentModeKHR> presentModes(presentModeCount);
 	if (presentModeCount != 0)
 	{
-		vkGetPhysicalDeviceSurfacePresentModesKHR(displayDevice.physicalDevice, vkSurface, &presentModeCount, presentModes.data());
+        vkGetPhysicalDeviceSurfacePresentModesKHR(displayDevice->deviceManager.deviceUtils.physicalDevice, vkSurface, &presentModeCount, presentModes.data());
 		for (const auto& availablePresentMode : presentModes)
 		{
 			if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -234,9 +232,10 @@ void DisplayManager::createSwapChain()
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
-	uint32_t queueFamilys[] = { displayDevice.graphicsQueues[0].queueFamilyIndex, presentQueues[0].queueFamilyIndex };
+	uint32_t queueFamilys[] = {displayDevice->deviceManager.deviceUtils.graphicsQueues[0].queueFamilyIndex, presentQueues[0].queueFamilyIndex};
 
-	if (displayDevice.graphicsQueues[0].queueFamilyIndex != presentQueues[0].queueFamilyIndex) {
+	if (displayDevice->deviceManager.deviceUtils.graphicsQueues[0].queueFamilyIndex != presentQueues[0].queueFamilyIndex)
+    {
 		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		createInfo.queueFamilyIndexCount = 2;
 		createInfo.pQueueFamilyIndices = queueFamilys;
@@ -251,15 +250,16 @@ void DisplayManager::createSwapChain()
 	createInfo.clipped = VK_TRUE;
 	createInfo.oldSwapchain = swapChain != VK_NULL_HANDLE ? swapChain : VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(displayDevice.logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
+	if (vkCreateSwapchainKHR(displayDevice->deviceManager.deviceUtils.logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS)
+    {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
 	std::vector<VkImage> swapChainVkImages;
-	vkGetSwapchainImagesKHR(displayDevice.logicalDevice, swapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(displayDevice->deviceManager.deviceUtils.logicalDevice, swapChain, &imageCount, nullptr);
 	swapChainVkImages.resize(imageCount);
 	swapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(displayDevice.logicalDevice, swapChain, &imageCount, swapChainVkImages.data());
+    vkGetSwapchainImagesKHR(displayDevice->deviceManager.deviceUtils.logicalDevice, swapChain, &imageCount, swapChainVkImages.data());
 
 	for (uint32_t i = 0; i < swapChainImages.size(); i++)
 	{
@@ -269,7 +269,13 @@ void DisplayManager::createSwapChain()
 		swapChainImages[i].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		swapChainImages[i].arrayLayers = 1;
 		swapChainImages[i].mipLevels = 1;
-        swapChainImages[i].imageView = globalHardwareContext.mainDevice->resourceManager.createImageView(swapChainImages[i]);
+
+        swapChainImages[i].device = &displayDevice->deviceManager;
+        swapChainImages[i].resourceManager = &displayDevice->resourceManager;
+
+		swapChainImages[i].pixelSize = 8;
+
+        swapChainImages[i].imageView =displayDevice->resourceManager.createImageView(swapChainImages[i]);
 	}
 }
 
@@ -288,7 +294,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
         }
 
 		VkSurfaceCapabilitiesKHR capabilities;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(displayDevice.physicalDevice, vkSurface, &capabilities);
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(displayDevice->deviceManager.deviceUtils.physicalDevice, vkSurface, &capabilities);
 
         ktm::uvec2 displaySize = ktm::uvec2{
             std::clamp(capabilities.currentExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
@@ -296,11 +302,11 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
         if (displaySize != this->displaySize)
         {
-            vkDeviceWaitIdle(displayDevice.logicalDevice);
+            vkDeviceWaitIdle(displayDevice->deviceManager.deviceUtils.logicalDevice);
 
             for (auto &image : swapChainImages)
             {
-                globalHardwareContext.mainDevice->resourceManager.destroyImage(image);
+               displayDevice->resourceManager.destroyImage(image);
             }
 
             createSwapChain();
@@ -309,47 +315,48 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
         vkQueueWaitIdle(presentQueues[0].vkQueue);
 
         uint32_t imageIndex;
-        VkResult result = vkAcquireNextImageKHR(displayDevice.logicalDevice, swapChain, UINT64_MAX, swapchainSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
+        VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.deviceUtils.logicalDevice, swapChain, UINT64_MAX, swapchainSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
         if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
 
-            auto runCommand = [&](VkCommandBuffer &commandBuffer) {
-                // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-                globalHardwareContext.mainDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            //auto runCommand = [&](VkCommandBuffer &commandBuffer) {
+            //   // // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+            //   //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-                // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-                globalHardwareContext.mainDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            //   // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+            //   //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-                VkImageBlit imageBlit;
-                imageBlit.dstOffsets[0] = VkOffset3D{0, 0, 0};
-                imageBlit.dstOffsets[1] = VkOffset3D{int32_t(swapChainImages[imageIndex].imageSize.x), int32_t(swapChainImages[imageIndex].imageSize.y), 1};
+            //    VkImageBlit imageBlit;
+            //    imageBlit.dstOffsets[0] = VkOffset3D{0, 0, 0};
+            //    imageBlit.dstOffsets[1] = VkOffset3D{int32_t(swapChainImages[imageIndex].imageSize.x), int32_t(swapChainImages[imageIndex].imageSize.y), 1};
 
-                imageBlit.srcOffsets[0] = VkOffset3D{0, 0, 0};
-                imageBlit.srcOffsets[1] = VkOffset3D{int32_t(imageGlobalPool[*displayImage.imageID].imageSize.x), int32_t(imageGlobalPool[*displayImage.imageID].imageSize.y), 1};
+            //    imageBlit.srcOffsets[0] = VkOffset3D{0, 0, 0};
+            //    imageBlit.srcOffsets[1] = VkOffset3D{int32_t(imageGlobalPool[*displayImage.imageID].imageSize.x), int32_t(imageGlobalPool[*displayImage.imageID].imageSize.y), 1};
 
-                imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            //    imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            //    imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
-                imageBlit.dstSubresource.baseArrayLayer = 0;
-                imageBlit.srcSubresource.baseArrayLayer = 0;
+            //    imageBlit.dstSubresource.baseArrayLayer = 0;
+            //    imageBlit.srcSubresource.baseArrayLayer = 0;
 
-                imageBlit.dstSubresource.layerCount = 1;
-                imageBlit.srcSubresource.layerCount = 1;
+            //    imageBlit.dstSubresource.layerCount = 1;
+            //    imageBlit.srcSubresource.layerCount = 1;
 
-                imageBlit.dstSubresource.mipLevel = 0;
-                imageBlit.srcSubresource.mipLevel = 0;
+            //    imageBlit.dstSubresource.mipLevel = 0;
+            //    imageBlit.srcSubresource.mipLevel = 0;
 
-                vkCmdBlitImage(commandBuffer, imageGlobalPool[*displayImage.imageID].imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                               swapChainImages[imageIndex].imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-                               &imageBlit, VK_FILTER_LINEAR);
+            //    vkCmdBlitImage(commandBuffer, imageGlobalPool[*displayImage.imageID].imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            //                   swapChainImages[imageIndex].imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+            //                   &imageBlit, VK_FILTER_LINEAR);
 
-                // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-                globalHardwareContext.mainDevice->resourceManager.transitionImageLayoutUnblocked(
-                    commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                    VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-            };
+            //   // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+            //   //displayDevice->resourceManager.transitionImageLayoutUnblocked(
+            //   //     commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            //   //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+            //};
 
-            globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand);
+           //displayDevice->deviceManager.executeSingleTimeCommands(runCommand);
+            displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], swapChainImages[imageIndex]);
 
             VkPresentInfoKHR presentInfo{};
             presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

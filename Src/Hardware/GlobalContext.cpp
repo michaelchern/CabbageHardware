@@ -32,10 +32,23 @@ HardwareContext::HardwareContext()
     for (size_t i = 0; i < devices.size(); i++)
     {
         hardwareUtils[i].deviceManager.initDeviceManager(hardwareCreateInfos, vkInstance, devices[i]);
-        hardwareUtils[i].resourceManager.initResourceManager(hardwareUtils[i].deviceManager.deviceUtils);
+        hardwareUtils[i].resourceManager.initResourceManager(hardwareUtils[i].deviceManager);
     }
 
     chooseMainDevice();
+
+    // demo of mutilple devices
+    //if (hardwareUtils.size()>1)
+    //{
+    //    ResourceManager::ImageHardwareWrap a = hardwareUtils[0].resourceManager.createImage(ktm::uvec2(800, 800), VK_FORMAT_R8G8B8A8_UINT, 4, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+    //    ResourceManager::ImageHardwareWrap b = hardwareUtils[1].resourceManager.createImage(ktm::uvec2(800, 800), VK_FORMAT_R8G8B8A8_UINT, 4, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+
+    //    hardwareUtils[0].resourceManager.copyImageMemory(a, b);
+    //    hardwareUtils[0].resourceManager.copyImageMemory(b, a);
+    //    hardwareUtils[1].resourceManager.copyImageMemory(a, b);
+    //    hardwareUtils[1].resourceManager.copyImageMemory(b, a);
+    //}
+    // demo of mutilple devices
 }
 
 
@@ -51,6 +64,7 @@ void HardwareContext::prepareFeaturesChain()
         std::set<const char *> requiredExtensions;
         requiredExtensions.insert("VK_KHR_surface");
         requiredExtensions.insert(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        //requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
 
 #if _WIN32 || _WIN64
         requiredExtensions.insert(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -76,6 +90,8 @@ void HardwareContext::prepareFeaturesChain()
 
         requiredExtensions.insert(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
         requiredExtensions.insert(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
+
+        //requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
 
         return requiredExtensions;
     };
