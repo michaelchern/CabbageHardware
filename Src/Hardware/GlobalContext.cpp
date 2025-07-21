@@ -64,7 +64,7 @@ void HardwareContext::prepareFeaturesChain()
         std::set<const char *> requiredExtensions;
         requiredExtensions.insert("VK_KHR_surface");
         requiredExtensions.insert(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-        requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
+        //requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
 
 #if _WIN32 || _WIN64
         requiredExtensions.insert(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -91,7 +91,7 @@ void HardwareContext::prepareFeaturesChain()
         requiredExtensions.insert(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
         requiredExtensions.insert(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 
-        requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
+        //requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
 
         return requiredExtensions;
     };
