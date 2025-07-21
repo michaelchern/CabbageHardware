@@ -1,10 +1,10 @@
 # TODO
-- BUG：mutiview初始化黑屏
 - 内存泄漏问题
+- copyImageMemory中vkCmdBlitImage有bug
+- 反射的type有bug
+- BUG：mutiview初始化黑屏
 - 重构pass间同步
 - 支持跨device传输（Vulkan与CUDA）
 - Intel核显（6600T、7700HQ）：bindless会导致纹理错位
 - AMD核显：bindless创建时，查询到的数量和实际数量不符
 - MacOS、AMD核显：bindless创建时，同一个Pool不同descriptorCount会寄
-- 反射的type有bug
-- copyImageMemory中vkCmdBlitImage有bug
