@@ -1,6 +1,6 @@
 # TODO
 - 内存泄漏问题
-- copyImageMemory中vkCmdBlitImage有bug
+- 不同device中，copyImageMemory中vkCmdBlitImage有bug
 - 反射的type有bug
 - BUG：mutiview初始化黑屏
 - 重构pass间同步
