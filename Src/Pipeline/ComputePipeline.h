@@ -28,7 +28,7 @@ struct ComputePipeline
             ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
             if (resource != nullptr)
             {
-                return HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant);
+                return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant));
             }
         }
         throw std::runtime_error("failed to find with name!");

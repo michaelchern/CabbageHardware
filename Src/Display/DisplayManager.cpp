@@ -138,37 +138,37 @@ void DisplayManager::choosePresentDevice()
 {
 	//for (int i = 0; i < deviceManager.userDevices.size(); i++)
 	//{
-	//	for (int j = 0; j < deviceManager.userDevices[i].queueFamilies.size(); j++)
-	//	{
-	//		VkBool32 presentSupport = false;
-	//		vkGetPhysicalDeviceSurfaceSupportKHR(deviceManager.userDevices[i].physicalDevice, j, vkSurface, &presentSupport);
+    for (int j = 0; j < globalHardwareContext.mainDevice->deviceManager.deviceUtils.queueFamilies.size(); j++)
+		{
+			VkBool32 presentSupport = false;
+            vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.mainDevice->deviceManager.deviceUtils.physicalDevice, j, vkSurface, &presentSupport);
 
-	//		if (presentSupport)
-	//		{ 
-	//			displayDevice = deviceManager.userDevices[i];
+			if (presentSupport)
+			{ 
+				displayDevice = globalHardwareContext.mainDevice->deviceManager.deviceUtils;
 
-	//			if (deviceManager.userDevices[i].graphicsQueues[0].queueFamilyIndex == j)
-	//			{
-	//				presentQueues = deviceManager.userDevices[i].graphicsQueues;
-	//			}
-	//			if (deviceManager.userDevices[i].computeQueues[0].queueFamilyIndex == j)
-	//			{
-	//				presentQueues = deviceManager.userDevices[i].computeQueues;
-	//			}
-	//			if (deviceManager.userDevices[i].transferQueues[0].queueFamilyIndex == j)
-	//			{
-	//				presentQueues = deviceManager.userDevices[i].transferQueues;
-	//			}
-	//		}
-	//	}
+				if (globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues[0].queueFamilyIndex == j)
+				{
+					presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues;
+				}
+				if (globalHardwareContext.mainDevice->deviceManager.deviceUtils.computeQueues[0].queueFamilyIndex == j)
+				{
+					presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.computeQueues;
+				}
+				if (globalHardwareContext.mainDevice->deviceManager.deviceUtils.transferQueues[0].queueFamilyIndex == j)
+				{
+					presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.transferQueues;
+				}
+			}
+		}
 
-	//	if (deviceManager.mainDevice != displayDevice)
-	//	{
-	//		break;
-	//	}
+		//if (deviceManager.mainDevice != displayDevice)
+		//{
+		//	break;
+		//}
 	//}
-    displayDevice = globalHardwareContext.mainDevice->deviceManager.deviceUtils;
-    presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues;
+    //displayDevice = globalHardwareContext.mainDevice->deviceManager.deviceUtils;
+    //presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues;
 }
 
 

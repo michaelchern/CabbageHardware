@@ -44,14 +44,14 @@ struct RasterizerPipeline
             ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
             if (resource != nullptr)
             {
-                return HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant);
+                return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant));
             }
             else
             {
                 ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
                 if (resource != nullptr)
                 {
-                    return HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant);
+                    return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant));
                 }
             }
         }
