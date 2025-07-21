@@ -136,39 +136,37 @@ void DisplayManager::createVkSurface(void* surface)
 
 void DisplayManager::choosePresentDevice()
 {
-	//for (int i = 0; i < deviceManager.userDevices.size(); i++)
-	//{
-    for (int j = 0; j < globalHardwareContext.mainDevice->deviceManager.deviceUtils.queueFamilies.size(); j++)
+    for (int i = 0; i < globalHardwareContext.hardwareUtils.size(); i++)
+	{
+        for (int j = 0; j < globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.queueFamilies.size(); j++)
 		{
 			VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.mainDevice->deviceManager.deviceUtils.physicalDevice, j, vkSurface, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.physicalDevice, j, vkSurface, &presentSupport);
 
 			if (presentSupport)
 			{ 
-				displayDevice = globalHardwareContext.mainDevice->deviceManager.deviceUtils;
+				displayDevice = globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils;
 
-				if (globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues[0].queueFamilyIndex == j)
+				if (globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.graphicsQueues[0].queueFamilyIndex == j)
 				{
-					presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues;
+                    presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.graphicsQueues;
 				}
-				if (globalHardwareContext.mainDevice->deviceManager.deviceUtils.computeQueues[0].queueFamilyIndex == j)
+                if (globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.computeQueues[0].queueFamilyIndex == j)
 				{
-					presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.computeQueues;
+                    presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.computeQueues;
 				}
-				if (globalHardwareContext.mainDevice->deviceManager.deviceUtils.transferQueues[0].queueFamilyIndex == j)
+                if (globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.transferQueues[0].queueFamilyIndex == j)
 				{
-					presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.transferQueues;
+                    presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.deviceUtils.transferQueues;
 				}
 			}
 		}
 
-		//if (deviceManager.mainDevice != displayDevice)
-		//{
-		//	break;
-		//}
-	//}
-    //displayDevice = globalHardwareContext.mainDevice->deviceManager.deviceUtils;
-    //presentQueues = globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues;
+		if (globalHardwareContext.mainDevice->deviceManager.deviceUtils != displayDevice)
+		{
+			break;
+		}
+	}
 }
 
 
