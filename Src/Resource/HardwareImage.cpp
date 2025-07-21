@@ -1,4 +1,4 @@
-#include"CabbageFramework.h"
+﻿#include"CabbageFramework.h"
 #include<HardwareManager/GlobalContext.h>
 
 std::unordered_map<uint64_t, ResourceManager::ImageHardwareWrap> imageGlobalPool;
@@ -14,6 +14,8 @@ HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 HardwareImage::HardwareImage()
 {
 	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
+
+	imageRefCount[*this->imageID] = 0;
 }
 
 HardwareImage::~HardwareImage()
@@ -56,6 +58,8 @@ HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, Imag
 {
 	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
 	*(this->imageID) = currentImageID++;
+
+	imageRefCount[*this->imageID] = 0;
 
 	VkImageUsageFlags vkImageUsageFlags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 

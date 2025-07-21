@@ -1,4 +1,4 @@
-#include"CabbageFramework.h"
+﻿#include"CabbageFramework.h"
 #include<HardwareManager/GlobalContext.h>
 
 
@@ -16,6 +16,8 @@ HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
 HardwareBuffer::HardwareBuffer()
 {
 	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
+
+	bufferRefCount[*this->bufferID] = 0;
 }
 
 
@@ -39,6 +41,8 @@ HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const voi
 {
 	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
 	*(this->bufferID) = currentBufferID++;
+
+	bufferRefCount[*this->bufferID] = 0;
 
 	VkBufferUsageFlags vkUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
