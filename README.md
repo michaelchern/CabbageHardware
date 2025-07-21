@@ -7,3 +7,4 @@
 - AMD核显：bindless创建时，查询到的数量和实际数量不符
 - MacOS、AMD核显：bindless创建时，同一个Pool不同descriptorCount会寄
 - 反射的type有bug
+- copyImageMemory中vkCmdBlitImage有bug
