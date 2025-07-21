@@ -330,9 +330,9 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
     {
         VkDeviceSize imageSizeBytes = source.imageSize.x * source.imageSize.y * 4; // 需根据format实际计算
 
-        // 1. 在source device上创建host可访问staging buffer
         ResourceManager::BufferHardwareWrap srcStaging = source.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-        // 2. 拷贝source image到staging buffer
+        ResourceManager::BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+
         auto srcCopyCmd = [&](VkCommandBuffer commandBuffer) {
             VkBufferImageCopy region{};
             region.bufferOffset = 0;
@@ -348,21 +348,14 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
         };
         source.device->executeSingleTimeCommands(srcCopyCmd);
 
-        // 3. 映射staging buffer，读取数据
         void *mappedData = nullptr;
-        vmaMapMemory(g_hAllocator, srcStaging.bufferAlloc, &mappedData);
-
-        // 4. 在destination device上创建host可访问staging buffer
-        ResourceManager::BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-
-        // 5. 映射destination staging buffer，写入数据
         void *dstMappedData = nullptr;
+        vmaMapMemory(g_hAllocator, srcStaging.bufferAlloc, &mappedData);
         vmaMapMemory(g_hAllocator, dstStaging.bufferAlloc, &dstMappedData);
         memcpy(dstMappedData, mappedData, imageSizeBytes);
         vmaUnmapMemory(g_hAllocator, srcStaging.bufferAlloc);
         vmaUnmapMemory(g_hAllocator, dstStaging.bufferAlloc);
 
-        // 6. 拷贝destination staging buffer到destination image
         auto dstCopyCmd = [&](VkCommandBuffer commandBuffer) {
             VkBufferImageCopy region{};
             region.bufferOffset = 0;
@@ -378,7 +371,6 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
         };
         destination.device->executeSingleTimeCommands(dstCopyCmd);
 
-        // 7. 销毁staging buffer
         source.resourceManager->destroyBuffer(srcStaging);
         destination.resourceManager->destroyBuffer(dstStaging);
 
