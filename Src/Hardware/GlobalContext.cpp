@@ -262,14 +262,14 @@ void HardwareContext::createVkInstance(const CreateCallback &initInfo)
 
 void HardwareContext::chooseMainDevice()
 {
-    for (size_t i = 0; i < hardwareUtils.size(); i++)
-    {
-        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceName[0] == 'N')
-        {
-            mainDevice = &hardwareUtils[i];
-            return;
-        }
-    }
+    //for (size_t i = 0; i < hardwareUtils.size(); i++)
+    //{
+    //    if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceName[0] == 'N')
+    //    {
+    //        mainDevice = &hardwareUtils[i];
+    //        return;
+    //    }
+    //}
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
@@ -292,6 +292,24 @@ void HardwareContext::chooseMainDevice()
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
         if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
+        {
+            mainDevice = &hardwareUtils[i];
+            return;
+        }
+    }
+
+    for (size_t i = 0; i < hardwareUtils.size(); i++)
+    {
+        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+        {
+            mainDevice = &hardwareUtils[i];
+            return;
+        }
+    }
+
+    for (size_t i = 0; i < hardwareUtils.size(); i++)
+    {
+        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
         {
             mainDevice = &hardwareUtils[i];
             return;
