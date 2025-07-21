@@ -316,7 +316,7 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
 {
     if (source.pixelSize == destination.pixelSize)
     {
-        if (source.imageSize == destination.imageSize)
+        if (source.imageSize == destination.imageSize && source.imageFormat == destination.imageFormat)
         {
 
             if (source.device != destination.device)
