@@ -8,6 +8,7 @@ struct PushConstant
 };
 
 std::unordered_map<uint64_t, PushConstant> pushConstantGlobalPool;
+std::unordered_map<uint64_t, uint64_t> pushConstantRefCount;
 uint64_t currentPushConstantID = 0;
 
 
@@ -15,6 +16,9 @@ HardwarePushConstant::HardwarePushConstant()
 {
 	this->pushConstantID = (uint64_t*)malloc(sizeof(uint64_t));
     *this->pushConstantID = currentPushConstantID++;
+
+    pushConstantRefCount[*this->pushConstantID] = 0;
+
     pushConstantGlobalPool[*this->pushConstantID] = PushConstant();
     pushConstantGlobalPool[*this->pushConstantID].size = 0;
     pushConstantGlobalPool[*this->pushConstantID].data = nullptr;

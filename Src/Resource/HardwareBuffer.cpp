@@ -3,6 +3,7 @@
 
 
 std::unordered_map<uint64_t, ResourceManager::BufferHardwareWrap> bufferGlobalPool;
+std::unordered_map<uint64_t, uint64_t> bufferRefCount;
 uint64_t currentBufferID = 0;
 
 

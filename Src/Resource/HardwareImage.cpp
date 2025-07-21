@@ -2,6 +2,7 @@
 #include<HardwareManager/GlobalContext.h>
 
 std::unordered_map<uint64_t, ResourceManager::ImageHardwareWrap> imageGlobalPool;
+std::unordered_map<uint64_t, uint64_t> imageRefCount;
 uint64_t currentImageID = 0;
 
 HardwareImage& HardwareImage::operator= (const HardwareImage& other)
