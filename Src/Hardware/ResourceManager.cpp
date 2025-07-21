@@ -172,6 +172,7 @@ ResourceManager::BufferHardwareWrap  ResourceManager::createBuffer(VkDeviceSize 
 {
 	BufferHardwareWrap resultBuffer;
     resultBuffer.device = this->device;
+    resultBuffer.resourceManager = this;
 
 	if (size > 0)
 	{
@@ -244,6 +245,7 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
 	ImageHardwareWrap resultImage;
 
     resultImage.device = this->device;
+    resultImage.resourceManager = this;
 
 	resultImage.imageSize = imageSize;
 	resultImage.imageFormat = imageFormat;
@@ -329,7 +331,7 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
         VkDeviceSize imageSizeBytes = source.imageSize.x * source.imageSize.y * 4; // 需根据format实际计算
 
         // 1. 在source device上创建host可访问staging buffer
-        ResourceManager::BufferHardwareWrap srcStaging = createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+        ResourceManager::BufferHardwareWrap srcStaging = source.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
         // 2. 拷贝source image到staging buffer
         auto srcCopyCmd = [&](VkCommandBuffer commandBuffer) {
             VkBufferImageCopy region{};
@@ -351,7 +353,7 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
         vmaMapMemory(g_hAllocator, srcStaging.bufferAlloc, &mappedData);
 
         // 4. 在destination device上创建host可访问staging buffer
-        ResourceManager::BufferHardwareWrap dstStaging = createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+        ResourceManager::BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
         // 5. 映射destination staging buffer，写入数据
         void *dstMappedData = nullptr;

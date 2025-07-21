@@ -20,6 +20,7 @@ struct ResourceManager
 		VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
 
         DeviceManager *device;
+        ResourceManager *resourceManager;
 	};
 
 	struct ImageHardwareWrap
@@ -43,6 +44,7 @@ struct ResourceManager
 		VkImageView imageView = VK_NULL_HANDLE;
 
 		DeviceManager *device;
+        ResourceManager *resourceManager;
 	};
 
 
