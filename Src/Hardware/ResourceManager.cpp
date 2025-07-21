@@ -379,8 +379,8 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap& source, ImageHardwareWr
         destination.device->executeSingleTimeCommands(dstCopyCmd);
 
         // 7. Ïú»Ùstaging buffer
-        destroyBuffer(srcStaging);
-        destroyBuffer(dstStaging);
+        source.resourceManager->destroyBuffer(srcStaging);
+        destination.resourceManager->destroyBuffer(dstStaging);
 
         return true;
     }
