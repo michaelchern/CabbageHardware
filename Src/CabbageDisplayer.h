@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <memory>
 #include <type_traits>
 #include <algorithm>
 
@@ -85,7 +86,7 @@ struct HardwareBuffer
 
 	operator bool();
 
-	uint64_t* bufferID;
+	std::shared_ptr<uint64_t> bufferID;
 };
 
 
@@ -108,7 +109,7 @@ struct HardwareImage
 
 	HardwareImage& operator= (const HardwareImage& other);
 
-	uint64_t* imageID;
+	std::shared_ptr<uint64_t> imageID;
 };
 
 

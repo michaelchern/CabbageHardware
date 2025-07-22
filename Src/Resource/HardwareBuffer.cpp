@@ -29,8 +29,7 @@ HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
 
 HardwareBuffer::HardwareBuffer()
 {
-    this->bufferID = (uint64_t *)malloc(sizeof(uint64_t));
-    *this->bufferID = currentBufferID++;
+    this->bufferID = std::make_shared<uint64_t>(std::numeric_limits<uint64_t>::max());
 }
 
 HardwareBuffer::HardwareBuffer(const HardwareBuffer &other)
@@ -52,7 +51,6 @@ HardwareBuffer::~HardwareBuffer()
             globalHardwareContext.mainDevice->resourceManager.destroyBuffer(bufferGlobalPool[*bufferID]);
             bufferGlobalPool.erase(*bufferID);
             bufferRefCount.erase(*bufferID);
-            free(bufferID);
         }
     }
 }
@@ -66,9 +64,7 @@ HardwareBuffer::operator bool()
 
 HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const void* data)
 {
-	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
-	*(this->bufferID) = currentBufferID++;
-
+    this->bufferID = std::make_shared<uint64_t>(currentBufferID++);
 	bufferRefCount[*this->bufferID] = 1;
 
 	VkBufferUsageFlags vkUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;

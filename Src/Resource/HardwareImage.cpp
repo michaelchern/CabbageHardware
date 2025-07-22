@@ -27,8 +27,7 @@ HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 
 HardwareImage::HardwareImage()
 {
-	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
-    *this->imageID = currentImageID++;
+    this->imageID = std::make_shared<uint64_t>(std::numeric_limits<uint64_t>::max());
 }
 
 HardwareImage::HardwareImage(const HardwareImage &other)
@@ -50,7 +49,6 @@ HardwareImage::~HardwareImage()
             globalHardwareContext.mainDevice->resourceManager.destroyImage(imageGlobalPool[*imageID]);
             imageGlobalPool.erase(*imageID);
             imageRefCount.erase(*imageID);
-            free(imageID);
         }
     }
 }
@@ -84,8 +82,7 @@ bool HardwareImage::copyFromData(const void* inputData)
 
 HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage, int arrayLayers, void* imageData)
 {
-	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
-	*(this->imageID) = currentImageID++;
+    this->imageID = std::make_shared<uint64_t>(currentImageID++);
 
 	imageRefCount[*this->imageID] = 1;
 
