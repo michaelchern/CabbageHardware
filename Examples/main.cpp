@@ -265,8 +265,8 @@ int main()
             rasterizer.recordGeomMesh(indexBuffer);
             rasterizer.executePipeline(ktm::uvec2(1920, 1080));
 
-            //computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
-            //computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
+            computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
+            computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
 
             displayManager0 = finalOutputImage;
             displayManager1 = finalOutputImage;
