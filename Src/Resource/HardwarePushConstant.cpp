@@ -15,8 +15,7 @@ uint64_t currentPushConstantID = 0;
 
 HardwarePushConstant::HardwarePushConstant()
 {
-	this->pushConstantID = (uint64_t*)malloc(sizeof(uint64_t));
-    *pushConstantID = currentPushConstantID++;
+    this->pushConstantID = std::make_shared<uint64_t>(currentPushConstantID++);
 
     pushConstantRefCount[*pushConstantID] = 1;
 
@@ -43,7 +42,7 @@ HardwarePushConstant::~HardwarePushConstant()
         }
         pushConstantGlobalPool.erase(*pushConstantID);
         pushConstantRefCount.erase(*pushConstantID);
-        free(pushConstantID);
+        //free(pushConstantID);
     }
 }
 
@@ -75,8 +74,8 @@ HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant
 
 HardwarePushConstant::HardwarePushConstant(uint64_t size, uint64_t offset, HardwarePushConstant* whole)
 {
-    this->pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
-    *this->pushConstantID = currentPushConstantID++;
+    this->pushConstantID = std::make_shared<uint64_t>(currentPushConstantID++);
+    //*this->pushConstantID = currentPushConstantID++;
 
     pushConstantRefCount[*this->pushConstantID] = 1;
 
@@ -105,8 +104,8 @@ uint64_t HardwarePushConstant::getSize() const
 
 void HardwarePushConstant::copyFromRaw(const void* src, uint64_t size)
 {
-    pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
-    *this->pushConstantID = currentPushConstantID++;
+    pushConstantID = std::make_shared<uint64_t>(currentPushConstantID++);
+    //*this->pushConstantID = currentPushConstantID++;
 
     pushConstantRefCount[*this->pushConstantID] = 1;
 

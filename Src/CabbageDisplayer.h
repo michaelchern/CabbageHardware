@@ -135,7 +135,7 @@ struct HardwarePushConstant
 
   private:
     void copyFromRaw(const void *src, uint64_t size);
-	uint64_t *pushConstantID = nullptr;
+    std::shared_ptr<uint64_t> pushConstantID;
 };
 
 
@@ -147,5 +147,5 @@ struct HardwareDisplayer
 	HardwareDisplayer &operator=(const HardwareImage &image);
     HardwareDisplayer &operator=(const HardwareDisplayer &other);
 
-    void *surface;
+    void *surface = nullptr;
 };
