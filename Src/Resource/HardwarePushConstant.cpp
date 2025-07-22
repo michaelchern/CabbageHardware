@@ -63,9 +63,9 @@ HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant
     }
     else
     {
-        *this->pushConstantID = *(other.pushConstantID);
         pushConstantRefCount[*other.pushConstantID]++;
         pushConstantRefCount[*pushConstantID]--;
+        *this->pushConstantID = *(other.pushConstantID);
     }
 
     return *this;

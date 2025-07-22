@@ -193,17 +193,17 @@ std::vector<uint32_t> indices =
 
 int main()
 {
-    HardwarePushConstant pushConstant;
-    pushConstant = 1;
-    HardwarePushConstant pushConstant3(16,0,nullptr);
-    HardwarePushConstant pushConstant2(4,0,&pushConstant3);
-    pushConstant2 = 1;
-    HardwarePushConstant pushConstant4 = 1;
-    HardwarePushConstant pushConstant5 = pushConstant4;
-    HardwarePushConstant pushConstant6;
-    pushConstant6 = pushConstant2;
-    HardwarePushConstant pushConstant7;
-    pushConstant7 = pushConstant3;
+    //HardwarePushConstant pushConstant;
+    //pushConstant = 1;
+    //HardwarePushConstant pushConstant3(16,0,nullptr);
+    //HardwarePushConstant pushConstant2(4,0,&pushConstant3);
+    //pushConstant2 = 1;
+    //HardwarePushConstant pushConstant4 = 1;
+    //HardwarePushConstant pushConstant5 = pushConstant4;
+    //HardwarePushConstant pushConstant6;
+    //pushConstant6 = pushConstant2;
+    //HardwarePushConstant pushConstant7;
+    //pushConstant7 = pushConstant3;
 
     HardwareBuffer postionBuffer = HardwareBuffer(pos, BufferUsage::VertexBuffer);
     HardwareBuffer normalBuffer = HardwareBuffer(normal, BufferUsage::VertexBuffer);
