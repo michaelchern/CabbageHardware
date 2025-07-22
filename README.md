@@ -3,6 +3,7 @@
 - (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题
 - (紧急)BUG：反射的type，texture不显示
 - (紧急)重构pass间同步
+- 程序关闭时资源释放问题
 - BUG：mutiview初始化黑屏
 - 支持跨device传输（Vulkan与CUDA）
 - Intel核显（6600T、7700HQ）：bindless会导致纹理错位
