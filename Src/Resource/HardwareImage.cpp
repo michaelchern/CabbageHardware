@@ -24,13 +24,13 @@ HardwareImage::HardwareImage()
 	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
     *this->imageID = currentImageID++;
 
+	imageGlobalPool[*this->imageID] = ResourceManager::ImageHardwareWrap();
 	imageRefCount[*this->imageID] = 1;
 }
 
 HardwareImage::HardwareImage(const HardwareImage &other)
 {
-    this->imageID = (uint64_t *)malloc(sizeof(uint64_t));
-    *(this->imageID) = *(other.imageID);
+    this->imageID = other.imageID;
     imageRefCount[*other.imageID]++;
 }
 
