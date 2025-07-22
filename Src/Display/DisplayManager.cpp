@@ -318,45 +318,9 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
         VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.deviceUtils.logicalDevice, swapChain, UINT64_MAX, swapchainSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
         if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
-
-            //auto runCommand = [&](VkCommandBuffer &commandBuffer) {
-            //   // // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-            //   //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
-
-            //   // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-            //   //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
-
-            //    VkImageBlit imageBlit;
-            //    imageBlit.dstOffsets[0] = VkOffset3D{0, 0, 0};
-            //    imageBlit.dstOffsets[1] = VkOffset3D{int32_t(swapChainImages[imageIndex].imageSize.x), int32_t(swapChainImages[imageIndex].imageSize.y), 1};
-
-            //    imageBlit.srcOffsets[0] = VkOffset3D{0, 0, 0};
-            //    imageBlit.srcOffsets[1] = VkOffset3D{int32_t(imageGlobalPool[*displayImage.imageID].imageSize.x), int32_t(imageGlobalPool[*displayImage.imageID].imageSize.y), 1};
-
-            //    imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            //    imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-            //    imageBlit.dstSubresource.baseArrayLayer = 0;
-            //    imageBlit.srcSubresource.baseArrayLayer = 0;
-
-            //    imageBlit.dstSubresource.layerCount = 1;
-            //    imageBlit.srcSubresource.layerCount = 1;
-
-            //    imageBlit.dstSubresource.mipLevel = 0;
-            //    imageBlit.srcSubresource.mipLevel = 0;
-
-            //    vkCmdBlitImage(commandBuffer, imageGlobalPool[*displayImage.imageID].imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-            //                   swapChainImages[imageIndex].imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-            //                   &imageBlit, VK_FILTER_LINEAR);
-
-            //   // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-            //   //displayDevice->resourceManager.transitionImageLayoutUnblocked(
-            //   //     commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            //   //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-            //};
-
-           //displayDevice->deviceManager.executeSingleTimeCommands(runCommand);
+            auto start_time_ = std::chrono::high_resolution_clock::now();
             displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], swapChainImages[imageIndex]);
+            std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
 
             VkPresentInfoKHR presentInfo{};
             presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
