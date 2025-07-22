@@ -193,18 +193,7 @@ std::vector<uint32_t> indices =
 
 int main()
 {
-    //HardwarePushConstant pushConstant;
-    //pushConstant = 1;
-    //HardwarePushConstant pushConstant3(16,0,nullptr);
-    //HardwarePushConstant pushConstant2(4,0,&pushConstant3);
-    //pushConstant2 = 1;
-    //HardwarePushConstant pushConstant4 = 1;
-    //HardwarePushConstant pushConstant5 = pushConstant4;
-    //HardwarePushConstant pushConstant6 = pushConstant5;
-    //pushConstant5 = 2;
-    //pushConstant6 = pushConstant2;
-    //HardwarePushConstant pushConstant7;
-    //pushConstant7 = pushConstant3;
+
 
     HardwareBuffer postionBuffer = HardwareBuffer(pos, BufferUsage::VertexBuffer);
     HardwareBuffer normalBuffer = HardwareBuffer(normal, BufferUsage::VertexBuffer);
@@ -268,6 +257,19 @@ int main()
 
             computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
             computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
+
+            //HardwarePushConstant pushConstant;
+            //pushConstant = 1;
+            //HardwarePushConstant pushConstant3(16, 0, nullptr);
+            //HardwarePushConstant pushConstant2(4, 0, &pushConstant3);
+            //pushConstant2 = 1;
+            //HardwarePushConstant pushConstant4 = 1;
+            //HardwarePushConstant pushConstant5 = pushConstant4;
+            //HardwarePushConstant pushConstant6 = pushConstant5;
+            //pushConstant5 = 2;
+            //pushConstant6 = pushConstant2;
+            //HardwarePushConstant pushConstant7;
+            //pushConstant7 = pushConstant3;
 
             displayManager0 = finalOutputImage;
             displayManager1 = finalOutputImage;
