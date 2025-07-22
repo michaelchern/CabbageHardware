@@ -1,7 +1,6 @@
 # TODO
 - (紧急)BUG：外层内存泄漏问题
 - (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题
-- (紧急)BUG：反射的type，texture不显示
 - (紧急)重构pass间同步
 - 程序关闭时资源释放问题
 - BUG：mutiview初始化黑屏
