@@ -9,13 +9,19 @@ uint64_t currentBufferID = 0;
 
 HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
 {
-    bufferRefCount[*other.bufferID]++;
-    bufferRefCount[*bufferID]--;
-    if (bufferRefCount[*bufferID] == 0)
+    if (bufferGlobalPool.count(*other.bufferID))
     {
-        globalHardwareContext.mainDevice->resourceManager.destroyBuffer(bufferGlobalPool[*bufferID]);
-        bufferGlobalPool.erase(*bufferID);
-        bufferRefCount.erase(*bufferID);
+        bufferRefCount[*other.bufferID]++;
+    }
+    if (bufferGlobalPool.count(*this->bufferID))
+    {
+        bufferRefCount[*bufferID]--;
+        if (bufferRefCount[*bufferID] == 0)
+        {
+            globalHardwareContext.mainDevice->resourceManager.destroyBuffer(bufferGlobalPool[*bufferID]);
+            bufferGlobalPool.erase(*bufferID);
+            bufferRefCount.erase(*bufferID);
+        }
     }
     *(this->bufferID) = *(other.bufferID);
     return *this;
@@ -25,26 +31,29 @@ HardwareBuffer::HardwareBuffer()
 {
     this->bufferID = (uint64_t *)malloc(sizeof(uint64_t));
     *this->bufferID = currentBufferID++;
-
-    bufferGlobalPool[*this->bufferID] = ResourceManager::BufferHardwareWrap();
-    bufferRefCount[*this->bufferID] = 1;
 }
 
 HardwareBuffer::HardwareBuffer(const HardwareBuffer &other)
 {
     this->bufferID = other.bufferID;
-    bufferRefCount[*other.bufferID]++;
+    if (bufferGlobalPool.count(*other.bufferID))
+    {
+        bufferRefCount[*other.bufferID]++;
+    }
 }
 
 HardwareBuffer::~HardwareBuffer()
 {
-    bufferRefCount[*bufferID]--;
-    if (bufferRefCount[*bufferID] == 0)
+    if (bufferGlobalPool.count(*bufferID))
     {
-        globalHardwareContext.mainDevice->resourceManager.destroyBuffer(bufferGlobalPool[*bufferID]);
-        bufferGlobalPool.erase(*bufferID);
-        bufferRefCount.erase(*bufferID);
-        free(bufferID);
+        bufferRefCount[*bufferID]--;
+        if (bufferRefCount[*bufferID] == 0)
+        {
+            globalHardwareContext.mainDevice->resourceManager.destroyBuffer(bufferGlobalPool[*bufferID]);
+            bufferGlobalPool.erase(*bufferID);
+            bufferRefCount.erase(*bufferID);
+            free(bufferID);
+        }
     }
 }
 
