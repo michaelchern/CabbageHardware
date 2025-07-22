@@ -204,7 +204,7 @@ int main()
     unsigned char *data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &channels, 0);
     HardwareImage texture(ktm::uvec2(width, height), ImageFormat::RGBA8_SRGB, ImageUsage::SampledImage, 1, data);
 
-    HardwareImage finalOutputImage(ktm::uvec2(800, 800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
+    HardwareImage finalOutputImage(ktm::uvec2(1920, 1080), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
 
     RasterizerPipeline rasterizer(readStringFile(shaderPath + "/vert.glsl"), readStringFile(shaderPath + "/frag.glsl"));
 
@@ -216,16 +216,16 @@ int main()
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        GLFWwindow *window0 = glfwCreateWindow(800, 800, "Cabbage Engine 0", nullptr, nullptr);
+        GLFWwindow *window0 = glfwCreateWindow(1920, 1080, "Cabbage Engine 0", nullptr, nullptr);
         HardwareDisplayer displayManager0(glfwGetWin32Window(window0));
 
-        GLFWwindow *window1 = glfwCreateWindow(800, 800, "Cabbage Engine 1", nullptr, nullptr);
+        GLFWwindow *window1 = glfwCreateWindow(1920, 1080, "Cabbage Engine 1", nullptr, nullptr);
         HardwareDisplayer displayManager1(glfwGetWin32Window(window1));
 
-        GLFWwindow *window2 = glfwCreateWindow(800, 800, "Cabbage Engine 2", nullptr, nullptr);
+        GLFWwindow *window2 = glfwCreateWindow(1920, 1080, "Cabbage Engine 2", nullptr, nullptr);
         HardwareDisplayer displayManager2(glfwGetWin32Window(window2));
 
-        GLFWwindow *window3 = glfwCreateWindow(800, 800, "Cabbage Engine 3", nullptr, nullptr);
+        GLFWwindow *window3 = glfwCreateWindow(1920, 1080, "Cabbage Engine 3", nullptr, nullptr);
         HardwareDisplayer displayManager3(glfwGetWin32Window(window3));
 
         while (!glfwWindowShouldClose(window0) &&
@@ -251,10 +251,10 @@ int main()
             rasterizer["inNormal"] = normalBuffer;
             rasterizer["outColor"] = finalOutputImage;
             rasterizer.recordGeomMesh(indexBuffer);
-            rasterizer.executePipeline(ktm::uvec2(800, 800));
+            rasterizer.executePipeline(ktm::uvec2(1920, 1080));
 
             //computer["pushConsts.imageID"] = finalOutputImage.storeDescriptor();
-            //computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
+            //computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
 
             displayManager0 = finalOutputImage;
             displayManager1 = finalOutputImage;
