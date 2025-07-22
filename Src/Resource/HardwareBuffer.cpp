@@ -17,7 +17,7 @@ HardwareBuffer::HardwareBuffer()
 {
 	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
 
-	//bufferRefCount[*this->bufferID] = 0;
+	bufferRefCount[*this->bufferID] = 1;
 }
 
 
@@ -42,7 +42,7 @@ HardwareBuffer::HardwareBuffer(uint64_t bufferSize, BufferUsage usage, const voi
 	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
 	*(this->bufferID) = currentBufferID++;
 
-	//bufferRefCount[*this->bufferID] = 0;
+	bufferRefCount[*this->bufferID] = 1;
 
 	VkBufferUsageFlags vkUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
