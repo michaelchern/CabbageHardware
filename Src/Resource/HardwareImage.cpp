@@ -7,14 +7,20 @@ uint64_t currentImageID = 0;
 
 HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 {
-    imageRefCount[*other.imageID]++;
-    imageRefCount[*imageID]--;
-    if (imageRefCount[*imageID] == 0)
+    if (imageGlobalPool.count(*other.imageID))
     {
-        globalHardwareContext.mainDevice->resourceManager.destroyImage(imageGlobalPool[*imageID]);
-        imageGlobalPool.erase(*imageID);
-        imageRefCount.erase(*imageID);
+        imageRefCount[*other.imageID]++;
     }
+	if (imageGlobalPool.count(*this->imageID))
+	{
+        imageRefCount[*imageID]--;
+        if (imageRefCount[*imageID] == 0)
+        {
+            globalHardwareContext.mainDevice->resourceManager.destroyImage(imageGlobalPool[*imageID]);
+            imageGlobalPool.erase(*imageID);
+            imageRefCount.erase(*imageID);
+        }
+	}
 	*(this->imageID) = *(other.imageID);
 	return *this;
 }
@@ -23,26 +29,29 @@ HardwareImage::HardwareImage()
 {
 	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
     *this->imageID = currentImageID++;
-
-	imageGlobalPool[*this->imageID] = ResourceManager::ImageHardwareWrap();
-	imageRefCount[*this->imageID] = 1;
 }
 
 HardwareImage::HardwareImage(const HardwareImage &other)
 {
     this->imageID = other.imageID;
-    imageRefCount[*other.imageID]++;
+    if (imageGlobalPool.count(*other.imageID))
+    {
+        imageRefCount[*other.imageID]++;
+    }
 }
 
 HardwareImage::~HardwareImage()
 {
-    imageRefCount[*imageID]--;
-    if (imageRefCount[*imageID] == 0)
+    if (imageGlobalPool.count(*imageID))
     {
-        globalHardwareContext.mainDevice->resourceManager.destroyImage(imageGlobalPool[*imageID]);
-        imageGlobalPool.erase(*imageID);
-        imageRefCount.erase(*imageID);
-        free(imageID);
+        imageRefCount[*imageID]--;
+        if (imageRefCount[*imageID] == 0)
+        {
+            globalHardwareContext.mainDevice->resourceManager.destroyImage(imageGlobalPool[*imageID]);
+            imageGlobalPool.erase(*imageID);
+            imageRefCount.erase(*imageID);
+            free(imageID);
+        }
     }
 }
 
