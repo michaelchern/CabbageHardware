@@ -27,8 +27,7 @@ HardwarePushConstant::HardwarePushConstant()
 
 HardwarePushConstant::HardwarePushConstant(const HardwarePushConstant &other)
 {
-    this->pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
-    *this->pushConstantID = *(other.pushConstantID);
+    this->pushConstantID = other.pushConstantID;
     pushConstantRefCount[*other.pushConstantID]++;
 }
 
