@@ -32,7 +32,7 @@ HardwarePushConstant::~HardwarePushConstant()
         pushConstantRefCount[*pushConstantID]--;
         if (pushConstantRefCount[*pushConstantID] == 1)
         {
-            if (pushConstantGlobalPool[*pushConstantID].data != nullptr && pushConstantGlobalPool[*pushConstantID].isSub !=true)
+            if (pushConstantGlobalPool[*pushConstantID].data != nullptr && !pushConstantGlobalPool[*pushConstantID].isSub)
             {
                 free(pushConstantGlobalPool[*pushConstantID].data);
                 pushConstantGlobalPool[*pushConstantID].data = nullptr;
@@ -50,7 +50,7 @@ HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant
 
     if (pushConstantGlobalPool[*pushConstantID].size != pushConstantGlobalPool[*other.pushConstantID].size || pushConstantGlobalPool[*pushConstantID].data == nullptr)
     {
-        if (pushConstantGlobalPool[*pushConstantID].data != nullptr && pushConstantGlobalPool[*pushConstantID].isSub != true)
+        if (pushConstantGlobalPool[*pushConstantID].data != nullptr && !pushConstantGlobalPool[*pushConstantID].isSub)
         {
             free(pushConstantGlobalPool[*pushConstantID].data);
         }
