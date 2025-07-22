@@ -34,24 +34,17 @@ HardwarePushConstant::HardwarePushConstant(const HardwarePushConstant &other)
 
 HardwarePushConstant::~HardwarePushConstant()
 {
-    if (pushConstantRefCount[*pushConstantID] > 0)
+    pushConstantRefCount[*pushConstantID]--;
+    if (pushConstantRefCount[*pushConstantID] == 0)
     {
-        pushConstantRefCount[*pushConstantID]--;
-        if (pushConstantRefCount[*pushConstantID] == 0)
+        if (pushConstantGlobalPool[*pushConstantID].data != nullptr && !pushConstantGlobalPool[*pushConstantID].isSub)
         {
-            if (pushConstantGlobalPool[*pushConstantID].data != nullptr && !pushConstantGlobalPool[*pushConstantID].isSub)
-            {
-                free(pushConstantGlobalPool[*pushConstantID].data);
-                pushConstantGlobalPool[*pushConstantID].data = nullptr;
-            }
-            pushConstantGlobalPool.erase(*pushConstantID);
-            pushConstantRefCount.erase(*pushConstantID);
-            free(pushConstantID);
+            free(pushConstantGlobalPool[*pushConstantID].data);
+            pushConstantGlobalPool[*pushConstantID].data = nullptr;
         }
-    }
-    else
-    {
-        std::cout << pushConstantRefCount[*pushConstantID] << std::endl;
+        pushConstantGlobalPool.erase(*pushConstantID);
+        pushConstantRefCount.erase(*pushConstantID);
+        free(pushConstantID);
     }
 }
 
