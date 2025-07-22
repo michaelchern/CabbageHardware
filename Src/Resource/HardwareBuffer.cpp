@@ -9,25 +9,43 @@ uint64_t currentBufferID = 0;
 
 HardwareBuffer& HardwareBuffer::operator= (const HardwareBuffer& other)
 {
-	*(this->bufferID) = *(other.bufferID);
-	return *this;
+    bufferRefCount[*other.bufferID]++;
+    bufferRefCount[*bufferID]--;
+    if (bufferRefCount[*bufferID] == 0)
+    {
+        globalHardwareContext.mainDevice->resourceManager.destroyBuffer(bufferGlobalPool[*bufferID]);
+        bufferGlobalPool.erase(*bufferID);
+        bufferRefCount.erase(*bufferID);
+    }
+    *(this->bufferID) = *(other.bufferID);
+    return *this;
 }
 
 HardwareBuffer::HardwareBuffer()
 {
-	this->bufferID = (uint64_t*)malloc(sizeof(uint64_t));
+    this->bufferID = (uint64_t *)malloc(sizeof(uint64_t));
+    *this->bufferID = currentBufferID++;
 
-	bufferRefCount[*this->bufferID] = 1;
+    bufferGlobalPool[*this->bufferID] = ResourceManager::BufferHardwareWrap();
+    bufferRefCount[*this->bufferID] = 1;
 }
 
+HardwareBuffer::HardwareBuffer(const HardwareBuffer &other)
+{
+    this->bufferID = other.bufferID;
+    bufferRefCount[*other.bufferID]++;
+}
 
 HardwareBuffer::~HardwareBuffer()
 {
-    // if (*this && imageID.use_count() == 1)
-    //{
-    //    globalHardwareContext.resourceManager.destroyImage(imageGlobalPool[*imageID]);
-    //    imageGlobalPool.erase(*imageID);
-    //}
+    bufferRefCount[*bufferID]--;
+    if (bufferRefCount[*bufferID] == 0)
+    {
+        globalHardwareContext.mainDevice->resourceManager.destroyBuffer(bufferGlobalPool[*bufferID]);
+        bufferGlobalPool.erase(*bufferID);
+        bufferRefCount.erase(*bufferID);
+        free(bufferID);
+    }
 }
 
 HardwareBuffer::operator bool()

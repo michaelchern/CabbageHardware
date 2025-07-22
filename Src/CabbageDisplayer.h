@@ -55,7 +55,7 @@ concept is_container = requires(T a)
 struct HardwareBuffer
 {
 	HardwareBuffer();
-
+    HardwareBuffer(const HardwareBuffer &other);
 	HardwareBuffer(uint64_t size, BufferUsage usage, const void* data = nullptr);
 
 	template<typename Type>
