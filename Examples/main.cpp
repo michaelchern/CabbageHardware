@@ -198,10 +198,10 @@ int main()
     //HardwarePushConstant pushConstant3(16,0,nullptr);
     //HardwarePushConstant pushConstant2(4,0,&pushConstant3);
     //pushConstant2 = 1;
-    HardwarePushConstant pushConstant4 = 1;
-    HardwarePushConstant pushConstant5 = pushConstant4;
-    HardwarePushConstant pushConstant6 = pushConstant5;
-    pushConstant5 = 2;
+    //HardwarePushConstant pushConstant4 = 1;
+    //HardwarePushConstant pushConstant5 = pushConstant4;
+    //HardwarePushConstant pushConstant6 = pushConstant5;
+    //pushConstant5 = 2;
     //pushConstant6 = pushConstant2;
     //HardwarePushConstant pushConstant7;
     //pushConstant7 = pushConstant3;
