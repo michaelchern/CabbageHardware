@@ -157,7 +157,10 @@ void ResourceManager::createTextureSampler()
 
 void ResourceManager::destroyBuffer(BufferHardwareWrap &buffer)
 {
-    vmaDestroyBuffer(g_hAllocator, buffer.bufferHandle, buffer.bufferAlloc);
+    if (buffer.bufferAlloc != VK_NULL_HANDLE && buffer.bufferHandle != VK_NULL_HANDLE)
+    {
+        vmaDestroyBuffer(g_hAllocator, buffer.bufferHandle, buffer.bufferAlloc);
+    }
 }
 
 ResourceManager::BufferHardwareWrap ResourceManager::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage)
