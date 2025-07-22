@@ -1,9 +1,9 @@
 # TODO
-- 内存泄漏问题
-- 不同device中，copyImageMemory中vkCmdBlitImage有bug
-- 反射的type有bug
+- (紧急)BUG：外层内存泄漏问题
+- (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题
+- (紧急)BUG：反射的type，texture不显示
+- (紧急)重构pass间同步
 - BUG：mutiview初始化黑屏
-- 重构pass间同步
 - 支持跨device传输（Vulkan与CUDA）
 - Intel核显（6600T、7700HQ）：bindless会导致纹理错位
 - AMD核显：bindless创建时，查询到的数量和实际数量不符
