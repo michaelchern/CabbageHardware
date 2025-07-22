@@ -25,12 +25,47 @@ HardwarePushConstant::HardwarePushConstant()
     pushConstantGlobalPool[*pushConstantID].data = nullptr;
 }
 
+HardwarePushConstant::HardwarePushConstant(const HardwarePushConstant &other)
+{
+    this->pushConstantID = (uint64_t *)malloc(sizeof(uint64_t));
+    *this->pushConstantID = *(other.pushConstantID);
+    pushConstantRefCount[*other.pushConstantID]++;
+}
+
 HardwarePushConstant::~HardwarePushConstant()
 {
     if (pushConstantRefCount[*pushConstantID] > 0)
     {
         pushConstantRefCount[*pushConstantID]--;
-        if (pushConstantRefCount[*pushConstantID] == 1)
+        if (pushConstantRefCount[*pushConstantID] == 0)
+        {
+            if (pushConstantGlobalPool[*pushConstantID].data != nullptr && !pushConstantGlobalPool[*pushConstantID].isSub)
+            {
+                free(pushConstantGlobalPool[*pushConstantID].data);
+                pushConstantGlobalPool[*pushConstantID].data = nullptr;
+            }
+            pushConstantGlobalPool.erase(*pushConstantID);
+            pushConstantRefCount.erase(*pushConstantID);
+            free(pushConstantID);
+        }
+    }
+    else
+    {
+        std::cout << pushConstantRefCount[*pushConstantID] << std::endl;
+    }
+}
+
+HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant &other)
+{   
+    if (pushConstantGlobalPool[*pushConstantID].isSub)
+    {
+        memcpy(pushConstantGlobalPool[*pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].size);
+    }
+    else
+    {
+        pushConstantRefCount[*other.pushConstantID]++;
+        pushConstantRefCount[*pushConstantID]--;
+        if (pushConstantRefCount[*pushConstantID] == 0)
         {
             if (pushConstantGlobalPool[*pushConstantID].data != nullptr && !pushConstantGlobalPool[*pushConstantID].isSub)
             {
@@ -40,30 +75,9 @@ HardwarePushConstant::~HardwarePushConstant()
             pushConstantGlobalPool.erase(*pushConstantID);
             pushConstantRefCount.erase(*pushConstantID);
         }
-        free(pushConstantID);
-    }
-}
-
-HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant &other)
-{   
-    pushConstantRefCount[*pushConstantID]++;
-
-    if (pushConstantGlobalPool[*pushConstantID].size != pushConstantGlobalPool[*other.pushConstantID].size || pushConstantGlobalPool[*pushConstantID].data == nullptr)
-    {
-        if (pushConstantGlobalPool[*pushConstantID].data != nullptr && !pushConstantGlobalPool[*pushConstantID].isSub)
-        {
-            free(pushConstantGlobalPool[*pushConstantID].data);
-        }
-        pushConstantGlobalPool[*pushConstantID].size = pushConstantGlobalPool[*other.pushConstantID].size;
-        pushConstantGlobalPool[*pushConstantID].data = (uint8_t *)malloc(pushConstantGlobalPool[*other.pushConstantID].size);
+        *this->pushConstantID = *(other.pushConstantID);
     }
 
-    if (pushConstantGlobalPool[*other.pushConstantID].data != nullptr)
-    {
-        memcpy(pushConstantGlobalPool[*pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].data, pushConstantGlobalPool[*other.pushConstantID].size);
-    }
-
-    *this->pushConstantID = *(other.pushConstantID);
     return *this;
 }
 
@@ -104,9 +118,8 @@ void HardwarePushConstant::copyFromRaw(const void* src, uint64_t size)
 
     pushConstantRefCount[*this->pushConstantID] = 1;
 
-    PushConstant pushConstant;
-    pushConstant.size = size;
-    pushConstant.data = (uint8_t *)malloc(size);
-    memcpy(pushConstant.data, src, size);
-    pushConstantGlobalPool[*pushConstantID] = pushConstant;
+    pushConstantGlobalPool[*pushConstantID] = PushConstant();
+    pushConstantGlobalPool[*pushConstantID].size = size;
+    pushConstantGlobalPool[*pushConstantID].data = (uint8_t *)malloc(size);
+    memcpy(pushConstantGlobalPool[*pushConstantID].data, src, size);
 }
