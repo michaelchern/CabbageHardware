@@ -65,6 +65,16 @@ HardwarePushConstant &HardwarePushConstant::operator=(const HardwarePushConstant
     {
         pushConstantRefCount[*other.pushConstantID]++;
         pushConstantRefCount[*pushConstantID]--;
+        if (pushConstantRefCount[*pushConstantID] == 0)
+        {
+            if (pushConstantGlobalPool[*pushConstantID].data != nullptr && !pushConstantGlobalPool[*pushConstantID].isSub)
+            {
+                free(pushConstantGlobalPool[*pushConstantID].data);
+                pushConstantGlobalPool[*pushConstantID].data = nullptr;
+            }
+            pushConstantGlobalPool.erase(*pushConstantID);
+            pushConstantRefCount.erase(*pushConstantID);
+        }
         *this->pushConstantID = *(other.pushConstantID);
     }
 
