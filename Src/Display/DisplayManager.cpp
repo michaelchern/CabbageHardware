@@ -321,7 +321,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
         VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.deviceUtils.logicalDevice, swapChain, UINT64_MAX, swapchainSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
         if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
-            auto start_time_ = std::chrono::high_resolution_clock::now();
+            //auto start_time_ = std::chrono::high_resolution_clock::now();
             displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage);
 
              auto runCommand = [&](VkCommandBuffer &commandBuffer) {
@@ -361,7 +361,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             };
 
              displayDevice->deviceManager.executeSingleTimeCommands(runCommand);
-            std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
+            //std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
 
             VkPresentInfoKHR presentInfo{};
             presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
