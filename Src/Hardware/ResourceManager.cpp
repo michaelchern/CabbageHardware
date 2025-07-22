@@ -314,8 +314,8 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
 
 bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWrap &destination)
 {
-    if (source.pixelSize == destination.pixelSize)
-    {
+    //if (source.pixelSize == destination.pixelSize)
+    //{
         if (source.imageSize == destination.imageSize && source.imageFormat == destination.imageFormat)
         {
 
@@ -389,156 +389,151 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
                 return true;
             }
         }
-        else
-        {
-            if (source.device == destination.device)
-            {
-                // 同 device，使用 vkCmdBlitImage
-                auto runCommand = [&](VkCommandBuffer &commandBuffer) {
-                    VkImageBlit imageBlit{};
-                    imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                    imageBlit.srcSubresource.mipLevel = 0;
-                    imageBlit.srcSubresource.baseArrayLayer = 0;
-                    imageBlit.srcSubresource.layerCount = 1;
-                    imageBlit.srcOffsets[0] = {0, 0, 0};
-                    imageBlit.srcOffsets[1] = {int32_t(source.imageSize.x), int32_t(source.imageSize.y), 1};
 
-                    imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                    imageBlit.dstSubresource.mipLevel = 0;
-                    imageBlit.dstSubresource.baseArrayLayer = 0;
-                    imageBlit.dstSubresource.layerCount = 1;
-                    imageBlit.dstOffsets[0] = {0, 0, 0};
-                    imageBlit.dstOffsets[1] = {int32_t(destination.imageSize.x), int32_t(destination.imageSize.y), 1};
-
-                    vkCmdBlitImage(commandBuffer,
-                                   source.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                   destination.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                   1, &imageBlit, VK_FILTER_LINEAR);
-                };
-                source.device->executeSingleTimeCommands(runCommand);
-                return true;
-            }
-            else
-            {
-                // device 不同，使用 staging buffer
-                VkDeviceSize srcSize = source.imageSize.x * source.imageSize.y * source.pixelSize;
-                VkDeviceSize dstSize = destination.imageSize.x * destination.imageSize.y * destination.pixelSize;
-
-                // 1. 源 device：image -> buffer
-                BufferHardwareWrap srcStaging = source.resourceManager->createBuffer(srcSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-                auto srcCopyCmd = [&](VkCommandBuffer commandBuffer) {
-                    VkBufferImageCopy region{};
-                    region.bufferOffset = 0;
-                    region.bufferRowLength = 0;
-                    region.bufferImageHeight = 0;
-                    region.imageSubresource.aspectMask = source.aspectMask;
-                    region.imageSubresource.mipLevel = 0;
-                    region.imageSubresource.baseArrayLayer = 0;
-                    region.imageSubresource.layerCount = 1;
-                    region.imageOffset = {0, 0, 0};
-                    region.imageExtent = {source.imageSize.x, source.imageSize.y, 1};
-                    vkCmdCopyImageToBuffer(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, srcStaging.bufferHandle, 1, &region);
-                };
-                source.device->executeSingleTimeCommands(srcCopyCmd);
-
-                // 2. host 拷贝
-                void *mappedData = nullptr;
-                vmaMapMemory(source.resourceManager->g_hAllocator, srcStaging.bufferAlloc, &mappedData);
-
-                // 3. 目标 device：buffer -> image
-                BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(dstSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-                void *dstMappedData = nullptr;
-                vmaMapMemory(destination.resourceManager->g_hAllocator, dstStaging.bufferAlloc, &dstMappedData);
-                memcpy(dstMappedData, mappedData, std::min(srcSize, dstSize));
-                vmaUnmapMemory(source.resourceManager->g_hAllocator, srcStaging.bufferAlloc);
-                vmaUnmapMemory(destination.resourceManager->g_hAllocator, dstStaging.bufferAlloc);
-
-                //auto dstCopyCmd = [&](VkCommandBuffer commandBuffer) {
-                //    VkBufferImageCopy region{};
-                //    region.bufferOffset = 0;
-                //    region.bufferRowLength = 0;
-                //    region.bufferImageHeight = 0;
-                //    region.imageSubresource.aspectMask = destination.aspectMask;
-                //    region.imageSubresource.mipLevel = 0;
-                //    region.imageSubresource.baseArrayLayer = 0;
-                //    region.imageSubresource.layerCount = 1;
-                //    region.imageOffset = {0, 0, 0};
-                //    region.imageExtent = {destination.imageSize.x, destination.imageSize.y, 1};
-                //    vkCmdCopyBufferToImage(commandBuffer, dstStaging.bufferHandle, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
-                //};
-                //destination.device->executeSingleTimeCommands(dstCopyCmd);
-
-                //auto runCommand = [&](VkCommandBuffer &commandBuffer) {
-                //    VkImageBlit imageBlit{};
-                //    imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                //    imageBlit.srcSubresource.mipLevel = 0;
-                //    imageBlit.srcSubresource.baseArrayLayer = 0;
-                //    imageBlit.srcSubresource.layerCount = 1;
-                //    imageBlit.srcOffsets[0] = {0, 0, 0};
-                //    imageBlit.srcOffsets[1] = {int32_t(source.imageSize.x), int32_t(source.imageSize.y), 1};
-
-                //    imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                //    imageBlit.dstSubresource.mipLevel = 0;
-                //    imageBlit.dstSubresource.baseArrayLayer = 0;
-                //    imageBlit.dstSubresource.layerCount = 1;
-                //    imageBlit.dstOffsets[0] = {0, 0, 0};
-                //    imageBlit.dstOffsets[1] = {int32_t(destination.imageSize.x), int32_t(destination.imageSize.y), 1};
-
-                //    vkCmdBlitImage(commandBuffer,
-                //                   source.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                //                   destination.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                //                   1, &imageBlit, VK_FILTER_LINEAR);
-                //};
-
-                             auto runCommand = [&](VkCommandBuffer &commandBuffer) {
-                   // // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-                   //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
-
-                   // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-                   //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
-
-                    VkImageBlit imageBlit;
-                    imageBlit.dstOffsets[0] = VkOffset3D{0, 0, 0};
-                    imageBlit.dstOffsets[1] = VkOffset3D{int32_t(destination.imageSize.x), int32_t(destination.imageSize.y), 1};
-
-                    imageBlit.srcOffsets[0] = VkOffset3D{0, 0, 0};
-                    imageBlit.srcOffsets[1] = VkOffset3D{int32_t(source.imageSize.x), int32_t(source.imageSize.y), 1};
-
-                    imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                    imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-                    imageBlit.dstSubresource.baseArrayLayer = 0;
-                    imageBlit.srcSubresource.baseArrayLayer = 0;
-
-                    imageBlit.dstSubresource.layerCount = 1;
-                    imageBlit.srcSubresource.layerCount = 1;
-
-                    imageBlit.dstSubresource.mipLevel = 0;
-                    imageBlit.srcSubresource.mipLevel = 0;
-
-                    vkCmdBlitImage(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                   destination.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-                                   &imageBlit, VK_FILTER_LINEAR);
-
-                   // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-                   //displayDevice->resourceManager.transitionImageLayoutUnblocked(
-                   //     commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                   //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-                };
-                destination.device->executeSingleTimeCommands(runCommand);
-
-                source.resourceManager->destroyBuffer(srcStaging);
-                destination.resourceManager->destroyBuffer(dstStaging);
-
-                return true;
-            }
-        }
-    }
-    else
-    {
-        std::cerr << "Pixel size mismatch between source and destination images." << std::endl;
         return false;
-    }
+
+        //else
+        //{
+        //    if (source.device == destination.device)
+        //    {
+        //        // 同 device，使用 vkCmdBlitImage
+        //        auto runCommand = [&](VkCommandBuffer &commandBuffer) {
+        //            VkImageBlit imageBlit{};
+        //            imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        //            imageBlit.srcSubresource.mipLevel = 0;
+        //            imageBlit.srcSubresource.baseArrayLayer = 0;
+        //            imageBlit.srcSubresource.layerCount = 1;
+        //            imageBlit.srcOffsets[0] = {0, 0, 0};
+        //            imageBlit.srcOffsets[1] = {int32_t(source.imageSize.x), int32_t(source.imageSize.y), 1};
+
+        //            imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        //            imageBlit.dstSubresource.mipLevel = 0;
+        //            imageBlit.dstSubresource.baseArrayLayer = 0;
+        //            imageBlit.dstSubresource.layerCount = 1;
+        //            imageBlit.dstOffsets[0] = {0, 0, 0};
+        //            imageBlit.dstOffsets[1] = {int32_t(destination.imageSize.x), int32_t(destination.imageSize.y), 1};
+
+        //            vkCmdBlitImage(commandBuffer,
+        //                           source.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        //                           destination.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        //                           1, &imageBlit, VK_FILTER_LINEAR);
+        //        };
+        //        source.device->executeSingleTimeCommands(runCommand);
+        //        return true;
+        //    }
+        //}
+        //    else
+        //    {
+        //        // device 不同，使用 staging buffer
+        //        VkDeviceSize srcSize = source.imageSize.x * source.imageSize.y * source.pixelSize;
+        //        VkDeviceSize dstSize = destination.imageSize.x * destination.imageSize.y * destination.pixelSize;
+
+        //        // 1. 源 device：image -> buffer
+        //        BufferHardwareWrap srcStaging = source.resourceManager->createBuffer(srcSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+        //        auto srcCopyCmd = [&](VkCommandBuffer commandBuffer) {
+        //            VkBufferImageCopy region{};
+        //            region.bufferOffset = 0;
+        //            region.bufferRowLength = 0;
+        //            region.bufferImageHeight = 0;
+        //            region.imageSubresource.aspectMask = source.aspectMask;
+        //            region.imageSubresource.mipLevel = 0;
+        //            region.imageSubresource.baseArrayLayer = 0;
+        //            region.imageSubresource.layerCount = 1;
+        //            region.imageOffset = {0, 0, 0};
+        //            region.imageExtent = {source.imageSize.x, source.imageSize.y, 1};
+        //            vkCmdCopyImageToBuffer(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, srcStaging.bufferHandle, 1, &region);
+        //        };
+        //        source.device->executeSingleTimeCommands(srcCopyCmd);
+
+        //        // 2. host 拷贝
+        //        void *mappedData = nullptr;
+        //        vmaMapMemory(source.resourceManager->g_hAllocator, srcStaging.bufferAlloc, &mappedData);
+
+        //        // 3. 目标 device：buffer -> image
+        //        BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(dstSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+        //        void *dstMappedData = nullptr;
+        //        vmaMapMemory(destination.resourceManager->g_hAllocator, dstStaging.bufferAlloc, &dstMappedData);
+        //        memcpy(dstMappedData, mappedData, std::min(srcSize, dstSize));
+        //        vmaUnmapMemory(source.resourceManager->g_hAllocator, srcStaging.bufferAlloc);
+        //        vmaUnmapMemory(destination.resourceManager->g_hAllocator, dstStaging.bufferAlloc);
+
+        //        //auto dstCopyCmd = [&](VkCommandBuffer commandBuffer) {
+        //        //    VkBufferImageCopy region{};
+        //        //    region.bufferOffset = 0;
+        //        //    region.bufferRowLength = 0;
+        //        //    region.bufferImageHeight = 0;
+        //        //    region.imageSubresource.aspectMask = destination.aspectMask;
+        //        //    region.imageSubresource.mipLevel = 0;
+        //        //    region.imageSubresource.baseArrayLayer = 0;
+        //        //    region.imageSubresource.layerCount = 1;
+        //        //    region.imageOffset = {0, 0, 0};
+        //        //    region.imageExtent = {destination.imageSize.x, destination.imageSize.y, 1};
+        //        //    vkCmdCopyBufferToImage(commandBuffer, dstStaging.bufferHandle, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
+        //        //};
+        //        //destination.device->executeSingleTimeCommands(dstCopyCmd);
+
+        //        //auto runCommand = [&](VkCommandBuffer &commandBuffer) {
+        //        //    VkImageBlit imageBlit{};
+        //        //    imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        //        //    imageBlit.srcSubresource.mipLevel = 0;
+        //        //    imageBlit.srcSubresource.baseArrayLayer = 0;
+        //        //    imageBlit.srcSubresource.layerCount = 1;
+        //        //    imageBlit.srcOffsets[0] = {0, 0, 0};
+        //        //    imageBlit.srcOffsets[1] = {int32_t(source.imageSize.x), int32_t(source.imageSize.y), 1};
+
+        //        //    imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        //        //    imageBlit.dstSubresource.mipLevel = 0;
+        //        //    imageBlit.dstSubresource.baseArrayLayer = 0;
+        //        //    imageBlit.dstSubresource.layerCount = 1;
+        //        //    imageBlit.dstOffsets[0] = {0, 0, 0};
+        //        //    imageBlit.dstOffsets[1] = {int32_t(destination.imageSize.x), int32_t(destination.imageSize.y), 1};
+
+        //        //    vkCmdBlitImage(commandBuffer,
+        //        //                   source.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        //        //                   destination.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        //        //                   1, &imageBlit, VK_FILTER_LINEAR);
+        //        //};
+
+
+        //        auto runCommand = [&](VkCommandBuffer &commandBuffer) {
+
+        //            VkImageBlit imageBlit;
+        //            imageBlit.dstOffsets[0] = VkOffset3D{0, 0, 0};
+        //            imageBlit.dstOffsets[1] = VkOffset3D{int32_t(destination.imageSize.x), int32_t(destination.imageSize.y), 1};
+
+        //            imageBlit.srcOffsets[0] = VkOffset3D{0, 0, 0};
+        //            imageBlit.srcOffsets[1] = VkOffset3D{int32_t(dstStaging.imageSize.x), int32_t(source.imageSize.y), 1};
+
+        //            imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        //            imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+
+        //            imageBlit.dstSubresource.baseArrayLayer = 0;
+        //            imageBlit.srcSubresource.baseArrayLayer = 0;
+
+        //            imageBlit.dstSubresource.layerCount = 1;
+        //            imageBlit.srcSubresource.layerCount = 1;
+
+        //            imageBlit.dstSubresource.mipLevel = 0;
+        //            imageBlit.srcSubresource.mipLevel = 0;
+
+        //            vkCmdBlitImage(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        //                           destination.imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+        //                           &imageBlit, VK_FILTER_LINEAR);
+        //        };
+        //        destination.device->executeSingleTimeCommands(runCommand);
+
+        //        source.resourceManager->destroyBuffer(srcStaging);
+        //        destination.resourceManager->destroyBuffer(dstStaging);
+
+        //        return true;
+        //    }
+        //}
+    //}
+    //else
+    //{
+    //    std::cerr << "Pixel size mismatch between source and destination images." << std::endl;
+    //    return false;
+    //}
 }
 
 void ResourceManager::transitionImageLayoutUnblocked(VkCommandBuffer &commandBuffer, ImageHardwareWrap &image,

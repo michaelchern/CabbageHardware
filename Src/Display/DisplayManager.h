@@ -33,6 +33,10 @@ public:
 //private:
 	VkSurfaceFormatKHR surfaceFormat;
 
+
+	ResourceManager::ImageHardwareWrap displayImage;
+
+
 	void cleaarupDisplayManager();
 
 
