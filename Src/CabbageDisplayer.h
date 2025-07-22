@@ -92,7 +92,7 @@ struct HardwareBuffer
 struct HardwareImage
 {
 	HardwareImage();
-
+    HardwareImage(const HardwareImage &other);
 	HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage = ImageUsage::SampledImage, int arrayLayers = 1, void* imageData = nullptr);
 
 	~HardwareImage();

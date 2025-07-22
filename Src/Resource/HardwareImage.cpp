@@ -7,6 +7,14 @@ uint64_t currentImageID = 0;
 
 HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 {
+    imageRefCount[*other.imageID]++;
+    imageRefCount[*imageID]--;
+    if (imageRefCount[*imageID] == 0)
+    {
+        globalHardwareContext.mainDevice->resourceManager.destroyImage(imageGlobalPool[*imageID]);
+        imageGlobalPool.erase(*imageID);
+        imageRefCount.erase(*imageID);
+    }
 	*(this->imageID) = *(other.imageID);
 	return *this;
 }
@@ -14,17 +22,28 @@ HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 HardwareImage::HardwareImage()
 {
 	this->imageID = (uint64_t*)malloc(sizeof(uint64_t));
+    *this->imageID = currentImageID++;
 
 	imageRefCount[*this->imageID] = 1;
 }
 
+HardwareImage::HardwareImage(const HardwareImage &other)
+{
+    this->imageID = (uint64_t *)malloc(sizeof(uint64_t));
+    *(this->imageID) = *(other.imageID);
+    imageRefCount[*other.imageID]++;
+}
+
 HardwareImage::~HardwareImage()
 {
-    // if (*this && imageID.use_count() == 1)
-    //{
-    //     globalHardwareContext.resourceManager.destroyImage(imageGlobalPool[*imageID]);
-    //     imageGlobalPool.erase(*imageID);
-    // }
+    imageRefCount[*imageID]--;
+    if (imageRefCount[*imageID] == 0)
+    {
+        globalHardwareContext.mainDevice->resourceManager.destroyImage(imageGlobalPool[*imageID]);
+        imageGlobalPool.erase(*imageID);
+        imageRefCount.erase(*imageID);
+        free(imageID);
+    }
 }
 
 HardwareImage::operator bool()
