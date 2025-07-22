@@ -195,8 +195,8 @@ int main()
 {
     HardwarePushConstant pushConstant;
     pushConstant = 1;
-    HardwarePushConstant pushConstant3 = (16,0,nullptr);
-    HardwarePushConstant pushConstant2 = (4,0,&pushConstant3);
+    HardwarePushConstant pushConstant3(16,0,nullptr);
+    HardwarePushConstant pushConstant2(4,0,&pushConstant3);
     pushConstant2 = 1;
     HardwarePushConstant pushConstant4 = 1;
     HardwarePushConstant pushConstant5 = pushConstant4;

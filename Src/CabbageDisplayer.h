@@ -117,6 +117,8 @@ struct HardwarePushConstant
 	HardwarePushConstant();
 	~HardwarePushConstant();
 
+	HardwarePushConstant(const HardwarePushConstant &other);
+
 	template<typename Type>
 	HardwarePushConstant(Type data) requires (!std::is_same_v<std::remove_cvref_t<Type>, HardwarePushConstant>)
 	{
