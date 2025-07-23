@@ -3,6 +3,11 @@
 
 layout(push_constant) uniform PushConsts
 {
+    uint uniformBufferIndex;
+}pushConsts;
+
+layout(set = 0, binding = 0) uniform UniformBufferObject
+{
     uint textureIndex;
     mat4 model;
     mat4 view;
@@ -10,7 +15,7 @@ layout(push_constant) uniform PushConsts
     vec3 viewPos;
     vec3 lightColor;
     vec3 lightPos;
-} pushConsts;
+}uniformBufferObjects[];
 
 
 layout(location = 0) in vec3 inPosition;
@@ -25,11 +30,14 @@ layout(location = 3) out vec3 fragColor;
 
 void main()
 {
-    gl_Position = pushConsts.proj * pushConsts.view * pushConsts.model * vec4(inPosition, 1.0);
+    gl_Position = uniformBufferObjects[pushConsts.uniformBufferIndex].proj * 
+        uniformBufferObjects[pushConsts.uniformBufferIndex].view * 
+        uniformBufferObjects[pushConsts.uniformBufferIndex].model * 
+        vec4(inPosition, 1.0);
 
-    fragPos = vec3(pushConsts.model * vec4(inPosition, 1.0));
+    fragPos = vec3(uniformBufferObjects[pushConsts.uniformBufferIndex].model * vec4(inPosition, 1.0));
 
-    fragNormal = normalize(mat3(transpose(inverse(pushConsts.model))) * inNormal);
+    fragNormal = normalize(mat3(transpose(inverse(uniformBufferObjects[pushConsts.uniformBufferIndex].model))) * inNormal);
 
     fragColor = inColor;
 

@@ -3,6 +3,11 @@
 
 layout(push_constant) uniform PushConsts
 {
+    uint uniformBufferIndex;
+}pushConsts;
+
+layout(set = 0, binding = 0) uniform UniformBufferObject
+{
     uint textureIndex;
     mat4 model;
     mat4 view;
@@ -10,7 +15,7 @@ layout(push_constant) uniform PushConsts
     vec3 viewPos;
     vec3 lightColor;
     vec3 lightPos;
-} pushConsts;
+}uniformBufferObjects[];
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
@@ -66,7 +71,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 vec3 calculateColor(vec3 WorldPos, vec3 Normal, vec3 albedo, float metallic, float roughness)
 {
     vec3 N = normalize(Normal);
-    vec3 V = normalize(pushConsts.viewPos - WorldPos);
+    vec3 V = normalize(uniformBufferObjects[pushConsts.uniformBufferIndex].viewPos - WorldPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
@@ -78,11 +83,11 @@ vec3 calculateColor(vec3 WorldPos, vec3 Normal, vec3 albedo, float metallic, flo
     //for(int i = 0; i < 4; ++i) 
     {
         // calculate per-light radiance
-        vec3 L = normalize(pushConsts.lightPos - WorldPos);
+        vec3 L = normalize(uniformBufferObjects[pushConsts.uniformBufferIndex].lightPos - WorldPos);
         vec3 H = normalize(V + L);
         //float distance = length(lightPos - WorldPos);
         float attenuation = 1.0;
-        vec3 radiance = pushConsts.lightColor * attenuation;
+        vec3 radiance = uniformBufferObjects[pushConsts.uniformBufferIndex].lightColor * attenuation;
 
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(N, H, roughness);
@@ -121,6 +126,6 @@ vec3 calculateColor(vec3 WorldPos, vec3 Normal, vec3 albedo, float metallic, flo
 
 void main()
 {
-    vec4 color = vec4(texture(textures[pushConsts.textureIndex], fragTexCoord));
+    vec4 color = vec4(texture(textures[uniformBufferObjects[pushConsts.uniformBufferIndex].textureIndex], fragTexCoord));
     outColor = vec4(calculateColor(inPosition, inNormal, color.w > 0.01 ? color.xyz : inColor, 0.5, 0.5),1.0);
 }

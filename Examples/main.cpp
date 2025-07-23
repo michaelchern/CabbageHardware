@@ -191,10 +191,21 @@ std::vector<float> color = {
 std::vector<uint32_t> indices =
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35};
 
+struct RasterizerUniformBufferObject
+{
+    uint32_t textureIndex;
+    ktm::fmat4x4 model = ktm::rotate3d_axis(ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+    ktm::fmat4x4 view = ktm::look_at_lh(ktm::fvec3(2.0f, 2.0f, 2.0f), ktm::fvec3(0.0f, 0.0f, 0.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+    ktm::fmat4x4 proj = ktm::perspective_lh(ktm::radians(45.0f), 800.0f / 800.0f, 0.1f, 10.0f);
+    ktm::fvec3 viewPos = ktm::fvec3(2.0f, 2.0f, 2.0f);
+    ktm::fvec3 lightColor = ktm::fvec3(10.0f, 10.0f, 10.0f);
+    ktm::fvec3 lightPos = ktm::fvec3(1.0f, 1.0f, 1.0f);
+} rasterizerUniformBufferObject;
+
 struct ComputeUniformBufferObject
 {
     uint32_t imageID;
-};
+} computeUniformData;
 
 int main()
 {
@@ -206,7 +217,8 @@ int main()
     HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
 
     HardwareBuffer computeUniformBuffer = HardwareBuffer(sizeof(ComputeUniformBufferObject), BufferUsage::UniformBuffer);
-    ComputeUniformBufferObject computeUniformData;
+
+    HardwareBuffer rasterizerUniformBuffer = HardwareBuffer(sizeof(RasterizerUniformBufferObject), BufferUsage::UniformBuffer);
 
     int width, height, channels;
     unsigned char *data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &channels, 0);
@@ -243,16 +255,12 @@ int main()
         {
             glfwPollEvents();
 
-            auto currentTime = std::chrono::high_resolution_clock::now();
-            float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+            float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
 
-            rasterizer["pushConsts.textureIndex"] = texture.storeDescriptor();
-            rasterizer["pushConsts.model"] = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
-            rasterizer["pushConsts.view"] = ktm::look_at_lh(ktm::fvec3(2.0f, 2.0f, 2.0f), ktm::fvec3(0.0f, 0.0f, 0.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
-            rasterizer["pushConsts.proj"] = ktm::perspective_lh(ktm::radians(45.0f), 800.0f / 800.0f, 0.1f, 10.0f);
-            rasterizer["pushConsts.viewPos"] = ktm::fvec3(2.0f, 2.0f, 2.0f);
-            rasterizer["pushConsts.lightPos"] = ktm::fvec3(1.0f, 1.0f, 1.0f);
-            rasterizer["pushConsts.lightColor"] = ktm::fvec3(10.0f, 10.0f, 10.0f);
+            rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
+            rasterizerUniformBufferObject.model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+            rasterizerUniformBuffer.copyFromData(&rasterizerUniformBufferObject, sizeof(rasterizerUniformBufferObject));
+            rasterizer["pushConsts.uniformBufferIndex"] = rasterizerUniformBuffer.storeDescriptor();
             rasterizer["inPosition"] = postionBuffer;
             rasterizer["inColor"] = colorBuffer;
             rasterizer["inTexCoord"] = uvBuffer;
@@ -265,19 +273,6 @@ int main()
             computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
             computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
             computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
-
-            //HardwarePushConstant pushConstant;
-            //pushConstant = 1;
-            //HardwarePushConstant pushConstant3(16, 0, nullptr);
-            //HardwarePushConstant pushConstant2(4, 0, &pushConstant3);
-            //pushConstant2 = 1;
-            //HardwarePushConstant pushConstant4 = 1;
-            //HardwarePushConstant pushConstant5 = pushConstant4;
-            //HardwarePushConstant pushConstant6 = pushConstant5;
-            //pushConstant5 = 2;
-            //pushConstant6 = pushConstant2;
-            //HardwarePushConstant pushConstant7;
-            //pushConstant7 = pushConstant3;
 
             displayManager0 = finalOutputImage;
             displayManager1 = finalOutputImage;
