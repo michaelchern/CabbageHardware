@@ -1,12 +1,18 @@
 #version 450
 #extension GL_EXT_nonuniform_qualifier : enable
 layout(local_size_x = 8, local_size_y = 8) in;
+
 layout(set = 0, binding = 3, rgba16) uniform image2D inputImageRGBA16[];
 
 layout(push_constant) uniform PushConsts
 {
-    uint imageID;
+    uint uniformBufferIndex;
 } pushConsts;
+
+layout(set = 0, binding = 0) uniform UniformBufferObject
+{
+    uint imageID;
+}uniformBufferObjects[];
 
 vec3 acesFilmicToneMapCurve(vec3 x)
 {
@@ -30,6 +36,7 @@ vec3 acesFilmicToneMapInverse(vec3 x)
 
 void main()
 {
-    vec4 color = imageLoad(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy));
-    imageStore(inputImageRGBA16[pushConsts.imageID], ivec2(gl_GlobalInvocationID.xy), vec4(acesFilmicToneMapCurve(color.xyz), 1.0));
+    uint imageID = uniformBufferObjects[pushConsts.uniformBufferIndex].imageID;
+    vec4 color = imageLoad(inputImageRGBA16[imageID], ivec2(gl_GlobalInvocationID.xy));
+    imageStore(inputImageRGBA16[imageID], ivec2(gl_GlobalInvocationID.xy), vec4(acesFilmicToneMapCurve(color.xyz), 1.0));
 }
