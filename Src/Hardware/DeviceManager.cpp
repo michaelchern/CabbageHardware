@@ -276,11 +276,11 @@ bool DeviceManager::createCommandBuffers()
 //	return true;
 //}
 
-bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer &commandBuffer)> commandsFunction)
+bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer &commandBuffer)> commandsFunction, QueueUtils &queue)
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = commandPool;
+    allocInfo.commandPool = queue.commandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
@@ -291,15 +291,15 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    vkBeginCommandBuffer(commandBuffers, &beginInfo);
+    vkBeginCommandBuffer(queue.commandBuffer, &beginInfo);
 
-    commandsFunction(commandBuffers);
+    commandsFunction(queue.commandBuffer);
 
-    vkEndCommandBuffer(commandBuffers);
+    vkEndCommandBuffer(queue.commandBuffer);
 
     VkCommandBufferSubmitInfo commandBufferSubmitInfo{};
     commandBufferSubmitInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-    commandBufferSubmitInfo.commandBuffer = commandBuffers;
+    commandBufferSubmitInfo.commandBuffer = queue.commandBuffer;
 
     VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo{};
     waitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
@@ -328,7 +328,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer
     VkFence fence;
     vkCreateFence(logicalDevice, &fenceInfo, nullptr, &fence);
 
-    VkResult result = vkQueueSubmit2(graphicsQueues[0].vkQueue, 1, &submitInfo, fence);
+    VkResult result = vkQueueSubmit2(queue.vkQueue, 1, &submitInfo, fence);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to submit command buffer!");
