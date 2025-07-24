@@ -221,7 +221,7 @@ void DisplayManager::createSwapChain()
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
-	std::vector<uint32_t> queueFamilys(displayDevice->deviceManager.queueFamilies.size());
+	std::vector<uint32_t> queueFamilys(displayDevice->deviceManager.getQueueFamilyNumber());
     for (size_t i = 0; i < queueFamilys.size(); i++)
     {
         queueFamilys[i] = i;

@@ -47,7 +47,6 @@ class DeviceManager
     } deviceFeaturesUtils;
 
 
-    std::vector<VkQueueFamilyProperties> queueFamilies;
 
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice logicalDevice = VK_NULL_HANDLE;
@@ -114,6 +113,11 @@ class DeviceManager
         return std::move(result);
     }
 
+    uint16_t getQueueFamilyNumber()
+    {
+        return queueFamilies.size();
+    }
+
   private:
     void createDevices(const CreateCallback &createInfo, const VkInstance &vkInstance);
 
@@ -129,4 +133,6 @@ class DeviceManager
     std::vector<QueueUtils> graphicsQueues;
     std::vector<QueueUtils> computeQueues;
     std::vector<QueueUtils> transferQueues;
+
+    std::vector<VkQueueFamilyProperties> queueFamilies;
 };
