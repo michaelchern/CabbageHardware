@@ -28,8 +28,10 @@ class DeviceManager
   public:
     struct QueueUtils
     {
-        VkQueue vkQueue = VK_NULL_HANDLE;
         uint32_t queueFamilyIndex = -1;
+        VkQueue vkQueue = VK_NULL_HANDLE;
+        VkCommandPool commandPool = VK_NULL_HANDLE;
+        VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
     };
 
     struct FeaturesUtils
@@ -44,10 +46,6 @@ class DeviceManager
         DeviceFeaturesChain featuresChain{};
     } deviceFeaturesUtils;
 
-    // bool checkDeviceSupport(FeaturesUtils required);
-
-    VkCommandPool commandPool = VK_NULL_HANDLE;
-    VkCommandBuffer commandBuffers = VK_NULL_HANDLE;
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
 
