@@ -264,20 +264,18 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     submitInfo.commandBufferInfoCount = 1;
     submitInfo.pCommandBufferInfos = &commandBufferSubmitInfo;
 
-    VkFenceCreateInfo fenceInfo{};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-
-    VkFence fence;
-    vkCreateFence(logicalDevice, &fenceInfo, nullptr, &fence);
-
-    VkResult result = vkQueueSubmit2(queue.vkQueue, 1, &submitInfo, fence);
+    VkResult result = vkQueueSubmit2(queue.vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to submit command buffer!");
     }
 
-    vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
-    vkDestroyFence(logicalDevice, fence, nullptr);
- 
+    VkSemaphoreWaitInfo waitInfo{};
+    waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+    waitInfo.semaphoreCount = 1;
+    waitInfo.pSemaphores = &timelineSemaphore;
+    waitInfo.pValues = &semaphoreValue;
+    vkWaitSemaphores(logicalDevice, &waitInfo, UINT64_MAX);
+
     return true;
 }

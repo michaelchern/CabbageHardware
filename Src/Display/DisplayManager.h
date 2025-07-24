@@ -47,7 +47,7 @@ private:
 	void choosePresentDevice();
 
 
-	void createFrameFence();
+	void createFrameSemaphores();
 
 	void createSwapChain();
 

@@ -56,15 +56,6 @@ void DisplayManager::cleaarupDisplayManager()
  //           vkDestroySurfaceKHR(globalHardwareContext.getVulkanInstance(), vkSurface, nullptr);
 	//		vkSurface = VK_NULL_HANDLE;
 	//	}
-		//if (frameFence != VK_NULL_HANDLE)
-		//{
-		//	vkDestroyFence(displayDevice.logicalDevice, frameFence, nullptr);
-		//	frameFence = VK_NULL_HANDLE;
-		//}
-		//if (GuiFence != VK_NULL_HANDLE)
-		//{
-		//	vkDestroyFence(displayDevice.logicalDevice, frameFence, nullptr);
-		//}
 	//}
 }
 
@@ -81,14 +72,14 @@ bool DisplayManager::initDisplayManager(void* surface)
 
 		createSwapChain();
 
-		createFrameFence();
+		createFrameSemaphores();
 	}
 
 	return true;
 }
 
 
-void DisplayManager::createFrameFence()
+void DisplayManager::createFrameSemaphores()
 {
 	VkSemaphoreCreateInfo semaphoreInfo{};
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
