@@ -280,7 +280,7 @@ void HardwareContext::chooseMainDevice()
 {
     //for (size_t i = 0; i < hardwareUtils.size(); i++)
     //{
-    //    if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceName[0] == 'N')
+    //    if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceName[0] == 'N')
     //    {
     //        mainDevice = &hardwareUtils[i];
     //        return;
@@ -289,7 +289,7 @@ void HardwareContext::chooseMainDevice()
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
         {
             mainDevice = &hardwareUtils[i];
             return;
@@ -298,7 +298,7 @@ void HardwareContext::chooseMainDevice()
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_OTHER)
+        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_OTHER)
         {
             mainDevice = &hardwareUtils[i];
             return;
@@ -307,7 +307,7 @@ void HardwareContext::chooseMainDevice()
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
+        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
         {
             mainDevice = &hardwareUtils[i];
             return;
@@ -316,7 +316,7 @@ void HardwareContext::chooseMainDevice()
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
         {
             mainDevice = &hardwareUtils[i];
             return;
@@ -325,7 +325,7 @@ void HardwareContext::chooseMainDevice()
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
+        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
         {
             mainDevice = &hardwareUtils[i];
             return;

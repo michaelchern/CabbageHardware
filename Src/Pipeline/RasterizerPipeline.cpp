@@ -106,7 +106,7 @@ void RasterizerPipeline::createRenderPass(int multiviewCount)
 	renderPassInfo.pNext = &renderPassMultiviewCI;
 
 
-	if (vkCreateRenderPass(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
+	if (vkCreateRenderPass(globalHardwareContext.mainDevice->deviceManager.logicalDevice, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create render pass!");
 	}
@@ -285,7 +285,7 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
 	pipelineLayoutInfo.pPushConstantRanges = &push_constant_ranges;
 
-	if (vkCreatePipelineLayout(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+	if (vkCreatePipelineLayout(globalHardwareContext.mainDevice->deviceManager.logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
@@ -306,14 +306,14 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-	VkResult result = vkCreateGraphicsPipelines(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline);
+	VkResult result = vkCreateGraphicsPipelines(globalHardwareContext.mainDevice->deviceManager.logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline);
 	if ( result != VK_SUCCESS) 
 	{
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 
-	vkDestroyShaderModule(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, fragShaderModule, nullptr);
-	vkDestroyShaderModule(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, vertShaderModule, nullptr);
+	vkDestroyShaderModule(globalHardwareContext.mainDevice->deviceManager.logicalDevice, fragShaderModule, nullptr);
+	vkDestroyShaderModule(globalHardwareContext.mainDevice->deviceManager.logicalDevice, vertShaderModule, nullptr);
 }
 
 
@@ -336,7 +336,7 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 	framebufferInfo.height = imageSize.y;
 	framebufferInfo.layers = 1;
 
-	if (vkCreateFramebuffer(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, &framebufferInfo, nullptr, &frameBuffers) != VK_SUCCESS)
+	if (vkCreateFramebuffer(globalHardwareContext.mainDevice->deviceManager.logicalDevice, &framebufferInfo, nullptr, &frameBuffers) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create framebuffer!");
 	}
@@ -347,7 +347,7 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 
 void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget)
 {
-	vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues[0].vkQueue);
+	vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.graphicsQueues[0].vkQueue);
 
 
 	if (this->depthImage)
@@ -384,12 +384,12 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-	if (vkBeginCommandBuffer(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, &beginInfo) != VK_SUCCESS) {
+	if (vkBeginCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers, &beginInfo) != VK_SUCCESS) {
 		throw std::runtime_error("failed to begin recording command buffer!");
 	}
 
 
-	vkCmdBeginRenderPass(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(globalHardwareContext.mainDevice->deviceManager.commandBuffers, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 
 
@@ -400,16 +400,16 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 	viewport.height = (float)imageGlobalPool[*depthImage.imageID].imageSize.y;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, 0, 1, &viewport);
+	vkCmdSetViewport(globalHardwareContext.mainDevice->deviceManager.commandBuffers, 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = { 0, 0 };
 	scissor.extent.width = imageGlobalPool[*depthImage.imageID].imageSize.x;
 	scissor.extent.height = imageGlobalPool[*depthImage.imageID].imageSize.y;
-	vkCmdSetScissor(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, 0, 1, &scissor);
+	vkCmdSetScissor(globalHardwareContext.mainDevice->deviceManager.commandBuffers, 0, 1, &scissor);
 
 
-	vkCmdBindPipeline(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+	vkCmdBindPipeline(globalHardwareContext.mainDevice->deviceManager.commandBuffers, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
 	for (size_t index = 0; index < geomMeshes.size(); index++)
 	{
@@ -421,27 +421,27 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 			offsets.push_back(0);
 		}
 
-		vkCmdBindVertexBuffers(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, 0, (uint32_t)geomMeshes[index].vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+		vkCmdBindVertexBuffers(globalHardwareContext.mainDevice->deviceManager.commandBuffers, 0, (uint32_t)geomMeshes[index].vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 
-		vkCmdBindIndexBuffer(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, geomMeshes[index].indexBuffer.bufferHandle, geomMeshes[index].indexOffset * sizeof(uint32_t), VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers, geomMeshes[index].indexBuffer.bufferHandle, geomMeshes[index].indexOffset * sizeof(uint32_t), VK_INDEX_TYPE_UINT32);
 
-		vkCmdBindDescriptorSets(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(globalHardwareContext.mainDevice->deviceManager.commandBuffers, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
 
 		void *data = geomMeshes[index].pushConstant.getData();
-		vkCmdPushConstants(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, pushConstantSize, data);
+		vkCmdPushConstants(globalHardwareContext.mainDevice->deviceManager.commandBuffers, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, pushConstantSize, data);
 
-		vkCmdDrawIndexed(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers, geomMeshes[index].indexCount, 1, 0, 0, 0);
+		vkCmdDrawIndexed(globalHardwareContext.mainDevice->deviceManager.commandBuffers, geomMeshes[index].indexCount, 1, 0, 0, 0);
 	}
 
 
-	vkCmdEndRenderPass(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers);
+	vkCmdEndRenderPass(globalHardwareContext.mainDevice->deviceManager.commandBuffers);
 
 
-	if (vkEndCommandBuffer(globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers) != VK_SUCCESS) {
+	if (vkEndCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
 
-	vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues[0].vkQueue);
+	vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.graphicsQueues[0].vkQueue);
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -454,14 +454,14 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 	submitInfo.pWaitDstStageMask = waitStages;
 
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &globalHardwareContext.mainDevice->deviceManager.deviceUtils.commandBuffers;
+	submitInfo.pCommandBuffers = &globalHardwareContext.mainDevice->deviceManager.commandBuffers;
 
 
 	submitInfo.signalSemaphoreCount = 0;
 	submitInfo.pSignalSemaphores = nullptr;
 
 
-	if (vkQueueSubmit(globalHardwareContext.mainDevice->deviceManager.deviceUtils.graphicsQueues[0].vkQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+	if (vkQueueSubmit(globalHardwareContext.mainDevice->deviceManager.graphicsQueues[0].vkQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
 		throw std::runtime_error("failed to submit draw command buffer!");
 	}
 

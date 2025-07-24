@@ -27,7 +27,7 @@ public:
 	std::vector<ResourceManager::ImageHardwareWrap> swapChainImages;
 	std::vector<VkSemaphore> swapchainSemaphore;
 
-	std::vector<DeviceManager::DeviceUtils::QueueUtils> presentQueues;
+	std::vector<DeviceManager::QueueUtils> presentQueues;
     HardwareContext::HardwareUtils *displayDevice;
 
 //private:

@@ -10,7 +10,7 @@ DeviceManager::~DeviceManager()
 
 void DeviceManager::initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice)
 {
-    deviceUtils.physicalDevice = physicalDevice;
+    this->physicalDevice = physicalDevice;
 
     createDevices(createCallback, vkInstance);
 
@@ -34,7 +34,7 @@ void DeviceManager::createTimelineSemaphore()
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
         semaphoreInfo.pNext = &type_create_info;
 
-        if (vkCreateSemaphore(deviceUtils.logicalDevice, &semaphoreInfo, nullptr, &deviceUtils.timelineSemaphore) != VK_SUCCESS)
+        if (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &timelineSemaphore) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
@@ -48,26 +48,26 @@ void DeviceManager::createDevices(const CreateCallback &initInfo, const VkInstan
     //userDevices.resize(deviceCount);
     //for (uint32_t index = 0; index < deviceCount; index++)
     {
-        //deviceUtils.physicalDevice = devices[index];
+        //physicalDevice = devices[index];
 
-        std::set<const char *> inputExtensions = initInfo.requiredDeviceExtensions(vkInstance, deviceUtils.physicalDevice);
+        std::set<const char *> inputExtensions = initInfo.requiredDeviceExtensions(vkInstance, physicalDevice);
         std::vector<const char *> requiredExtensions = std::vector<const char *>(inputExtensions.begin(), inputExtensions.end());
 
-        deviceUtils.deviceFeaturesUtils.supportedProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-        deviceUtils.deviceFeaturesUtils.rayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
-        deviceUtils.deviceFeaturesUtils.accelerationStructureProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
-        deviceUtils.deviceFeaturesUtils.rayTracingPipelineProperties.pNext = &deviceUtils.deviceFeaturesUtils.accelerationStructureProperties;
-        deviceUtils.deviceFeaturesUtils.supportedProperties.pNext = &deviceUtils.deviceFeaturesUtils.rayTracingPipelineProperties;
-        deviceUtils.deviceFeaturesUtils.accelerationStructureProperties.pNext = nullptr;
+        deviceFeaturesUtils.supportedProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        deviceFeaturesUtils.rayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+        deviceFeaturesUtils.accelerationStructureProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
+        deviceFeaturesUtils.rayTracingPipelineProperties.pNext = &deviceFeaturesUtils.accelerationStructureProperties;
+        deviceFeaturesUtils.supportedProperties.pNext = &deviceFeaturesUtils.rayTracingPipelineProperties;
+        deviceFeaturesUtils.accelerationStructureProperties.pNext = nullptr;
 
-        vkGetPhysicalDeviceProperties2(deviceUtils.physicalDevice, &deviceUtils.deviceFeaturesUtils.supportedProperties);
-        std::cout << "---------- GPU " << " : " << deviceUtils.deviceFeaturesUtils.supportedProperties.properties.deviceName << "----------" << std::endl;
+        vkGetPhysicalDeviceProperties2(physicalDevice, &deviceFeaturesUtils.supportedProperties);
+        std::cout << "---------- GPU " << " : " << deviceFeaturesUtils.supportedProperties.properties.deviceName << "----------" << std::endl;
 
         {
             uint32_t extensionCount;
-            vkEnumerateDeviceExtensionProperties(deviceUtils.physicalDevice, nullptr, &extensionCount, nullptr);
+            vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
             std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-            vkEnumerateDeviceExtensionProperties(deviceUtils.physicalDevice, nullptr, &extensionCount, availableExtensions.data());
+            vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.data());
 
             for (size_t i = 0; i < requiredExtensions.size(); i++)
             {
@@ -90,22 +90,22 @@ void DeviceManager::createDevices(const CreateCallback &initInfo, const VkInstan
             }
         }
 
-        vkGetPhysicalDeviceFeatures2(deviceUtils.physicalDevice, deviceUtils.deviceFeaturesUtils.featuresChain.getChainHead());
+        vkGetPhysicalDeviceFeatures2(physicalDevice, deviceFeaturesUtils.featuresChain.getChainHead());
 
-        deviceUtils.deviceFeaturesUtils.featuresChain = deviceUtils.deviceFeaturesUtils.featuresChain & initInfo.requiredDeviceFeatures(vkInstance, deviceUtils.physicalDevice);
+        deviceFeaturesUtils.featuresChain = deviceFeaturesUtils.featuresChain & initInfo.requiredDeviceFeatures(vkInstance, physicalDevice);
 
         uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(deviceUtils.physicalDevice, &queueFamilyCount, nullptr);
-        deviceUtils.queueFamilies.resize(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(deviceUtils.physicalDevice, &queueFamilyCount, deviceUtils.queueFamilies.data());
+        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+        queueFamilies.resize(queueFamilyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 
-        std::vector<std::vector<float>> queuePriorities(deviceUtils.queueFamilies.size());
+        std::vector<std::vector<float>> queuePriorities(queueFamilies.size());
 
-        for (int i = 0; i < deviceUtils.queueFamilies.size(); i++)
+        for (int i = 0; i < queueFamilies.size(); i++)
         {
-            queuePriorities[i].resize(deviceUtils.queueFamilies[i].queueCount);
+            queuePriorities[i].resize(queueFamilies[i].queueCount);
             for (int j = 0; j < queuePriorities[i].size(); j++)
             {
                 queuePriorities[i][j] = 1.0f;
@@ -114,7 +114,7 @@ void DeviceManager::createDevices(const CreateCallback &initInfo, const VkInstan
             VkDeviceQueueCreateInfo queueCreateInfo{};
             queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             queueCreateInfo.queueFamilyIndex = i;
-            queueCreateInfo.queueCount = deviceUtils.queueFamilies[i].queueCount;
+            queueCreateInfo.queueCount = queueFamilies[i].queueCount;
             queueCreateInfo.pQueuePriorities = queuePriorities[i].data();
             queueCreateInfos.push_back(queueCreateInfo);
         }
@@ -128,9 +128,9 @@ void DeviceManager::createDevices(const CreateCallback &initInfo, const VkInstan
         createInfo.enabledLayerCount = 0;
         createInfo.ppEnabledLayerNames = nullptr;
         createInfo.pEnabledFeatures = nullptr;
-        createInfo.pNext = deviceUtils.deviceFeaturesUtils.featuresChain.getChainHead();
+        createInfo.pNext = deviceFeaturesUtils.featuresChain.getChainHead();
 
-        VkResult result = vkCreateDevice(deviceUtils.physicalDevice, &createInfo, nullptr, &deviceUtils.logicalDevice);
+        VkResult result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice);
         if (result != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create logical device!");
@@ -142,38 +142,38 @@ void DeviceManager::choosePresentQueueFamily()
 {
     //for (int index = 0; index < userDevices.size(); index++)
     {
-        for (int i = 0; i < deviceUtils.queueFamilies.size(); i++)
+        for (int i = 0; i < queueFamilies.size(); i++)
         {
-            DeviceUtils::QueueUtils tempQueueUtils;
+            QueueUtils tempQueueUtils;
             tempQueueUtils.queueFamilyIndex = i;
 
-            for (uint32_t queueIndex = 0; queueIndex < deviceUtils.queueFamilies[i].queueCount; queueIndex++)
+            for (uint32_t queueIndex = 0; queueIndex < queueFamilies[i].queueCount; queueIndex++)
             {
-                vkGetDeviceQueue(deviceUtils.logicalDevice, i, queueIndex, &tempQueueUtils.vkQueue);
+                vkGetDeviceQueue(logicalDevice, i, queueIndex, &tempQueueUtils.vkQueue);
 
-                if (deviceUtils.queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
                 {
-                    deviceUtils.graphicsQueues.push_back(tempQueueUtils);
+                    graphicsQueues.push_back(tempQueueUtils);
                 }
-                else if (deviceUtils.queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
+                else if (queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
                 {
-                    deviceUtils.computeQueues.push_back(tempQueueUtils);
+                    computeQueues.push_back(tempQueueUtils);
                 }
-                else if (deviceUtils.queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
+                else if (queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
                 {
-                    deviceUtils.transferQueues.push_back(tempQueueUtils);
+                    transferQueues.push_back(tempQueueUtils);
                 }
             }
         }
 
-        if (deviceUtils.computeQueues.size() == 0)
+        if (computeQueues.size() == 0)
         {
-            deviceUtils.computeQueues.push_back(deviceUtils.graphicsQueues[0]);
+            computeQueues.push_back(graphicsQueues[0]);
         }
 
-        if (deviceUtils.transferQueues.size() == 0)
+        if (transferQueues.size() == 0)
         {
-            deviceUtils.transferQueues.push_back(deviceUtils.graphicsQueues[0]);
+            transferQueues.push_back(graphicsQueues[0]);
         }
     }
 }
@@ -185,8 +185,8 @@ bool DeviceManager::createCommandBuffers()
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = deviceUtils.graphicsQueues[0].queueFamilyIndex;
-        VkResult result = vkCreateCommandPool(deviceUtils.logicalDevice, &poolInfo, nullptr, &deviceUtils.commandPool);
+        poolInfo.queueFamilyIndex = graphicsQueues[0].queueFamilyIndex;
+        VkResult result = vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &commandPool);
         if (result != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create graphics command pool!");
@@ -195,11 +195,11 @@ bool DeviceManager::createCommandBuffers()
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = deviceUtils.commandPool;
+        allocInfo.commandPool = commandPool;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = 1;
 
-        result = vkAllocateCommandBuffers(deviceUtils.logicalDevice, &allocInfo, &deviceUtils.commandBuffers);
+        result = vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffers);
         if (result != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate command buffers!");
@@ -270,12 +270,12 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = deviceUtils.commandPool;
+    allocInfo.commandPool = commandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(deviceUtils.logicalDevice, &allocInfo, &commandBuffer);
+    vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -293,14 +293,14 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer
 
     VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo{};
     waitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    waitSemaphoreSubmitInfo.semaphore = deviceUtils.timelineSemaphore;
-    waitSemaphoreSubmitInfo.value = deviceUtils.semaphoreValue++;
+    waitSemaphoreSubmitInfo.semaphore = timelineSemaphore;
+    waitSemaphoreSubmitInfo.value = semaphoreValue++;
     waitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
 
     VkSemaphoreSubmitInfo signalSemaphoreSubmitInfo{};
     signalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    signalSemaphoreSubmitInfo.semaphore = deviceUtils.timelineSemaphore;
-    signalSemaphoreSubmitInfo.value = deviceUtils.semaphoreValue;
+    signalSemaphoreSubmitInfo.semaphore = timelineSemaphore;
+    signalSemaphoreSubmitInfo.value = semaphoreValue;
     signalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
 
     VkSubmitInfo2 submitInfo{};
@@ -316,9 +316,9 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
     VkFence fence;
-    vkCreateFence(deviceUtils.logicalDevice, &fenceInfo, nullptr, &fence);
+    vkCreateFence(logicalDevice, &fenceInfo, nullptr, &fence);
 
-    VkResult result = vkQueueSubmit2(deviceUtils.graphicsQueues[0].vkQueue, 1, &submitInfo, fence);
+    VkResult result = vkQueueSubmit2(graphicsQueues[0].vkQueue, 1, &submitInfo, fence);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to submit command buffer!");
@@ -326,9 +326,9 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer
 
     // No need to wait for the fence here, just free the command buffer
     // Ensure the command buffer is not in use before freeing it
-    vkWaitForFences(deviceUtils.logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
-    vkDestroyFence(deviceUtils.logicalDevice, fence, nullptr);
-    vkFreeCommandBuffers(deviceUtils.logicalDevice, deviceUtils.commandPool, 1, &commandBuffer);
+    vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
+    vkDestroyFence(logicalDevice, fence, nullptr);
+    vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
 
     return true;
 }

@@ -49,18 +49,18 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
 
-		if (vkCreatePipelineLayout(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+		if (vkCreatePipelineLayout(globalHardwareContext.mainDevice->deviceManager.logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
         {
 			throw std::runtime_error("failed to create pipeline layout!");
 		}
 		computePipelineCreateInfo.layout = pipelineLayout;
 
-		VkResult result = vkCreateComputePipelines(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &pipeline);
+		VkResult result = vkCreateComputePipelines(globalHardwareContext.mainDevice->deviceManager.logicalDevice, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &pipeline);
 		if ( result != VK_SUCCESS) {
 			throw std::runtime_error("failed to create compute pipeline!");
 		}
 
-		vkDestroyShaderModule(globalHardwareContext.mainDevice->deviceManager.deviceUtils.logicalDevice, shaderModule, nullptr);
+		vkDestroyShaderModule(globalHardwareContext.mainDevice->deviceManager.logicalDevice, shaderModule, nullptr);
 	}
 
 	if (pipelineLayout != VK_NULL_HANDLE && pipeline != VK_NULL_HANDLE)
