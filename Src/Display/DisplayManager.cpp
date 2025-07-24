@@ -1,6 +1,7 @@
 ﻿#include"DisplayManager.h"
 
 #include <algorithm>
+#include<vector>
 
 #include<Volk/volk.h>
 
@@ -138,29 +139,17 @@ void DisplayManager::choosePresentDevice()
 {
     for (int i = 0; i < globalHardwareContext.hardwareUtils.size(); i++)
 	{
-        for (int j = 0; j < globalHardwareContext.hardwareUtils[i].deviceManager.queueFamilies.size(); j++)
-		{
-			VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.hardwareUtils[i].deviceManager.physicalDevice, j, vkSurface, &presentSupport);
+        auto pickQueuesRoles = [&](const DeviceManager::QueueUtils &queues) -> bool {
+            VkBool32 presentSupport = false;
+            vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.hardwareUtils[i].deviceManager.physicalDevice, queues.queueFamilyIndex, vkSurface, &presentSupport);
+            return presentSupport;
+        };
 
-			if (presentSupport)
-			{ 
-				displayDevice = &globalHardwareContext.hardwareUtils[i];
-
-				if (globalHardwareContext.hardwareUtils[i].deviceManager.graphicsQueues[0].queueFamilyIndex == j)
-				{
-                    presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.graphicsQueues;
-				}
-                if (globalHardwareContext.hardwareUtils[i].deviceManager.computeQueues[0].queueFamilyIndex == j)
-				{
-                    presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.computeQueues;
-				}
-                if (globalHardwareContext.hardwareUtils[i].deviceManager.transferQueues[0].queueFamilyIndex == j)
-				{
-                    presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.transferQueues;
-				}
-			}
-		}
+		presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.pickAvailableQueues(pickQueuesRoles);
+        if (presentQueues.size()>0)
+        {
+            displayDevice = &globalHardwareContext.hardwareUtils[i];
+        }
 
 		if (globalHardwareContext.mainDevice != displayDevice)
 		{
@@ -232,17 +221,22 @@ void DisplayManager::createSwapChain()
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
-	uint32_t queueFamilys[] = {displayDevice->deviceManager.graphicsQueues[0].queueFamilyIndex, presentQueues[0].queueFamilyIndex};
-
-	if (displayDevice->deviceManager.graphicsQueues[0].queueFamilyIndex != presentQueues[0].queueFamilyIndex)
+	std::vector<uint32_t> queueFamilys(displayDevice->deviceManager.queueFamilies.size());
+    for (size_t i = 0; i < queueFamilys.size(); i++)
     {
-		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-		createInfo.queueFamilyIndexCount = 2;
-		createInfo.pQueueFamilyIndices = queueFamilys;
-	}
-	else {
-		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	}
+        queueFamilys[i] = i;
+    }
+
+    if (queueFamilys.size() > 0)
+    {
+        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        createInfo.queueFamilyIndexCount = queueFamilys.size();
+        createInfo.pQueueFamilyIndices = queueFamilys.data();
+    }
+    else
+    {
+        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    }
 
 	createInfo.preTransform = capabilities.currentTransform;
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;

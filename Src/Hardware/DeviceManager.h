@@ -26,17 +26,11 @@
 class DeviceManager
 {
   public:
-    // struct DeviceUtils
-    //{
     struct QueueUtils
     {
         VkQueue vkQueue = VK_NULL_HANDLE;
         uint32_t queueFamilyIndex = -1;
     };
-
-    std::vector<QueueUtils> graphicsQueues;
-    std::vector<QueueUtils> computeQueues;
-    std::vector<QueueUtils> transferQueues;
 
     struct FeaturesUtils
     {
@@ -67,7 +61,7 @@ class DeviceManager
 
     uint64_t semaphoreValue = 0;
     VkSemaphore timelineSemaphore;
-    //} deviceUtils;
+
 
     DeviceManager();
 
@@ -77,13 +71,50 @@ class DeviceManager
 
     void createTimelineSemaphore();
 
-    // bool executeSingleTimeCommands(std::function<void(VkCommandBuffer& commandBuffer)> commandsFunction);
-
     bool executeSingleTimeCommands(std::function<void(VkCommandBuffer &commandBuffer)> commandsFunction);
 
-    // DeviceUtils mainDevice;
+    QueueUtils getNextGraphicsQueues()
+    {
+        currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
+        return graphicsQueues[currentGraphicsQueueIndex];
+    }
+    QueueUtils getNextComputeQueues()
+    {
+        currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
+        return computeQueues[currentComputeQueueIndex];
+    }
+    QueueUtils getNextTransferQueues()
+    {
+        currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
+        return transferQueues[currentTransferQueueIndex];
+    }
 
-    // std::vector<DeviceUtils> userDevices;
+    std::vector<QueueUtils> pickAvailableQueues(std::function<bool(const QueueUtils&)> required)
+    {
+        std::vector<QueueUtils> result;
+        for (size_t i = 0; i < graphicsQueues.size(); i++)
+        {
+            if (required(graphicsQueues[i]))
+            {
+                result.push_back(graphicsQueues[i]);
+            }
+        }
+        for (size_t i = 0; i < computeQueues.size(); i++)
+        {
+            if (required(computeQueues[i]))
+            {
+                result.push_back(computeQueues[i]);
+            }
+        }
+        for (size_t i = 0; i < transferQueues.size(); i++)
+        {
+            if (required(transferQueues[i]))
+            {
+                result.push_back(transferQueues[i]);
+            }
+        }
+        return std::move(result);
+    }
 
   private:
     void createDevices(const CreateCallback &createInfo, const VkInstance &vkInstance);
@@ -93,4 +124,11 @@ class DeviceManager
     void choosePresentQueueFamily();
 
     bool createCommandBuffers();
+
+    uint16_t currentGraphicsQueueIndex = 0;
+    uint16_t currentComputeQueueIndex = 0;
+    uint16_t currentTransferQueueIndex = 0;
+    std::vector<QueueUtils> graphicsQueues;
+    std::vector<QueueUtils> computeQueues;
+    std::vector<QueueUtils> transferQueues;
 };

@@ -347,7 +347,7 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 
 void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget)
 {
-	vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.graphicsQueues[0].vkQueue);
+    vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue);
 
 
 	if (this->depthImage)
@@ -441,7 +441,7 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 		throw std::runtime_error("failed to record command buffer!");
 	}
 
-	vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.graphicsQueues[0].vkQueue);
+	vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue);
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -461,7 +461,8 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 	submitInfo.pSignalSemaphores = nullptr;
 
 
-	if (vkQueueSubmit(globalHardwareContext.mainDevice->deviceManager.graphicsQueues[0].vkQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+	if (vkQueueSubmit(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
+    {
 		throw std::runtime_error("failed to submit draw command buffer!");
 	}
 
