@@ -348,7 +348,14 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget)
 {
     vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue);
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
+    if (vkBeginCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers, &beginInfo) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to begin recording command buffer!");
+    }
 
 	if (this->depthImage)
 	{
@@ -379,14 +386,6 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
-
-	VkCommandBufferBeginInfo beginInfo{};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-
-	if (vkBeginCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers, &beginInfo) != VK_SUCCESS) {
-		throw std::runtime_error("failed to begin recording command buffer!");
-	}
 
 
 	vkCmdBeginRenderPass(globalHardwareContext.mainDevice->deviceManager.commandBuffers, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);

@@ -274,22 +274,22 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
-    VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer);
+    //VkCommandBuffer commandBuffer;
+    //vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    vkBeginCommandBuffer(commandBuffers, &beginInfo);
 
-    commandsFunction(commandBuffer);
+    commandsFunction(commandBuffers);
 
-    vkEndCommandBuffer(commandBuffer);
+    vkEndCommandBuffer(commandBuffers);
 
     VkCommandBufferSubmitInfo commandBufferSubmitInfo{};
     commandBufferSubmitInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-    commandBufferSubmitInfo.commandBuffer = commandBuffer;
+    commandBufferSubmitInfo.commandBuffer = commandBuffers;
 
     VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo{};
     waitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
@@ -328,7 +328,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer
     // Ensure the command buffer is not in use before freeing it
     vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
     vkDestroyFence(logicalDevice, fence, nullptr);
-    vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
+    //vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
 
     return true;
 }
