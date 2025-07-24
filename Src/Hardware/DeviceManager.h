@@ -70,6 +70,8 @@ class DeviceManager
 
     bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, const QueueUtils& queue);
 
+    bool waitALL();
+
     QueueUtils getNextGraphicsQueues()
     {
         currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();

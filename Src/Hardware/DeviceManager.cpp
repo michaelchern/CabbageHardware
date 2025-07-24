@@ -270,6 +270,12 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         throw std::runtime_error("Failed to submit command buffer!");
     }
 
+    return true;
+}
+
+
+bool DeviceManager::waitALL()
+{
     VkSemaphoreWaitInfo waitInfo{};
     waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
     waitInfo.semaphoreCount = 1;
