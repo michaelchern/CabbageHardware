@@ -18,23 +18,25 @@ public:
 
 	bool displayFrame(void *surface, HardwareImage displayImage);
 
-	VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-	VkSwapchainKHR swapChain = VK_NULL_HANDLE;
+private:
 
-	ktm::uvec2 displaySize = ktm::uvec2(0, 0);
-	void *displaySurface = nullptr;
+    VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
+    VkSwapchainKHR swapChain = VK_NULL_HANDLE;
 
-	std::vector<ResourceManager::ImageHardwareWrap> swapChainImages;
-	std::vector<VkSemaphore> swapchainSemaphore;
+    ktm::uvec2 displaySize = ktm::uvec2(0, 0);
+    void *displaySurface = nullptr;
 
-	std::vector<DeviceManager::QueueUtils> presentQueues;
-    HardwareContext::HardwareUtils *displayDevice;
+    std::vector<ResourceManager::ImageHardwareWrap> swapChainImages;
 
-//private:
 	VkSurfaceFormatKHR surfaceFormat;
 
 
 	ResourceManager::ImageHardwareWrap displayImage;
+
+    std::vector<VkSemaphore> swapchainSemaphore;
+
+    std::vector<DeviceManager::QueueUtils> presentQueues;
+    HardwareContext::HardwareUtils *displayDevice;
 
 
 	void cleaarupDisplayManager();
