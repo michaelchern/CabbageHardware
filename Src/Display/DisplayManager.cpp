@@ -39,7 +39,6 @@ void DisplayManager::cleaarupDisplayManager()
 {
 	//if (displayDevice.logicalDevice != VK_NULL_HANDLE)
 	//{
-	//	//vkDeviceWaitIdle(displayDevice.logicalDevice);
 
 	//	for (size_t i = 0; i < swapChainImages.size(); i++)
 	//	{
@@ -299,7 +298,6 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
         if (displaySize != this->displaySize)
         {
-            vkDeviceWaitIdle(displayDevice->deviceManager.logicalDevice);
 
             for (auto &image : swapChainImages)
             {
@@ -309,7 +307,6 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             createSwapChain();
         }
 
-        vkQueueWaitIdle(presentQueues[0].vkQueue);
 
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, swapchainSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
