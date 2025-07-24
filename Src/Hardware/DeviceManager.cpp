@@ -229,9 +229,6 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
-    //VkCommandBuffer commandBuffer;
-    //vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer);
-
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
@@ -279,11 +276,8 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         throw std::runtime_error("Failed to submit command buffer!");
     }
 
-    // No need to wait for the fence here, just free the command buffer
-    // Ensure the command buffer is not in use before freeing it
     vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
     vkDestroyFence(logicalDevice, fence, nullptr);
-    //vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
-
+ 
     return true;
 }
