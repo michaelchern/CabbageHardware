@@ -276,7 +276,7 @@ bool DeviceManager::createCommandBuffers()
 //	return true;
 //}
 
-bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer &commandBuffer)> commandsFunction, QueueUtils &queue)
+bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, const QueueUtils &queue)
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

@@ -318,7 +318,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             //auto start_time_ = std::chrono::high_resolution_clock::now();
             displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage);
 
-             auto runCommand = [&](VkCommandBuffer &commandBuffer) {
+             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
                // // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
                //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
@@ -354,7 +354,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
-             displayDevice->deviceManager.executeSingleTimeCommands(runCommand);
+             displayDevice->deviceManager.executeSingleTimeCommands(runCommand, displayDevice->deviceManager.getNextGraphicsQueues());
             //std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
 
             VkPresentInfoKHR presentInfo{};

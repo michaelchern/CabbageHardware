@@ -69,7 +69,7 @@ class DeviceManager
 
     void createTimelineSemaphore();
 
-    bool executeSingleTimeCommands(std::function<void(VkCommandBuffer &commandBuffer)> commandsFunction, QueueUtils& queue);
+    bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, const QueueUtils& queue);
 
     QueueUtils getNextGraphicsQueues()
     {

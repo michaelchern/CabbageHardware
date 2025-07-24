@@ -65,7 +65,7 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 
 	if (pipelineLayout != VK_NULL_HANDLE && pipeline != VK_NULL_HANDLE)
 	{
-		auto runCommand = [&](VkCommandBuffer& commandBuffer)
+		auto runCommand = [&](const VkCommandBuffer& commandBuffer)
 			{
 				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
             vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
@@ -80,6 +80,6 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 				vkCmdDispatch(commandBuffer, groupCount.x, groupCount.y, groupCount.z);
 			};
 
-		globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand);
+		globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, globalHardwareContext.mainDevice->deviceManager.getNextComputeQueues());
 	}
 }
