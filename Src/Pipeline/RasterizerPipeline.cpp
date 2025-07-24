@@ -347,15 +347,6 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 
 void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget)
 {
-    //vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue);
-    //VkCommandBufferBeginInfo beginInfo{};
-    //beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    //beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-
-    //if (vkBeginCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers, &beginInfo) != VK_SUCCESS)
-    //{
-    //    throw std::runtime_error("failed to begin recording command buffer!");
-    //}
 
 	if (this->depthImage)
 	{
@@ -432,36 +423,6 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
     };
 
     globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues());
-
-	//if (vkEndCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers) != VK_SUCCESS) {
-	//	throw std::runtime_error("failed to record command buffer!");
-	//}
-
-	//vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue);
-
-	//VkSubmitInfo submitInfo{};
-	//submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-	////VkSemaphore waitSemaphores[] = { SwapChainSemaphores };
-
-	//VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_ALL_COMMANDS_BIT };
-	//submitInfo.waitSemaphoreCount = 0;
-	//submitInfo.pWaitSemaphores = nullptr;
-	//submitInfo.pWaitDstStageMask = waitStages;
-
-	//submitInfo.commandBufferCount = 1;
-	//submitInfo.pCommandBuffers = &globalHardwareContext.mainDevice->deviceManager.commandBuffers;
-
-
-	//submitInfo.signalSemaphoreCount = 0;
-	//submitInfo.pSignalSemaphores = nullptr;
-
-
-	//if (vkQueueSubmit(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
- //   {
-	//	throw std::runtime_error("failed to submit draw command buffer!");
-	//}
-
 }
 
 

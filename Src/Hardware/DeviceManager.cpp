@@ -219,62 +219,7 @@ bool DeviceManager::createCommandBuffers()
 
     return true;
 }
-//
-//
-// bool DeviceManager::executeSingleTimeCommands(std::function<void(VkCommandBuffer& commandBuffer)> commandsFunction)
-//{
-//	VkCommandBufferBeginInfo beginInfo{};
-//	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-//	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-//
-//	vkBeginCommandBuffer(mainDevice.commandBuffers, &beginInfo);
-//
-//	commandsFunction(mainDevice.commandBuffers);
-//
-//	vkEndCommandBuffer(mainDevice.commandBuffers);
-//
-//	VkCommandBufferSubmitInfo commandBufferSubmitInfos{};
-//	commandBufferSubmitInfos.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-//	commandBufferSubmitInfos.commandBuffer = mainDevice.commandBuffers;
-//
-//	VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo{};
-//	waitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-//	waitSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-//	waitSemaphoreSubmitInfo.value = semaphoreValue++;
-//	waitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-//
-//	VkSemaphoreSubmitInfo signalSemaphoreSubmitInfo{};
-//	signalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-//	signalSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-//	signalSemaphoreSubmitInfo.value = semaphoreValue;
-//	signalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-//
-//	VkSubmitInfo2 submitInfo{};
-//	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
-//	submitInfo.waitSemaphoreInfoCount = 1;
-//	submitInfo.pWaitSemaphoreInfos = &waitSemaphoreSubmitInfo;
-//	submitInfo.signalSemaphoreInfoCount = 1;
-//	submitInfo.pSignalSemaphoreInfos = &signalSemaphoreSubmitInfo;
-//	submitInfo.commandBufferInfoCount = 1;
-//	submitInfo.pCommandBufferInfos = &commandBufferSubmitInfos;
-//
-//	VkResult result = vkQueueSubmit2(mainDevice.graphicsQueues[0].vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
-//	if (result != VK_SUCCESS)
-//	{
-//		throw std::runtime_error("Failed to submit command buffer!");
-//	}
-//
-//	// Wait for the timeline semaphore to reach the desired value
-//	VkSemaphoreWaitInfo waitInfo{};
-//	waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
-//	waitInfo.semaphoreCount = 1;
-//	waitInfo.pSemaphores = &timelineSemaphore;
-//	waitInfo.pValues = &semaphoreValue;
-//
-//	vkWaitSemaphores(mainDevice.logicalDevice, &waitInfo, UINT64_MAX);
-//
-//	return true;
-//}
+
 
 bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, const QueueUtils &queue)
 {
