@@ -347,15 +347,15 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 
 void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget)
 {
-    vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue);
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+    //vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue);
+    //VkCommandBufferBeginInfo beginInfo{};
+    //beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    //beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-    if (vkBeginCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers, &beginInfo) != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to begin recording command buffer!");
-    }
+    //if (vkBeginCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers, &beginInfo) != VK_SUCCESS)
+    //{
+    //    throw std::runtime_error("failed to begin recording command buffer!");
+    //}
 
 	if (this->depthImage)
 	{
@@ -368,102 +368,99 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
 		createFramebuffers(imageGlobalPool[*depthImage.imageID].imageSize);
 	}
 
+    auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = renderPass;
+        renderPassInfo.framebuffer = frameBuffers;
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent.width = imageGlobalPool[*depthImage.imageID].imageSize.x;
+        renderPassInfo.renderArea.extent.height = imageGlobalPool[*depthImage.imageID].imageSize.y;
 
-	VkRenderPassBeginInfo renderPassInfo{};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = renderPass;
-	renderPassInfo.framebuffer = frameBuffers;
-	renderPassInfo.renderArea.offset = { 0, 0 };
-	renderPassInfo.renderArea.extent.width = imageGlobalPool[*depthImage.imageID].imageSize.x;
-	renderPassInfo.renderArea.extent.height = imageGlobalPool[*depthImage.imageID].imageSize.y;
+        std::vector<VkClearValue> clearValues;
+        for (size_t i = 0; i < renderTarget.size(); i++)
+        {
+            clearValues.push_back(imageGlobalPool[*renderTarget[i].imageID].clearValue);
+        }
+        clearValues.push_back(imageGlobalPool[*depthImage.imageID].clearValue);
 
-	std::vector<VkClearValue> clearValues;
-	for (size_t i = 0; i < renderTarget.size(); i++)
-	{
-		clearValues.push_back(imageGlobalPool[*renderTarget[i].imageID].clearValue);
-	}
-	clearValues.push_back(imageGlobalPool[*depthImage.imageID].clearValue);
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
 
-	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-	renderPassInfo.pClearValues = clearValues.data();
+        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)imageGlobalPool[*depthImage.imageID].imageSize.x;
+        viewport.height = (float)imageGlobalPool[*depthImage.imageID].imageSize.y;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
-	vkCmdBeginRenderPass(globalHardwareContext.mainDevice->deviceManager.commandBuffers, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        VkRect2D scissor{};
+        scissor.offset = {0, 0};
+        scissor.extent.width = imageGlobalPool[*depthImage.imageID].imageSize.x;
+        scissor.extent.height = imageGlobalPool[*depthImage.imageID].imageSize.y;
+        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
+        for (size_t index = 0; index < geomMeshes.size(); index++)
+        {
+            std::vector<VkBuffer> vertexBuffers;
+            std::vector<VkDeviceSize> offsets;
+            for (size_t vertexBufferIndex = 0; vertexBufferIndex < geomMeshes[index].vertexBuffers.size(); vertexBufferIndex++)
+            {
+                vertexBuffers.push_back(geomMeshes[index].vertexBuffers[vertexBufferIndex].bufferHandle);
+                offsets.push_back(0);
+            }
 
-	VkViewport viewport{};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = (float)imageGlobalPool[*depthImage.imageID].imageSize.x;
-	viewport.height = (float)imageGlobalPool[*depthImage.imageID].imageSize.y;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(globalHardwareContext.mainDevice->deviceManager.commandBuffers, 0, 1, &viewport);
+            vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)geomMeshes[index].vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 
-	VkRect2D scissor{};
-	scissor.offset = { 0, 0 };
-	scissor.extent.width = imageGlobalPool[*depthImage.imageID].imageSize.x;
-	scissor.extent.height = imageGlobalPool[*depthImage.imageID].imageSize.y;
-	vkCmdSetScissor(globalHardwareContext.mainDevice->deviceManager.commandBuffers, 0, 1, &scissor);
+            vkCmdBindIndexBuffer(commandBuffer, geomMeshes[index].indexBuffer.bufferHandle, geomMeshes[index].indexOffset * sizeof(uint32_t), VK_INDEX_TYPE_UINT32);
 
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
 
-	vkCmdBindPipeline(globalHardwareContext.mainDevice->deviceManager.commandBuffers, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+            void *data = geomMeshes[index].pushConstant.getData();
+            vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, pushConstantSize, data);
 
-	for (size_t index = 0; index < geomMeshes.size(); index++)
-	{
-		std::vector<VkBuffer> vertexBuffers;
-		std::vector<VkDeviceSize> offsets;
-		for (size_t vertexBufferIndex = 0; vertexBufferIndex < geomMeshes[index].vertexBuffers.size(); vertexBufferIndex++)
-		{
-			vertexBuffers.push_back(geomMeshes[index].vertexBuffers[vertexBufferIndex].bufferHandle);
-			offsets.push_back(0);
-		}
+            vkCmdDrawIndexed(commandBuffer, geomMeshes[index].indexCount, 1, 0, 0, 0);
+        }
 
-		vkCmdBindVertexBuffers(globalHardwareContext.mainDevice->deviceManager.commandBuffers, 0, (uint32_t)geomMeshes[index].vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+        vkCmdEndRenderPass(commandBuffer);
+    };
 
-		vkCmdBindIndexBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers, geomMeshes[index].indexBuffer.bufferHandle, geomMeshes[index].indexOffset * sizeof(uint32_t), VK_INDEX_TYPE_UINT32);
+    globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues());
 
-		vkCmdBindDescriptorSets(globalHardwareContext.mainDevice->deviceManager.commandBuffers, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
+	//if (vkEndCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers) != VK_SUCCESS) {
+	//	throw std::runtime_error("failed to record command buffer!");
+	//}
 
-		void *data = geomMeshes[index].pushConstant.getData();
-		vkCmdPushConstants(globalHardwareContext.mainDevice->deviceManager.commandBuffers, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, pushConstantSize, data);
+	//vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue);
 
-		vkCmdDrawIndexed(globalHardwareContext.mainDevice->deviceManager.commandBuffers, geomMeshes[index].indexCount, 1, 0, 0, 0);
-	}
+	//VkSubmitInfo submitInfo{};
+	//submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
+	////VkSemaphore waitSemaphores[] = { SwapChainSemaphores };
 
-	vkCmdEndRenderPass(globalHardwareContext.mainDevice->deviceManager.commandBuffers);
+	//VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_ALL_COMMANDS_BIT };
+	//submitInfo.waitSemaphoreCount = 0;
+	//submitInfo.pWaitSemaphores = nullptr;
+	//submitInfo.pWaitDstStageMask = waitStages;
 
-
-	if (vkEndCommandBuffer(globalHardwareContext.mainDevice->deviceManager.commandBuffers) != VK_SUCCESS) {
-		throw std::runtime_error("failed to record command buffer!");
-	}
-
-	vkQueueWaitIdle(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue);
-
-	VkSubmitInfo submitInfo{};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-	//VkSemaphore waitSemaphores[] = { SwapChainSemaphores };
-
-	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_ALL_COMMANDS_BIT };
-	submitInfo.waitSemaphoreCount = 0;
-	submitInfo.pWaitSemaphores = nullptr;
-	submitInfo.pWaitDstStageMask = waitStages;
-
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &globalHardwareContext.mainDevice->deviceManager.commandBuffers;
+	//submitInfo.commandBufferCount = 1;
+	//submitInfo.pCommandBuffers = &globalHardwareContext.mainDevice->deviceManager.commandBuffers;
 
 
-	submitInfo.signalSemaphoreCount = 0;
-	submitInfo.pSignalSemaphores = nullptr;
+	//submitInfo.signalSemaphoreCount = 0;
+	//submitInfo.pSignalSemaphores = nullptr;
 
 
-	if (vkQueueSubmit(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
-    {
-		throw std::runtime_error("failed to submit draw command buffer!");
-	}
+	//if (vkQueueSubmit(globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues().vkQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
+ //   {
+	//	throw std::runtime_error("failed to submit draw command buffer!");
+	//}
 
 }
 
