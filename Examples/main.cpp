@@ -196,7 +196,7 @@ struct RasterizerUniformBufferObject
     uint32_t textureIndex;
     ktm::fmat4x4 model = ktm::rotate3d_axis(ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
     ktm::fmat4x4 view = ktm::look_at_lh(ktm::fvec3(2.0f, 2.0f, 2.0f), ktm::fvec3(0.0f, 0.0f, 0.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
-    ktm::fmat4x4 proj = ktm::perspective_lh(ktm::radians(45.0f), 800.0f / 800.0f, 0.1f, 10.0f);
+    ktm::fmat4x4 proj = ktm::perspective_lh(ktm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 10.0f);
     ktm::fvec3 viewPos = ktm::fvec3(2.0f, 2.0f, 2.0f);
     ktm::fvec3 lightColor = ktm::fvec3(10.0f, 10.0f, 10.0f);
     ktm::fvec3 lightPos = ktm::fvec3(1.0f, 1.0f, 1.0f);
