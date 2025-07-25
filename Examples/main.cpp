@@ -200,15 +200,18 @@ struct RasterizerUniformBufferObject
     ktm::fvec3 viewPos = ktm::fvec3(2.0f, 2.0f, 2.0f);
     ktm::fvec3 lightColor = ktm::fvec3(10.0f, 10.0f, 10.0f);
     ktm::fvec3 lightPos = ktm::fvec3(1.0f, 1.0f, 1.0f);
-} rasterizerUniformBufferObject;
+} ;
 
 struct ComputeUniformBufferObject
 {
     uint32_t imageID;
-} computeUniformData;
+} ;
 
 int main()
 {
+    RasterizerUniformBufferObject rasterizerUniformBufferObject;
+    ComputeUniformBufferObject computeUniformData;
+
     HardwareBuffer postionBuffer = HardwareBuffer(pos, BufferUsage::VertexBuffer);
     HardwareBuffer normalBuffer = HardwareBuffer(normal, BufferUsage::VertexBuffer);
     HardwareBuffer uvBuffer = HardwareBuffer(textureUV, BufferUsage::VertexBuffer);
