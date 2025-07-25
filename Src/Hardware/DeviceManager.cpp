@@ -146,10 +146,11 @@ void DeviceManager::choosePresentQueueFamily()
         {
             QueueUtils tempQueueUtils;
             tempQueueUtils.queueFamilyIndex = i;
-            tempQueueUtils.queueMutex = std::make_shared<std::mutex>();
 
             for (uint32_t queueIndex = 0; queueIndex < queueFamilies[i].queueCount; queueIndex++)
             {
+                tempQueueUtils.queueMutex = std::make_shared<std::mutex>();
+
                 vkGetDeviceQueue(logicalDevice, i, queueIndex, &tempQueueUtils.vkQueue);
 
                 if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
