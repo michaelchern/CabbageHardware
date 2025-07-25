@@ -356,7 +356,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             presentInfo.pSwapchains = swapChains;
             presentInfo.pImageIndices = &imageIndex;
 
-            result = vkQueuePresentKHR(presentQueues[0].vkQueue, &presentInfo);
+            submitQueuePresent(presentInfo);
 
             currentFrame = (currentFrame + 1) % swapChainImages.size();
         }

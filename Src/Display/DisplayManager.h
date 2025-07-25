@@ -51,5 +51,15 @@ private:
 
 	void createSwapChain();
 
+	bool submitQueuePresent(VkPresentInfoKHR &persentInfo)
+    {
+        VkResult result = vkQueuePresentKHR(presentQueues[0].vkQueue, &persentInfo);
+		if (result != VK_SUCCESS)
+		{
+            throw std::runtime_error("failed to vkQueuePresentKHR for a frame!");
+		}
+        return true;
+    }
+
 	uint32_t currentFrame = 0;
 };
