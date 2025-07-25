@@ -146,6 +146,7 @@ void DeviceManager::choosePresentQueueFamily()
         {
             QueueUtils tempQueueUtils;
             tempQueueUtils.queueFamilyIndex = i;
+            tempQueueUtils.queueMutex = std::make_shared<std::mutex>();
 
             for (uint32_t queueIndex = 0; queueIndex < queueFamilies[i].queueCount; queueIndex++)
             {

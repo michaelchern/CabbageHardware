@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <mutex>
+#include <memory>
 #include <functional>
 #include <iostream>
 #include <optional>
@@ -28,6 +30,7 @@ class DeviceManager
   public:
     struct QueueUtils
     {
+        std::shared_ptr<std::mutex> queueMutex;
         uint32_t queueFamilyIndex = -1;
         VkQueue vkQueue = VK_NULL_HANDLE;
         VkCommandPool commandPool = VK_NULL_HANDLE;
@@ -46,8 +49,6 @@ class DeviceManager
         DeviceFeaturesChain featuresChain{};
     } deviceFeaturesUtils;
 
-
-
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice logicalDevice = VK_NULL_HANDLE;
 
@@ -59,7 +60,6 @@ class DeviceManager
     uint64_t semaphoreValue = 0;
     VkSemaphore timelineSemaphore;
 
-
     DeviceManager();
 
     ~DeviceManager();
@@ -68,7 +68,7 @@ class DeviceManager
 
     void createTimelineSemaphore();
 
-    bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, const QueueUtils& queue);
+    bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, const QueueUtils &queue);
 
     bool waitALL();
 
@@ -88,7 +88,7 @@ class DeviceManager
         return transferQueues[currentTransferQueueIndex];
     }
 
-    std::vector<QueueUtils> pickAvailableQueues(std::function<bool(const QueueUtils&)> required)
+    std::vector<QueueUtils> pickAvailableQueues(std::function<bool(const QueueUtils &)> required)
     {
         std::vector<QueueUtils> result;
         for (size_t i = 0; i < graphicsQueues.size(); i++)
@@ -132,6 +132,7 @@ class DeviceManager
     uint16_t currentGraphicsQueueIndex = 0;
     uint16_t currentComputeQueueIndex = 0;
     uint16_t currentTransferQueueIndex = 0;
+
     std::vector<QueueUtils> graphicsQueues;
     std::vector<QueueUtils> computeQueues;
     std::vector<QueueUtils> transferQueues;
