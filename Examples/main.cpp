@@ -209,6 +209,13 @@ struct ComputeUniformBufferObject
 
 int main()
 {
+     std::thread([&]() {
+         while (true)
+         {
+         }
+     }).detach();
+
+
     RasterizerUniformBufferObject rasterizerUniformBufferObject;
     ComputeUniformBufferObject computeUniformData;
 
