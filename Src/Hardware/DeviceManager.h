@@ -130,23 +130,23 @@ class DeviceManager
     std::vector<QueueUtils> transferQueues;
 
     
-    QueueUtils getNextGraphicsQueues()
-    {
-        currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
-        return graphicsQueues[currentGraphicsQueueIndex];
-    }
+    //QueueUtils getNextGraphicsQueues()
+    //{
+    //    currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
+    //    return graphicsQueues[currentGraphicsQueueIndex];
+    //}
 
-    QueueUtils getNextComputeQueues()
-    {
-        currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
-        return computeQueues[currentComputeQueueIndex];
-    }
+    //QueueUtils getNextComputeQueues()
+    //{
+    //    currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
+    //    return computeQueues[currentComputeQueueIndex];
+    //}
 
-    QueueUtils getNextTransferQueues()
-    {
-        currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
-        return transferQueues[currentTransferQueueIndex];
-    }
+    //QueueUtils getNextTransferQueues()
+    //{
+    //    currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
+    //    return transferQueues[currentTransferQueueIndex];
+    //}
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
 };

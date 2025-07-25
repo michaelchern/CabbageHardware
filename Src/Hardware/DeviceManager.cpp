@@ -23,7 +23,7 @@ void DeviceManager::initDeviceManager(const CreateCallback &createCallback, cons
 
 void DeviceManager::createTimelineSemaphore()
 {
-    //for (size_t i = 0; i < userDevices.size(); i++)
+    // for (size_t i = 0; i < userDevices.size(); i++)
     {
         VkSemaphoreTypeCreateInfo type_create_info{};
         type_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO_KHR;
@@ -44,11 +44,10 @@ void DeviceManager::createTimelineSemaphore()
 void DeviceManager::createDevices(const CreateCallback &initInfo, const VkInstance &vkInstance)
 {
 
-
-    //userDevices.resize(deviceCount);
-    //for (uint32_t index = 0; index < deviceCount; index++)
+    // userDevices.resize(deviceCount);
+    // for (uint32_t index = 0; index < deviceCount; index++)
     {
-        //physicalDevice = devices[index];
+        // physicalDevice = devices[index];
 
         std::set<const char *> inputExtensions = initInfo.requiredDeviceExtensions(vkInstance, physicalDevice);
         std::vector<const char *> requiredExtensions = std::vector<const char *>(inputExtensions.begin(), inputExtensions.end());
@@ -140,7 +139,7 @@ void DeviceManager::createDevices(const CreateCallback &initInfo, const VkInstan
 
 void DeviceManager::choosePresentQueueFamily()
 {
-    //for (int index = 0; index < userDevices.size(); index++)
+    // for (int index = 0; index < userDevices.size(); index++)
     {
         for (int i = 0; i < queueFamilies.size(); i++)
         {
@@ -224,28 +223,64 @@ bool DeviceManager::createCommandBuffers()
 
 bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType)
 {
-    QueueUtils queue;
+    QueueUtils* queue;
+    uint16_t queueIndex = 0;
 
     switch (queueType)
     {
-    case QueueType::GraphicsQueue:
-        queue = getNextGraphicsQueues();
+    case QueueType::GraphicsQueue: {
+        while (true)
+        {
+            if (graphicsQueues[queueIndex].queueMutex->try_lock())
+            {
+                break;
+            }
+            else
+            {
+                queueIndex = (queueIndex + 1) % graphicsQueues.size();
+            }
+        }
+        queue = &graphicsQueues[queueIndex];
         break;
-    case QueueType::ComputeQueue:
-        queue = getNextComputeQueues();
-        break;
-    case QueueType::TransferQueue:
-        queue = getNextTransferQueues();
-        break;
-    defult:
-        throw std::runtime_error("Invalid queue type specified for single time command execution!");
     }
 
-    std::lock_guard<std::mutex> guard(*queue.queueMutex); 
+    case QueueType::ComputeQueue: {
+        while (true)
+        {
+            if (computeQueues[queueIndex].queueMutex->try_lock())
+            {
+                break;
+            }
+            else
+            {
+                queueIndex = (queueIndex + 1) % computeQueues.size();
+            }
+        }
+        queue = &computeQueues[queueIndex];
+        break;
+    }
+
+    case QueueType::TransferQueue: {
+        while (true)
+        {
+            if (transferQueues[queueIndex].queueMutex->try_lock())
+            {
+                break;
+            }
+            else
+            {
+                queueIndex = (queueIndex + 1) % transferQueues.size();
+            }
+        }
+        queue = &transferQueues[queueIndex];
+        break;
+    }
+    }
+
 
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = queue.commandPool;
+    allocInfo.commandPool = queue->commandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
@@ -253,15 +288,15 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    vkBeginCommandBuffer(queue.commandBuffer, &beginInfo);
+    vkBeginCommandBuffer(queue->commandBuffer, &beginInfo);
 
-    commandsFunction(queue.commandBuffer);
+    commandsFunction(queue->commandBuffer);
 
-    vkEndCommandBuffer(queue.commandBuffer);
+    vkEndCommandBuffer(queue->commandBuffer);
 
     VkCommandBufferSubmitInfo commandBufferSubmitInfo{};
     commandBufferSubmitInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-    commandBufferSubmitInfo.commandBuffer = queue.commandBuffer;
+    commandBufferSubmitInfo.commandBuffer = queue->commandBuffer;
 
     VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo{};
     waitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
@@ -284,7 +319,10 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     submitInfo.commandBufferInfoCount = 1;
     submitInfo.pCommandBufferInfos = &commandBufferSubmitInfo;
 
-    VkResult result = vkQueueSubmit2(queue.vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
+
+    queue->queueMutex->unlock();
+
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to submit command buffer!");
@@ -292,7 +330,6 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
 
     return true;
 }
-
 
 bool DeviceManager::waitALL()
 {
