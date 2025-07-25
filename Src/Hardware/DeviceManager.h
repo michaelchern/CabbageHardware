@@ -63,7 +63,7 @@ class DeviceManager
     DeviceManager();
 
     ~DeviceManager();
-
+     
     void initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice);
 
     void createTimelineSemaphore();

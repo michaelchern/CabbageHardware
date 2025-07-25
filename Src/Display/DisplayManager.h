@@ -53,7 +53,23 @@ private:
 
 	bool submitQueuePresent(VkPresentInfoKHR &persentInfo)
     {
-        VkResult result = vkQueuePresentKHR(presentQueues[0].vkQueue, &persentInfo);
+        uint16_t queueIndex = 0;
+        while (true)
+        {
+            if (presentQueues[queueIndex].queueMutex->try_lock())
+            {
+                break;
+            }
+            else
+            {
+                queueIndex = (queueIndex + 1) % presentQueues.size();
+            }
+        }
+
+        VkResult result = vkQueuePresentKHR(presentQueues[queueIndex].vkQueue, &persentInfo);
+
+        presentQueues[queueIndex].queueMutex->unlock();
+
 		if (result != VK_SUCCESS)
 		{
             throw std::runtime_error("failed to vkQueuePresentKHR for a frame!");
