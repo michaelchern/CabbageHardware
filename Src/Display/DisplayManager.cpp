@@ -343,7 +343,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
-             displayDevice->deviceManager.executeSingleTimeCommands(runCommand, displayDevice->deviceManager.getNextGraphicsQueues());
+             displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue);
             //std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
 
             VkPresentInfoKHR presentInfo{};

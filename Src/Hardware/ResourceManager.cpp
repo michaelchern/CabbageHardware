@@ -342,7 +342,7 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
                     region.imageExtent = {source.imageSize.x, source.imageSize.y, 1};
                     vkCmdCopyImageToBuffer(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, srcStaging.bufferHandle, 1, &region);
                 };
-                source.device->executeSingleTimeCommands(srcCopyCmd, source.device->getNextTransferQueues());
+                source.device->executeSingleTimeCommands(srcCopyCmd, DeviceManager::TransferQueue);
 
                 void *mappedData = nullptr;
                 void *dstMappedData = nullptr;
@@ -365,7 +365,7 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
                     region.imageExtent = {destination.imageSize.x, destination.imageSize.y, 1};
                     vkCmdCopyBufferToImage(commandBuffer, dstStaging.bufferHandle, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
                 };
-                destination.device->executeSingleTimeCommands(dstCopyCmd, destination.device->getNextTransferQueues());
+                destination.device->executeSingleTimeCommands(dstCopyCmd, DeviceManager::TransferQueue);
 
                 source.resourceManager->destroyBuffer(srcStaging);
                 destination.resourceManager->destroyBuffer(dstStaging);
@@ -387,7 +387,7 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
                     vkCmdCopyImage(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &imageCopyRegion);
                 };
 
-                globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, globalHardwareContext.mainDevice->deviceManager.getNextTransferQueues());
+                globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::TransferQueue);
 
                 return true;
             }
@@ -695,7 +695,7 @@ void ResourceManager::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t
         vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, globalHardwareContext.mainDevice->deviceManager.getNextTransferQueues());
+    globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::TransferQueue);
 }
 
 void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
@@ -706,7 +706,7 @@ void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDevic
         vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, globalHardwareContext.mainDevice->deviceManager.getNextTransferQueues());
+    globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::TransferQueue);
 }
 
 void ResourceManager::createBindlessDescriptorSet()

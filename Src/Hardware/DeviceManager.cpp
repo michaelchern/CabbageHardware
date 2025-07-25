@@ -222,9 +222,25 @@ bool DeviceManager::createCommandBuffers()
     return true;
 }
 
-
-bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, const QueueUtils &queue)
+bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType)
 {
+    QueueUtils queue;
+
+    switch (queueType)
+    {
+    case QueueType::GraphicsQueue:
+        queue = getNextGraphicsQueues();
+        break;
+    case QueueType::ComputeQueue:
+        queue = getNextComputeQueues();
+        break;
+    case QueueType::TransferQueue:
+        queue = getNextTransferQueues();
+        break;
+    defult:
+        throw std::runtime_error("Invalid queue type specified for single time command execution!");
+    }
+
     std::lock_guard<std::mutex> guard(*queue.queueMutex); 
 
     VkCommandBufferAllocateInfo allocInfo{};

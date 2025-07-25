@@ -422,7 +422,7 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
         vkCmdEndRenderPass(commandBuffer);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, globalHardwareContext.mainDevice->deviceManager.getNextGraphicsQueues());
+    globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue);
 }
 
 

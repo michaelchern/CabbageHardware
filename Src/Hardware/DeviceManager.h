@@ -28,6 +28,13 @@
 class DeviceManager
 {
   public:
+    enum QueueType
+    {
+        GraphicsQueue = 0,
+        ComputeQueue = 1,
+        TransferQueue = 2
+    };
+
     struct QueueUtils
     {
         std::shared_ptr<std::mutex> queueMutex;
@@ -68,25 +75,10 @@ class DeviceManager
 
     void createTimelineSemaphore();
 
-    bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, const QueueUtils &queue);
+    bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType);
 
     bool waitALL();
 
-    QueueUtils getNextGraphicsQueues()
-    {
-        currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
-        return graphicsQueues[currentGraphicsQueueIndex];
-    }
-    QueueUtils getNextComputeQueues()
-    {
-        currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
-        return computeQueues[currentComputeQueueIndex];
-    }
-    QueueUtils getNextTransferQueues()
-    {
-        currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
-        return transferQueues[currentTransferQueueIndex];
-    }
 
     std::vector<QueueUtils> pickAvailableQueues(std::function<bool(const QueueUtils &)> required)
     {
@@ -136,6 +128,25 @@ class DeviceManager
     std::vector<QueueUtils> graphicsQueues;
     std::vector<QueueUtils> computeQueues;
     std::vector<QueueUtils> transferQueues;
+
+    
+    QueueUtils getNextGraphicsQueues()
+    {
+        currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
+        return graphicsQueues[currentGraphicsQueueIndex];
+    }
+
+    QueueUtils getNextComputeQueues()
+    {
+        currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
+        return computeQueues[currentComputeQueueIndex];
+    }
+
+    QueueUtils getNextTransferQueues()
+    {
+        currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
+        return transferQueues[currentTransferQueueIndex];
+    }
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
 };
