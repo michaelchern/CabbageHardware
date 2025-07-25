@@ -224,6 +224,8 @@ bool DeviceManager::createCommandBuffers()
 
 bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, const QueueUtils &queue)
 {
+    std::lock_guard<std::mutex> guard(*queue.queueMutex); 
+
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = queue.commandPool;
