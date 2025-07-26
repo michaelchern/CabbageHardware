@@ -856,6 +856,8 @@ uint32_t ResourceManager::storeDescriptor(ImageHardwareWrap image)
 
     VkDescriptorType descriptorType = (image.imageUsage & VK_IMAGE_USAGE_STORAGE_BIT) ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 
+    bool updateDescriptorSets = false;
+
     if (descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
     {
         auto it = StorageImageBindingList.find(image.imageView);
@@ -865,6 +867,8 @@ uint32_t ResourceManager::storeDescriptor(ImageHardwareWrap image)
         }
         else
         {
+            updateDescriptorSets = true;
+
             textureIndex = StorageImageBindingIndex++;
             StorageImageBindingList.insert(std::pair<VkImageView, int>(image.imageView, textureIndex));
         }
@@ -878,34 +882,39 @@ uint32_t ResourceManager::storeDescriptor(ImageHardwareWrap image)
         }
         else
         {
+            updateDescriptorSets = true;
+
             textureIndex = TextureBindingIndex++;
             TextureBindingList.insert(std::pair<VkImageView, int>(image.imageView, textureIndex));
         }
     }
 
-    VkDescriptorImageInfo imageInfo{};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-    imageInfo.imageView = image.imageView;
-    imageInfo.sampler = textureSampler;
-
-    VkWriteDescriptorSet write{};
-    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    write.descriptorType = descriptorType;
-    write.dstSet = bindlessDescriptor.descriptorSet;
-    write.descriptorCount = 1;
-    write.dstArrayElement = textureIndex;
-    write.pImageInfo = &imageInfo;
-
-    if (write.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+    if (updateDescriptorSets)
     {
-        write.dstBinding = TextureBinding;
-    }
-    if (write.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
-    {
-        write.dstBinding = StorageImageBinding;
-    }
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+        imageInfo.imageView = image.imageView;
+        imageInfo.sampler = textureSampler;
 
-    vkUpdateDescriptorSets(this->device->logicalDevice, 1, &write, 0, nullptr);
+        VkWriteDescriptorSet write{};
+        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.descriptorType = descriptorType;
+        write.dstSet = bindlessDescriptor.descriptorSet;
+        write.descriptorCount = 1;
+        write.dstArrayElement = textureIndex;
+        write.pImageInfo = &imageInfo;
+
+        if (write.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+        {
+            write.dstBinding = TextureBinding;
+        }
+        if (write.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
+        {
+            write.dstBinding = StorageImageBinding;
+        }
+
+        vkUpdateDescriptorSets(this->device->logicalDevice, 1, &write, 0, nullptr);
+    }
 
     return textureIndex;
 }
@@ -918,6 +927,8 @@ uint32_t ResourceManager::storeDescriptor(BufferHardwareWrap buffer)
 
     VkDescriptorType descriptorType = (buffer.bufferUsage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
+    bool updateDescriptorSets = false;
+
     if (descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
     {
         auto it = StorageBufferBindingList.find(buffer.bufferHandle);
@@ -927,6 +938,8 @@ uint32_t ResourceManager::storeDescriptor(BufferHardwareWrap buffer)
         }
         else
         {
+            updateDescriptorSets = true;
+
             bufferIndex = StorageBufferBindingIndex++;
             StorageBufferBindingList.insert(std::pair<VkBuffer, int>(buffer.bufferHandle, bufferIndex));
         }
@@ -940,34 +953,39 @@ uint32_t ResourceManager::storeDescriptor(BufferHardwareWrap buffer)
         }
         else
         {
+            updateDescriptorSets = true;
+
             bufferIndex = UniformBindingIndex++;
             UniformBindingList.insert(std::pair<VkBuffer, int>(buffer.bufferHandle, bufferIndex));
         }
     }
 
-    VkDescriptorBufferInfo bufferInfo{};
-    bufferInfo.buffer = buffer.bufferHandle;
-    bufferInfo.offset = 0;
-    bufferInfo.range = VK_WHOLE_SIZE;
-
-    VkWriteDescriptorSet writes{};
-    writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writes.dstSet = bindlessDescriptor.descriptorSet;
-    writes.descriptorCount = 1;
-    writes.pBufferInfo = &bufferInfo;
-    writes.descriptorType = descriptorType;
-    writes.dstArrayElement = bufferIndex;
-
-    if (writes.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+    if (updateDescriptorSets)
     {
-        writes.dstBinding = UniformBinding;
-    }
-    if (writes.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-    {
-        writes.dstBinding = StorageBufferBinding;
-    }
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = buffer.bufferHandle;
+        bufferInfo.offset = 0;
+        bufferInfo.range = VK_WHOLE_SIZE;
 
-    vkUpdateDescriptorSets(this->device->logicalDevice, 1, &writes, 0, nullptr);
+        VkWriteDescriptorSet writes{};
+        writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writes.dstSet = bindlessDescriptor.descriptorSet;
+        writes.descriptorCount = 1;
+        writes.pBufferInfo = &bufferInfo;
+        writes.descriptorType = descriptorType;
+        writes.dstArrayElement = bufferIndex;
+
+        if (writes.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+        {
+            writes.dstBinding = UniformBinding;
+        }
+        if (writes.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+        {
+            writes.dstBinding = StorageBufferBinding;
+        }
+
+        vkUpdateDescriptorSets(this->device->logicalDevice, 1, &writes, 0, nullptr);
+    }
 
     return bufferIndex;
 }
