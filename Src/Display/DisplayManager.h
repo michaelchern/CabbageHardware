@@ -55,11 +55,13 @@ private:
 
 	bool submitQueuePresent(VkPresentInfoKHR &persentInfo)
     {
+        DeviceManager::QueueUtils *queue;
         uint16_t queueIndex = currentQueueIndex.fetch_add(1) % presentQueues.size();
         while (true)
         {
             if (presentQueues[queueIndex].queueMutex->try_lock())
             {
+                queue = &presentQueues[queueIndex];
                 break;
             }
             else
@@ -69,9 +71,9 @@ private:
         }
         //std::cout << "Present Queue Index: " << queueIndex << std::endl;
 
-        VkResult result = vkQueuePresentKHR(presentQueues[queueIndex].vkQueue, &persentInfo);
+        VkResult result = vkQueuePresentKHR(queue->vkQueue, &persentInfo);
 
-        presentQueues[queueIndex].queueMutex->unlock();
+        queue->queueMutex->unlock();
 
 		if (result != VK_SUCCESS)
 		{
