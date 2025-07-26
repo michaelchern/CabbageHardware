@@ -423,14 +423,15 @@ int main()
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        std::vector<GLFWwindow *> windows(4);
+        std::vector<GLFWwindow *> windows(8);
         for (size_t i = 0; i < windows.size(); i++)
         {
-            windows[i] = glfwCreateWindow(800, 800, "Cabbage Engine ", nullptr, nullptr);
+            windows[i] = glfwCreateWindow(400, 400, "Cabbage Engine ", nullptr, nullptr);
         }
 
+        auto oneWindowThread = [&](void* surface) {
+            //HardwareDisplayer displayManager(surface);
 
-        auto oneWindowThread = [&]() {
             RasterizerUniformBufferObject rasterizerUniformBufferObject;
             ComputeUniformBufferObject computeUniformData;
 
@@ -457,7 +458,6 @@ int main()
 
             auto startTime = std::chrono::high_resolution_clock::now();
 
-            //HardwareDisplayer displayManager(glfwGetWin32Window(window));
 
             while (true)
             {
@@ -480,19 +480,28 @@ int main()
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
                 computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
-                //displayManager = finalOutputImage;
+                 //displayManager = finalOutputImage;
             }
-
         };
 
-        std::thread(oneWindowThread).detach();
-        std::thread(oneWindowThread).detach();
-        std::thread(oneWindowThread).detach();
-        std::thread(oneWindowThread).detach();
-
-        while (!glfwWindowShouldClose(windows[0]))
+        for (size_t i = 0; i < windows.size(); i++)
         {
-             glfwPollEvents();
+            std::thread(oneWindowThread, glfwGetWin32Window(windows[i])).detach();
+        }
+
+        auto shouldClosed = [&]() {
+            for (size_t i = 0; i < windows.size(); i++)
+            {
+                if (glfwWindowShouldClose(windows[i]))
+                {
+                    return true;
+                }
+            }
+        };
+
+        while (true)
+        {
+            glfwPollEvents();
         }
 
         for (size_t i = 0; i < windows.size(); i++)
