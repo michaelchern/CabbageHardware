@@ -139,40 +139,37 @@ void DeviceManager::createDevices(const CreateCallback &initInfo, const VkInstan
 
 void DeviceManager::choosePresentQueueFamily()
 {
-    // for (int index = 0; index < userDevices.size(); index++)
+    for (int i = 0; i < queueFamilies.size(); i++)
     {
-        for (int i = 0; i < queueFamilies.size(); i++)
+        QueueUtils tempQueueUtils;
+        tempQueueUtils.queueFamilyIndex = i;
+
+        for (uint32_t queueIndex = 0; queueIndex < queueFamilies[i].queueCount; queueIndex++)
         {
-            QueueUtils tempQueueUtils;
-            tempQueueUtils.queueFamilyIndex = i;
+            tempQueueUtils.queueMutex = std::make_shared<std::mutex>();
 
-            for (uint32_t queueIndex = 0; queueIndex < queueFamilies[i].queueCount; queueIndex++)
+            vkGetDeviceQueue(logicalDevice, i, queueIndex, &tempQueueUtils.vkQueue);
+
+            if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
             {
-                tempQueueUtils.queueMutex = std::make_shared<std::mutex>();
-
-                vkGetDeviceQueue(logicalDevice, i, queueIndex, &tempQueueUtils.vkQueue);
-
-                if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-                {
-                    graphicsQueues.push_back(tempQueueUtils);
-                }
-                else if (queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
-                {
-                    computeQueues.push_back(tempQueueUtils);
-                }
-                else if (queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
-                {
-                    transferQueues.push_back(tempQueueUtils);
-                }
+                graphicsQueues.push_back(tempQueueUtils);
+            }
+            else if (queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
+            {
+                computeQueues.push_back(tempQueueUtils);
+            }
+            else if (queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
+            {
+                transferQueues.push_back(tempQueueUtils);
             }
         }
 
-        if (computeQueues.size() == 0)
+        if (computeQueues.empty() && !graphicsQueues.empty())
         {
             computeQueues.push_back(graphicsQueues[0]);
         }
 
-        if (transferQueues.size() == 0)
+        if (transferQueues.empty() && !graphicsQueues.empty())
         {
             transferQueues.push_back(graphicsQueues[0]);
         }
