@@ -711,46 +711,26 @@ void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDevic
 
 void ResourceManager::createBindlessDescriptorSet()
 {
-    uint32_t k_max_bindless_resources[4] = {8, 8, 8, 8};
+    auto &limits = device->deviceFeaturesUtils.supportedProperties.properties.limits;
 
-    // k_max_bindless_resources[0] = std::min(
-    //	std::min(
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxPerStageResources/4,
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxPerStageDescriptorUniformBuffers),
-    //	std::min(
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxDescriptorSetUniformBuffers,
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxDescriptorSetUniformBuffersDynamic)
-    //);
-
-    // k_max_bindless_resources[1] = std::min(
-    //	std::min(
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxPerStageResources/4,
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxPerStageDescriptorSampledImages
-    //	),
-    //	deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxDescriptorSetSampledImages
-    //);
-
-    // k_max_bindless_resources[2] = std::min(
-    //	std::min(
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxPerStageResources/4,
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxPerStageDescriptorStorageBuffers
-    //	),
-    //	std::min(
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxDescriptorSetStorageBuffers,
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxDescriptorSetStorageBuffersDynamic)
-    //);
-
-    // k_max_bindless_resources[3] = std::min(
-    //	std::min(
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxPerStageResources/4,
-    //		deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxPerStageDescriptorStorageImages),
-    //	deviceManager.mainDevice.deviceFeaturesUtils.supportedProperties.properties.limits.maxDescriptorSetStorageImages
-    //);
-    //
-    // std::cout << k_max_bindless_resources[0] << std::endl;
-    // std::cout << k_max_bindless_resources[1] << std::endl;
-    // std::cout << k_max_bindless_resources[2] << std::endl;
-    // std::cout << k_max_bindless_resources[3] << std::endl;
+    uint32_t k_max_bindless_resources[4] = {
+        std::min({limits.maxPerStageResources / 4,
+                  limits.maxPerStageDescriptorUniformBuffers,
+                  limits.maxDescriptorSetUniformBuffers}),
+        std::min({limits.maxPerStageResources / 4,
+                  limits.maxPerStageDescriptorSampledImages,
+                  limits.maxDescriptorSetSampledImages}),
+        std::min({limits.maxPerStageResources / 4,
+                  limits.maxPerStageDescriptorStorageBuffers,
+                  limits.maxDescriptorSetStorageBuffers}),
+        std::min({limits.maxPerStageResources / 4,
+                  limits.maxPerStageDescriptorStorageImages,
+                  limits.maxDescriptorSetStorageImages})};
+    
+     //std::cout << k_max_bindless_resources[0] << std::endl;
+     //std::cout << k_max_bindless_resources[1] << std::endl;
+     //std::cout << k_max_bindless_resources[2] << std::endl;
+     //std::cout << k_max_bindless_resources[3] << std::endl;
 
     std::array<VkDescriptorSetLayoutBinding, 4> bindings{};
     std::array<VkDescriptorBindingFlags, 4> flags{};
