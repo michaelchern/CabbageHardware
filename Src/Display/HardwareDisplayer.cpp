@@ -1,7 +1,7 @@
 #include"CabbageDisplayer.h"
 #include"DisplayManager.h"
 
-std::unordered_map<void *, DisplayManager> displayerGlobalPool;
+std::unordered_map < void *, std::shared_ptr<DisplayManager>> displayerGlobalPool;
 
 std::mutex displayerMutex;
 
@@ -12,7 +12,7 @@ HardwareDisplayer::HardwareDisplayer(void* surface): surface(surface)
 
     if (surface != nullptr && !displayerGlobalPool.count(surface))
     {
-        displayerGlobalPool[surface] = DisplayManager();
+        displayerGlobalPool[surface] = std::make_shared<DisplayManager>();
     }
 }
 
@@ -34,7 +34,7 @@ HardwareDisplayer& HardwareDisplayer::operator = (const HardwareImage& image)
 
     if (displayerGlobalPool.count(surface))
     {
-        displayerGlobalPool[surface].displayFrame(surface,image);
+        displayerGlobalPool[surface]->displayFrame(surface,image);
     }
     return *this;
 }

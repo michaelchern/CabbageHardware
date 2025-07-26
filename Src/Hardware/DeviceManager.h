@@ -121,9 +121,9 @@ class DeviceManager
 
     bool createCommandBuffers();
 
-    uint16_t currentGraphicsQueueIndex = 0;
-    uint16_t currentComputeQueueIndex = 0;
-    uint16_t currentTransferQueueIndex = 0;
+    std::atomic_uint16_t currentGraphicsQueueIndex = 0;
+    std::atomic_uint16_t currentComputeQueueIndex = 0;
+    std::atomic_uint16_t currentTransferQueueIndex = 0;
 
     std::vector<QueueUtils> graphicsQueues;
     std::vector<QueueUtils> computeQueues;

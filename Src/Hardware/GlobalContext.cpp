@@ -28,11 +28,12 @@ HardwareContext::HardwareContext()
         throw std::runtime_error("Failed to find GPUs! Please buy a GPU!");
     }
 
-    hardwareUtils.resize(devices.size());
+    //hardwareUtils.resize(devices.size());
     for (size_t i = 0; i < devices.size(); i++)
     {
-        hardwareUtils[i].deviceManager.initDeviceManager(hardwareCreateInfos, vkInstance, devices[i]);
-        hardwareUtils[i].resourceManager.initResourceManager(hardwareUtils[i].deviceManager);
+        hardwareUtils.push_back(std::make_shared<HardwareUtils>());
+        hardwareUtils[i]->deviceManager.initDeviceManager(hardwareCreateInfos, vkInstance, devices[i]);
+        hardwareUtils[i]->resourceManager.initResourceManager(hardwareUtils[i]->deviceManager);
     }
 
     chooseMainDevice();
@@ -280,7 +281,7 @@ void HardwareContext::chooseMainDevice()
 {
     //for (size_t i = 0; i < hardwareUtils.size(); i++)
     //{
-    //    if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceName[0] == 'N')
+    //    if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceName[0] == 'N')
     //    {
     //        mainDevice = &hardwareUtils[i];
     //        return;
@@ -289,52 +290,52 @@ void HardwareContext::chooseMainDevice()
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+        if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
         {
-            mainDevice = &hardwareUtils[i];
+            mainDevice = hardwareUtils[i];
             return;
         }
     }
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_OTHER)
+        if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_OTHER)
         {
-            mainDevice = &hardwareUtils[i];
+            mainDevice = hardwareUtils[i];
             return;
         }
     }
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
+        if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
         {
-            mainDevice = &hardwareUtils[i];
+            mainDevice = hardwareUtils[i];
             return;
         }
     }
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+        if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
         {
-            mainDevice = &hardwareUtils[i];
+            mainDevice = hardwareUtils[i];
             return;
         }
     }
 
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
-        if (hardwareUtils[i].deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
+        if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
         {
-            mainDevice = &hardwareUtils[i];
+            mainDevice = hardwareUtils[i];
             return;
         }
     }
 
     if (hardwareUtils.size() > 0)
     {
-        mainDevice = &hardwareUtils[0];
+        mainDevice = hardwareUtils[0];
     }
     else
     {

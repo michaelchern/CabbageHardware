@@ -34,9 +34,11 @@ private:
 	ResourceManager::ImageHardwareWrap displayImage;
 
     std::vector<VkSemaphore> swapchainSemaphore;
-
+    
+    std::atomic_uint16_t currentQueueIndex = 0;
     std::vector<DeviceManager::QueueUtils> presentQueues;
-    HardwareContext::HardwareUtils *displayDevice;
+
+    std::shared_ptr<HardwareContext::HardwareUtils> displayDevice;
 
 
 	void cleaarupDisplayManager();
@@ -53,7 +55,7 @@ private:
 
 	bool submitQueuePresent(VkPresentInfoKHR &persentInfo)
     {
-        uint16_t queueIndex = 0;
+        uint16_t queueIndex = currentQueueIndex;
         while (true)
         {
             if (presentQueues[queueIndex].queueMutex->try_lock())
@@ -62,7 +64,8 @@ private:
             }
             else
             {
-                queueIndex = (queueIndex + 1) % presentQueues.size();
+                currentQueueIndex = (currentQueueIndex + 1) % presentQueues.size();
+                queueIndex = currentQueueIndex;
             }
         }
         std::cout << "Present Queue Index: " << queueIndex << std::endl;

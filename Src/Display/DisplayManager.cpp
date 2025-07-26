@@ -131,14 +131,14 @@ void DisplayManager::choosePresentDevice()
 	{
         auto pickQueuesRoles = [&](const DeviceManager::QueueUtils &queues) -> bool {
             VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.hardwareUtils[i].deviceManager.physicalDevice, queues.queueFamilyIndex, vkSurface, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.hardwareUtils[i]->deviceManager.physicalDevice, queues.queueFamilyIndex, vkSurface, &presentSupport);
             return presentSupport;
         };
 
-		presentQueues = globalHardwareContext.hardwareUtils[i].deviceManager.pickAvailableQueues(pickQueuesRoles);
+		presentQueues = globalHardwareContext.hardwareUtils[i]->deviceManager.pickAvailableQueues(pickQueuesRoles);
         if (presentQueues.size()>0)
         {
-            displayDevice = &globalHardwareContext.hardwareUtils[i];
+            displayDevice = globalHardwareContext.hardwareUtils[i];
         }
 
 		if (globalHardwareContext.mainDevice != displayDevice)

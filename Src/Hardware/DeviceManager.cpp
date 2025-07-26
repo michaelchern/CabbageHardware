@@ -224,11 +224,11 @@ bool DeviceManager::createCommandBuffers()
 bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType)
 {
     QueueUtils* queue;
-    uint16_t queueIndex = 0;
 
     switch (queueType)
     {
     case QueueType::GraphicsQueue: {
+        uint16_t queueIndex = currentGraphicsQueueIndex;
         while (true)
         {
             if (graphicsQueues[queueIndex].queueMutex->try_lock())
@@ -237,7 +237,8 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
             }
             else
             {
-                queueIndex = (queueIndex + 1) % graphicsQueues.size();
+                currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
+                queueIndex = currentGraphicsQueueIndex;
             }
         }
         queue = &graphicsQueues[queueIndex];
@@ -247,6 +248,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     }
 
     case QueueType::ComputeQueue: {
+        uint16_t queueIndex = currentComputeQueueIndex;
         while (true)
         {
             if (computeQueues[queueIndex].queueMutex->try_lock())
@@ -255,7 +257,8 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
             }
             else
             {
-                queueIndex = (queueIndex + 1) % computeQueues.size();
+                currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
+                queueIndex = currentComputeQueueIndex;
             }
         }
         queue = &computeQueues[queueIndex];
@@ -265,6 +268,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     }
 
     case QueueType::TransferQueue: {
+        uint16_t queueIndex = currentTransferQueueIndex;
         while (true)
         {
             if (transferQueues[queueIndex].queueMutex->try_lock())
@@ -273,7 +277,8 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
             }
             else
             {
-                queueIndex = (queueIndex + 1) % transferQueues.size();
+                currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
+                queueIndex = currentTransferQueueIndex;
             }
         }
         queue = &transferQueues[queueIndex];
