@@ -423,6 +423,13 @@ int main()
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
+        std::vector<GLFWwindow *> windows(4);
+        for (size_t i = 0; i < windows.size(); i++)
+        {
+            windows[i] = glfwCreateWindow(800, 800, "Cabbage Engine ", nullptr, nullptr);
+        }
+
+
         auto oneWindowThread = [&]() {
             RasterizerUniformBufferObject rasterizerUniformBufferObject;
             ComputeUniformBufferObject computeUniformData;
@@ -450,36 +457,32 @@ int main()
 
             auto startTime = std::chrono::high_resolution_clock::now();
 
-            GLFWwindow *window = glfwCreateWindow(800, 800, "Cabbage Engine ", nullptr, nullptr);
-            HardwareDisplayer displayManager(glfwGetWin32Window(window));
+            //HardwareDisplayer displayManager(glfwGetWin32Window(window));
 
-            while (!glfwWindowShouldClose(window))
+            while (true)
             {
-                glfwPollEvents();
+                float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
 
-                //float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
+                rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
+                rasterizerUniformBufferObject.model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+                rasterizerUniformBuffer.copyFromData(&rasterizerUniformBufferObject, sizeof(rasterizerUniformBufferObject));
+                rasterizer["pushConsts.uniformBufferIndex"] = rasterizerUniformBuffer.storeDescriptor();
+                rasterizer["inPosition"] = postionBuffer;
+                rasterizer["inColor"] = colorBuffer;
+                rasterizer["inTexCoord"] = uvBuffer;
+                rasterizer["inNormal"] = normalBuffer;
+                rasterizer["outColor"] = finalOutputImage;
+                rasterizer.recordGeomMesh(indexBuffer);
+                rasterizer.executePipeline(ktm::uvec2(800, 800));
 
-                //rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
-                //rasterizerUniformBufferObject.model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
-                //rasterizerUniformBuffer.copyFromData(&rasterizerUniformBufferObject, sizeof(rasterizerUniformBufferObject));
-                //rasterizer["pushConsts.uniformBufferIndex"] = rasterizerUniformBuffer.storeDescriptor();
-                //rasterizer["inPosition"] = postionBuffer;
-                //rasterizer["inColor"] = colorBuffer;
-                //rasterizer["inTexCoord"] = uvBuffer;
-                //rasterizer["inNormal"] = normalBuffer;
-                //rasterizer["outColor"] = finalOutputImage;
-                //rasterizer.recordGeomMesh(indexBuffer);
-                //rasterizer.executePipeline(ktm::uvec2(800, 800));
-
-                //computeUniformData.imageID = finalOutputImage.storeDescriptor();
-                //computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
-                //computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
-                //computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
+                computeUniformData.imageID = finalOutputImage.storeDescriptor();
+                computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
+                computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
+                computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
                 //displayManager = finalOutputImage;
             }
 
-            glfwDestroyWindow(window);
         };
 
         std::thread(oneWindowThread).detach();
@@ -487,8 +490,14 @@ int main()
         std::thread(oneWindowThread).detach();
         std::thread(oneWindowThread).detach();
 
-        while (true)
+        while (!glfwWindowShouldClose(windows[0]))
         {
+             glfwPollEvents();
+        }
+
+        for (size_t i = 0; i < windows.size(); i++)
+        {
+            glfwDestroyWindow(windows[i]);
         }
         glfwTerminate();
     }

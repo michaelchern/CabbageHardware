@@ -82,16 +82,12 @@ uint32_t HardwareImage::storeDescriptor()
 
 bool HardwareImage::copyFromBuffer(const HardwareBuffer& buffer)
 {
-    std::unique_lock<std::mutex> lock(imageMutex);
-
     globalHardwareContext.mainDevice->resourceManager.copyBufferToImage(bufferGlobalPool[*buffer.bufferID].bufferHandle, imageGlobalPool[*imageID].imageHandle, imageGlobalPool[*imageID].imageSize.x, imageGlobalPool[*imageID].imageSize.y);
 	return true;
 }
 
 bool HardwareImage::copyFromData(const void* inputData)
 {
-    std::unique_lock<std::mutex> lock(imageMutex);
-
 	HardwareBuffer stagingBuffer = HardwareBuffer(imageGlobalPool[*imageID].imageSize.x * imageGlobalPool[*imageID].imageSize.y * imageGlobalPool[*imageID].pixelSize, BufferUsage::StorageBuffer, inputData);
 	copyFromBuffer(stagingBuffer);
 	return true;
