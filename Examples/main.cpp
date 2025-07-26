@@ -429,6 +429,8 @@ int main()
             windows[i] = glfwCreateWindow(400, 400, "Cabbage Engine ", nullptr, nullptr);
         }
 
+        std::atomic_bool running = true;
+
         auto oneWindowThread = [&](void* surface) {
             //HardwareDisplayer displayManager(surface);
 
@@ -459,7 +461,7 @@ int main()
             auto startTime = std::chrono::high_resolution_clock::now();
 
 
-            while (true)
+            while (running)
             {
                 float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
 
@@ -489,19 +491,17 @@ int main()
             std::thread(oneWindowThread, glfwGetWin32Window(windows[i])).detach();
         }
 
-        auto shouldClosed = [&]() {
+        while (running)
+        {
+            glfwPollEvents();
             for (size_t i = 0; i < windows.size(); i++)
             {
                 if (glfwWindowShouldClose(windows[i]))
                 {
-                    return true;
+                    running = false;
+                    break;
                 }
             }
-        };
-
-        while (true)
-        {
-            glfwPollEvents();
         }
 
         for (size_t i = 0; i < windows.size(); i++)
