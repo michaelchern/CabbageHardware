@@ -200,22 +200,15 @@ struct RasterizerUniformBufferObject
     ktm::fvec3 viewPos = ktm::fvec3(2.0f, 2.0f, 2.0f);
     ktm::fvec3 lightColor = ktm::fvec3(10.0f, 10.0f, 10.0f);
     ktm::fvec3 lightPos = ktm::fvec3(1.0f, 1.0f, 1.0f);
-} ;
+};
 
 struct ComputeUniformBufferObject
 {
     uint32_t imageID;
-} ;
+};
 
 int main()
 {
-     std::thread([&]() {
-         while (true)
-         {
-         }
-     }).detach();
-
-
     RasterizerUniformBufferObject rasterizerUniformBufferObject;
     ComputeUniformBufferObject computeUniformData;
 
@@ -284,10 +277,22 @@ int main()
             computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
             computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
-            displayManager0 = finalOutputImage;
-            displayManager1 = finalOutputImage;
-            displayManager2 = finalOutputImage;
-            displayManager3 = finalOutputImage;
+            std::thread([&]() {
+                displayManager0 = finalOutputImage;
+            }).detach();
+
+            std::thread([&]() {
+                displayManager1 = finalOutputImage;
+            }).detach();
+
+            std::thread([&]() {
+                displayManager2 = finalOutputImage;
+            }).detach();
+
+            std::thread([&]() {
+                displayManager3 = finalOutputImage;
+            }).detach();
+
         }
 
         glfwDestroyWindow(window0);
