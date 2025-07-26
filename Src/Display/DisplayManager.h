@@ -59,8 +59,7 @@ private:
 
         while (true)
         {
-            currentQueueIndex.fetch_add(1);
-            uint16_t queueIndex = currentQueueIndex.load() % presentQueues.size();
+            uint16_t queueIndex = currentQueueIndex.fetch_add(1) % presentQueues.size();
             if (presentQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &presentQueues[queueIndex];

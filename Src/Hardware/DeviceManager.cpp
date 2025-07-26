@@ -227,7 +227,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         while (true)
         {
             currentGraphicsQueueIndex.fetch_add(1);
-            uint16_t queueIndex = currentGraphicsQueueIndex.load() % graphicsQueues.size();
+            uint16_t queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
             if (graphicsQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &graphicsQueues[queueIndex];
@@ -239,8 +239,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     case QueueType::ComputeQueue: {
         while (true)
         {
-            currentComputeQueueIndex.fetch_add(1);
-            uint16_t queueIndex = currentComputeQueueIndex.load() % computeQueues.size();
+            uint16_t queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
             if (computeQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &computeQueues[queueIndex];
@@ -252,8 +251,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     case QueueType::TransferQueue: {
         while (true)
         {
-            currentTransferQueueIndex.fetch_add(1);
-            uint16_t queueIndex = currentTransferQueueIndex.load() % transferQueues.size();
+            uint16_t queueIndex = currentTransferQueueIndex.fetch_add(1) % transferQueues.size();
             if (transferQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &transferQueues[queueIndex];
