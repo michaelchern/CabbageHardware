@@ -483,9 +483,9 @@ int main()
         };
 
         std::thread(oneWindowThread).detach();
-        std::thread(oneWindowThread).detach();
-        std::thread(oneWindowThread).detach();
-        std::thread(oneWindowThread).detach();
+        //std::thread(oneWindowThread).detach();
+        //std::thread(oneWindowThread).detach();
+        //std::thread(oneWindowThread).detach();
 
         while (true)
         {

@@ -65,6 +65,7 @@ private:
                 queueIndex = (queueIndex + 1) % presentQueues.size();
             }
         }
+        std::cout << "Present Queue Index: " << queueIndex << std::endl;
 
         VkResult result = vkQueuePresentKHR(presentQueues[queueIndex].vkQueue, &persentInfo);
 
