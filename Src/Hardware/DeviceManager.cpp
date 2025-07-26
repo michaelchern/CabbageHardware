@@ -244,7 +244,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         }
         queue = &graphicsQueues[queueIndex];
 
-        std::cout << "Graphics Queue Index: " << queueIndex << std::endl;
+        //std::cout << "Graphics Queue Index: " << queueIndex << std::endl;
         break;
     }
 
@@ -265,7 +265,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         }
         queue = &computeQueues[queueIndex];
 
-        std::cout << "Compute Queue Index: " << queueIndex << std::endl;
+        //std::cout << "Compute Queue Index: " << queueIndex << std::endl;
         break;
     }
 
@@ -286,7 +286,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         }
         queue = &transferQueues[queueIndex];
 
-        std::cout << "Transfer Queue Index: " << queueIndex << std::endl;
+        //std::cout << "Transfer Queue Index: " << queueIndex << std::endl;
         break;
     }
     }
