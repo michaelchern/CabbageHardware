@@ -228,29 +228,23 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     switch (queueType)
     {
     case QueueType::GraphicsQueue: {
-        currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
-        uint16_t queueIndex = currentGraphicsQueueIndex;
+        uint16_t queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
         while (true)
         {
             if (graphicsQueues[queueIndex].queueMutex->try_lock())
             {
+                queue = &graphicsQueues[queueIndex];
                 break;
             }
             else
             {
-                currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
-                queueIndex = currentGraphicsQueueIndex;
+                queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
             }
         }
-        queue = &graphicsQueues[queueIndex];
-
-        //std::cout << "Graphics Queue Index: " << queueIndex << std::endl;
         break;
     }
-
     case QueueType::ComputeQueue: {
-        currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
-        uint16_t queueIndex = currentComputeQueueIndex;
+        uint16_t queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
         while (true)
         {
             if (computeQueues[queueIndex].queueMutex->try_lock())
@@ -259,34 +253,27 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
             }
             else
             {
-                currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
-                queueIndex = currentComputeQueueIndex;
+                queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
             }
         }
         queue = &computeQueues[queueIndex];
 
-        //std::cout << "Compute Queue Index: " << queueIndex << std::endl;
         break;
     }
-
     case QueueType::TransferQueue: {
-        currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
-        uint16_t queueIndex = currentTransferQueueIndex;
+        uint16_t queueIndex = currentTransferQueueIndex.fetch_add(1) % transferQueues.size();
         while (true)
         {
             if (transferQueues[queueIndex].queueMutex->try_lock())
             {
+                queue = &transferQueues[queueIndex];
                 break;
             }
             else
             {
-                currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
-                queueIndex = currentTransferQueueIndex;
+                queueIndex = currentTransferQueueIndex.fetch_add(1) % transferQueues.size();
             }
         }
-        queue = &transferQueues[queueIndex];
-
-        //std::cout << "Transfer Queue Index: " << queueIndex << std::endl;
         break;
     }
     }

@@ -55,8 +55,7 @@ private:
 
 	bool submitQueuePresent(VkPresentInfoKHR &persentInfo)
     {
-        currentQueueIndex = (currentQueueIndex + 1) % presentQueues.size();
-        uint16_t queueIndex = currentQueueIndex;
+        uint16_t queueIndex = currentQueueIndex.fetch_add(1) % presentQueues.size();
         while (true)
         {
             if (presentQueues[queueIndex].queueMutex->try_lock())
@@ -65,8 +64,7 @@ private:
             }
             else
             {
-                currentQueueIndex = (currentQueueIndex + 1) % presentQueues.size();
-                queueIndex = currentQueueIndex;
+                queueIndex = currentQueueIndex.fetch_add(1) % presentQueues.size();
             }
         }
         //std::cout << "Present Queue Index: " << queueIndex << std::endl;

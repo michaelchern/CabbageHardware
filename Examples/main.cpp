@@ -497,7 +497,7 @@ int main()
             {
                 if (glfwWindowShouldClose(windows[i]))
                 {
-                    running = false;
+                    running.exchange(false);
                     break;
                 }
             }
