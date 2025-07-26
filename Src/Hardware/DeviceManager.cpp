@@ -228,6 +228,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     switch (queueType)
     {
     case QueueType::GraphicsQueue: {
+        currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
         uint16_t queueIndex = currentGraphicsQueueIndex;
         while (true)
         {
@@ -248,6 +249,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     }
 
     case QueueType::ComputeQueue: {
+        currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
         uint16_t queueIndex = currentComputeQueueIndex;
         while (true)
         {
@@ -268,6 +270,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     }
 
     case QueueType::TransferQueue: {
+        currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
         uint16_t queueIndex = currentTransferQueueIndex;
         while (true)
         {

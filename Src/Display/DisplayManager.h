@@ -55,6 +55,7 @@ private:
 
 	bool submitQueuePresent(VkPresentInfoKHR &persentInfo)
     {
+        currentQueueIndex = (currentQueueIndex + 1) % presentQueues.size();
         uint16_t queueIndex = currentQueueIndex;
         while (true)
         {
