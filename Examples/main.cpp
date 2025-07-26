@@ -431,8 +431,7 @@ int main()
 
         std::atomic_bool running = true;
 
-        auto oneWindowThread = [&](void* surface) 
-            {
+        auto oneWindowThread = [&](void *surface) {
             HardwareDisplayer displayManager(surface);
 
             RasterizerUniformBufferObject rasterizerUniformBufferObject;
@@ -482,7 +481,7 @@ int main()
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
                 computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
-                 //displayManager = finalOutputImage;
+                displayManager = finalOutputImage;
             }
         };
 
