@@ -221,7 +221,6 @@ bool DeviceManager::createCommandBuffers()
 bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType)
 {
     QueueUtils* queue;
-
     switch (queueType)
     {
     case QueueType::GraphicsQueue: {
@@ -246,6 +245,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         {
             if (computeQueues[queueIndex].queueMutex->try_lock())
             {
+                queue = &computeQueues[queueIndex];
                 break;
             }
             else
@@ -253,8 +253,6 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
                 queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
             }
         }
-        queue = &computeQueues[queueIndex];
-
         break;
     }
     case QueueType::TransferQueue: {
