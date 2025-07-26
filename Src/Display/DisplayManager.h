@@ -69,7 +69,7 @@ private:
                 queueIndex = currentQueueIndex;
             }
         }
-        std::cout << "Present Queue Index: " << queueIndex << std::endl;
+        //std::cout << "Present Queue Index: " << queueIndex << std::endl;
 
         VkResult result = vkQueuePresentKHR(presentQueues[queueIndex].vkQueue, &persentInfo);
 

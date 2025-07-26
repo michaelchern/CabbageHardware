@@ -48,12 +48,12 @@ struct ResourceManager
 	};
 
 
-	struct 
-	{
-		VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
-		VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-		VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-	}bindlessDescriptor;
+	struct
+    {
+        VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+        VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+        VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+    } bindlessDescriptor;;
 
 
 	ResourceManager();
@@ -114,20 +114,19 @@ private:
 	const uint32_t TextureBinding = 1;
 	const uint32_t StorageBufferBinding = 2;
 	const uint32_t StorageImageBinding = 3;
-	//const uint32_t accelerationStructureBinding = 4;
 
 	std::unordered_map<VkBuffer, int> UniformBindingList;
 	std::unordered_map<VkImageView, int> TextureBindingList;
 	std::unordered_map<VkBuffer, int> StorageBufferBindingList;
 	std::unordered_map<VkImageView, int> StorageImageBindingList;
-	//std::unordered_map<VkAccelerationStructureKHR, int> accelerationStructureBindingList;
+
+	std::mutex bindlessDescriptorMutex;
+
 
 	uint32_t UniformBindingIndex = 0;
-	uint32_t TextureBindingIndex = 0;
-	uint32_t StorageBufferBindingIndex = 0;
-	uint32_t StorageImageBindingIndex = 0;
-	//uint32_t accelerationStructureBindingIndex = 0;
-
+    uint32_t TextureBindingIndex = 0;
+    uint32_t StorageBufferBindingIndex = 0;
+    uint32_t StorageImageBindingIndex = 0;
 
 	uint64_t deviceMemorySize = 0;
 	uint64_t hostSharedMemorySize = 0;

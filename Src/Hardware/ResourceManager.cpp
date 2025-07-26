@@ -850,10 +850,7 @@ void ResourceManager::createBindlessDescriptorSet()
 
 uint32_t ResourceManager::storeDescriptor(ImageHardwareWrap image)
 {
-    // Ensure the image view is created with the correct usage flags for storage images
-    // if (image.imageUsage & VK_IMAGE_USAGE_STORAGE_BIT) {
-    //	image.imageView = createImageView(image);
-    //}
+    std::unique_lock<std::mutex> lock(bindlessDescriptorMutex);
 
     uint32_t textureIndex = -1;
 
@@ -915,6 +912,8 @@ uint32_t ResourceManager::storeDescriptor(ImageHardwareWrap image)
 
 uint32_t ResourceManager::storeDescriptor(BufferHardwareWrap buffer)
 {
+    std::unique_lock<std::mutex> lock(bindlessDescriptorMutex);
+
     uint32_t bufferIndex = -1;
 
     VkDescriptorType descriptorType = (buffer.bufferUsage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
