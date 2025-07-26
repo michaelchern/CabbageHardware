@@ -121,7 +121,7 @@ class DeviceManager
 
     //std::mutex deviceMutex;
 
-    uint64_t semaphoreValue = 0;
+    std::atomic_uint64_t semaphoreValue = 0;
     VkSemaphore timelineSemaphore;
 
     std::atomic_uint16_t currentGraphicsQueueIndex = 0;

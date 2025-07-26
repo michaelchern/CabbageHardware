@@ -294,16 +294,18 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     commandBufferSubmitInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
     commandBufferSubmitInfo.commandBuffer = queue->commandBuffer;
 
+    uint64_t waitValue = semaphoreValue.fetch_add(1);
+
     VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo{};
     waitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
     waitSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-    waitSemaphoreSubmitInfo.value = semaphoreValue++;
+    waitSemaphoreSubmitInfo.value = waitValue;
     waitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
 
     VkSemaphoreSubmitInfo signalSemaphoreSubmitInfo{};
     signalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
     signalSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-    signalSemaphoreSubmitInfo.value = semaphoreValue;
+    signalSemaphoreSubmitInfo.value = waitValue + 1;
     signalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
 
     VkSubmitInfo2 submitInfo{};
