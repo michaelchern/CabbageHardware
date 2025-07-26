@@ -226,7 +226,6 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     case QueueType::GraphicsQueue: {
         while (true)
         {
-            currentGraphicsQueueIndex.fetch_add(1);
             uint16_t queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
             if (graphicsQueues[queueIndex].queueMutex->try_lock())
             {
