@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <mutex>
 #include <memory>
 #include <type_traits>
 #include <algorithm>
@@ -104,12 +105,15 @@ struct HardwareImage
 
 	bool blitFromImage(const HardwareImage& buffer);
 	bool copyFromImage(const HardwareImage& buffer);
-	bool copyFromBuffer(const HardwareBuffer& buffer);
-	bool copyFromData(const void* inputData);
+
 
 	HardwareImage& operator= (const HardwareImage& other);
 
 	std::shared_ptr<uint64_t> imageID;
+
+  private:
+    bool copyFromBuffer(const HardwareBuffer &buffer);
+    bool copyFromData(const void *inputData);
 };
 
 

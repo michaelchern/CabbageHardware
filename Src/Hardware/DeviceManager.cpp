@@ -224,11 +224,12 @@ bool DeviceManager::createCommandBuffers()
 bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType)
 {
     QueueUtils* queue;
-    uint16_t queueIndex = 0;
 
     switch (queueType)
     {
     case QueueType::GraphicsQueue: {
+        currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
+        uint16_t queueIndex = currentGraphicsQueueIndex;
         while (true)
         {
             if (graphicsQueues[queueIndex].queueMutex->try_lock())
@@ -237,14 +238,19 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
             }
             else
             {
-                queueIndex = (queueIndex + 1) % graphicsQueues.size();
+                currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
+                queueIndex = currentGraphicsQueueIndex;
             }
         }
         queue = &graphicsQueues[queueIndex];
+
+        //std::cout << "Graphics Queue Index: " << queueIndex << std::endl;
         break;
     }
 
     case QueueType::ComputeQueue: {
+        currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
+        uint16_t queueIndex = currentComputeQueueIndex;
         while (true)
         {
             if (computeQueues[queueIndex].queueMutex->try_lock())
@@ -253,14 +259,19 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
             }
             else
             {
-                queueIndex = (queueIndex + 1) % computeQueues.size();
+                currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
+                queueIndex = currentComputeQueueIndex;
             }
         }
         queue = &computeQueues[queueIndex];
+
+        //std::cout << "Compute Queue Index: " << queueIndex << std::endl;
         break;
     }
 
     case QueueType::TransferQueue: {
+        currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
+        uint16_t queueIndex = currentTransferQueueIndex;
         while (true)
         {
             if (transferQueues[queueIndex].queueMutex->try_lock())
@@ -269,10 +280,13 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
             }
             else
             {
-                queueIndex = (queueIndex + 1) % transferQueues.size();
+                currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
+                queueIndex = currentTransferQueueIndex;
             }
         }
         queue = &transferQueues[queueIndex];
+
+        //std::cout << "Transfer Queue Index: " << queueIndex << std::endl;
         break;
     }
     }
@@ -331,14 +345,16 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     return true;
 }
 
-bool DeviceManager::waitALL()
-{
-    VkSemaphoreWaitInfo waitInfo{};
-    waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
-    waitInfo.semaphoreCount = 1;
-    waitInfo.pSemaphores = &timelineSemaphore;
-    waitInfo.pValues = &semaphoreValue;
-    vkWaitSemaphores(logicalDevice, &waitInfo, UINT64_MAX);
-
-    return true;
-}
+//bool DeviceManager::waitALL()
+//{
+//    std::unique_lock<std::mutex> lock(deviceMutex);
+//
+//    VkSemaphoreWaitInfo waitInfo{};
+//    waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+//    waitInfo.semaphoreCount = 1;
+//    waitInfo.pSemaphores = &timelineSemaphore;
+//    waitInfo.pValues = &semaphoreValue;
+//    vkWaitSemaphores(logicalDevice, &waitInfo, UINT64_MAX);
+//
+//    return true;
+//}

@@ -15,9 +15,9 @@ struct HardwareContext
         ResourceManager resourceManager;
     };
 
-    std::vector<HardwareUtils> hardwareUtils;
+    std::vector<std::shared_ptr<HardwareUtils>> hardwareUtils;
 
-    HardwareUtils* mainDevice;
+    std::shared_ptr<HardwareUtils> mainDevice;
 
     VkInstance getVulkanInstance();
 

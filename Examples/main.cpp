@@ -54,47 +54,119 @@ std::string shaderPath = [] {
 }();
 
 std::vector<float> pos = {
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
 
-	-0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
 
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
 
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
 
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f, -0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
 
-	-0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    -0.5f,
 };
 
 std::vector<float> normal = {
@@ -124,68 +196,206 @@ std::vector<float> normal = {
 };
 
 std::vector<float> textureUV = {
-	// Back face
-	0.0f, 0.0f,
-	1.0f, 0.0f,
-	1.0f, 1.0f,
-	1.0f, 1.0f,
-	0.0f, 1.0f,
-	0.0f, 0.0f,
+    // Back face
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
 
-	// Front face
-	0.0f, 0.0f,
-	1.0f, 0.0f,
-	1.0f, 1.0f,
-	1.0f, 1.0f,
-	0.0f, 1.0f,
-	0.0f, 0.0f,
+    // Front face
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
 
-	// Left face
-	0.0f, 0.0f,
-	1.0f, 0.0f,
-	1.0f, 1.0f,
-	1.0f, 1.0f,
-	0.0f, 1.0f,
-	0.0f, 0.0f,
+    // Left face
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
 
-	// Right face
-	0.0f, 0.0f,
-	1.0f, 0.0f,
-	1.0f, 1.0f,
-	1.0f, 1.0f,
-	0.0f, 1.0f,
-	0.0f, 0.0f,
+    // Right face
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
 
-	// Bottom face
-	0.0f, 0.0f,
-	1.0f, 0.0f,
-	1.0f, 1.0f,
-	1.0f, 1.0f,
-	0.0f, 1.0f,
-	0.0f, 0.0f,
+    // Bottom face
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
 
-	// Top face
-	0.0f, 0.0f,
-	1.0f, 0.0f,
-	1.0f, 1.0f,
-	1.0f, 1.0f,
-	0.0f, 1.0f,
-	0.0f, 0.0f,
+    // Top face
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
 };
 
 std::vector<float> color = {
-	// Back face (Red)
-	1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,
-	// Front face (Green)
-	0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,
-	// Left face (Blue)
-	0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,
-	// Right face (Yellow)
-	1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
-	// Bottom face (Cyan)
-	0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f, 1.0f,
-	// Top face (Magenta)
-	1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, 1.0f,
+    // Back face (Red)
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    // Front face (Green)
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    // Left face (Blue)
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    // Right face (Yellow)
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    // Bottom face (Cyan)
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    // Top face (Magenta)
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
 };
 
 std::vector<uint32_t> indices =
@@ -200,94 +410,103 @@ struct RasterizerUniformBufferObject
     ktm::fvec3 viewPos = ktm::fvec3(2.0f, 2.0f, 2.0f);
     ktm::fvec3 lightColor = ktm::fvec3(10.0f, 10.0f, 10.0f);
     ktm::fvec3 lightPos = ktm::fvec3(1.0f, 1.0f, 1.0f);
-} ;
+};
 
 struct ComputeUniformBufferObject
 {
     uint32_t imageID;
-} ;
+};
 
 int main()
 {
-    RasterizerUniformBufferObject rasterizerUniformBufferObject;
-    ComputeUniformBufferObject computeUniformData;
-
-    HardwareBuffer postionBuffer = HardwareBuffer(pos, BufferUsage::VertexBuffer);
-    HardwareBuffer normalBuffer = HardwareBuffer(normal, BufferUsage::VertexBuffer);
-    HardwareBuffer uvBuffer = HardwareBuffer(textureUV, BufferUsage::VertexBuffer);
-    HardwareBuffer colorBuffer = HardwareBuffer(color, BufferUsage::VertexBuffer);
-
-    HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
-
-    HardwareBuffer computeUniformBuffer = HardwareBuffer(sizeof(ComputeUniformBufferObject), BufferUsage::UniformBuffer);
-
-    HardwareBuffer rasterizerUniformBuffer = HardwareBuffer(sizeof(RasterizerUniformBufferObject), BufferUsage::UniformBuffer);
-
-    int width, height, channels;
-    unsigned char *data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &channels, 0);
-    HardwareImage texture(ktm::uvec2(width, height), ImageFormat::RGBA8_SRGB, ImageUsage::SampledImage, 1, data);
-
-    HardwareImage finalOutputImage(ktm::uvec2(800, 800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
-
-    RasterizerPipeline rasterizer(readStringFile(shaderPath + "/vert.glsl"), readStringFile(shaderPath + "/frag.glsl"));
-
-    ComputePipeline computer(readStringFile(shaderPath + "/compute.glsl"));
-
-    auto startTime = std::chrono::high_resolution_clock::now();
-
     if (glfwInit() >= 0)
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        GLFWwindow *window0 = glfwCreateWindow(800, 800, "Cabbage Engine 0", nullptr, nullptr);
-        HardwareDisplayer displayManager0(glfwGetWin32Window(window0));
-
-        GLFWwindow *window1 = glfwCreateWindow(800, 800, "Cabbage Engine 1", nullptr, nullptr);
-        HardwareDisplayer displayManager1(glfwGetWin32Window(window1));
-
-        GLFWwindow *window2 = glfwCreateWindow(800, 800, "Cabbage Engine 2", nullptr, nullptr);
-        HardwareDisplayer displayManager2(glfwGetWin32Window(window2));
-
-        GLFWwindow *window3 = glfwCreateWindow(800, 800, "Cabbage Engine 3", nullptr, nullptr);
-        HardwareDisplayer displayManager3(glfwGetWin32Window(window3));
-
-        while (!glfwWindowShouldClose(window0) &&
-               !glfwWindowShouldClose(window1) &&
-               !glfwWindowShouldClose(window2) &&
-               !glfwWindowShouldClose(window3))
+        std::vector<GLFWwindow *> windows(8);
+        for (size_t i = 0; i < windows.size(); i++)
         {
-            glfwPollEvents();
-
-            float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
-
-            rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
-            rasterizerUniformBufferObject.model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
-            rasterizerUniformBuffer.copyFromData(&rasterizerUniformBufferObject, sizeof(rasterizerUniformBufferObject));
-            rasterizer["pushConsts.uniformBufferIndex"] = rasterizerUniformBuffer.storeDescriptor();
-            rasterizer["inPosition"] = postionBuffer;
-            rasterizer["inColor"] = colorBuffer;
-            rasterizer["inTexCoord"] = uvBuffer;
-            rasterizer["inNormal"] = normalBuffer;
-            rasterizer["outColor"] = finalOutputImage;
-            rasterizer.recordGeomMesh(indexBuffer);
-            rasterizer.executePipeline(ktm::uvec2(800, 800));
-
-            computeUniformData.imageID = finalOutputImage.storeDescriptor();
-            computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
-            computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
-            computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
-
-            displayManager0 = finalOutputImage;
-            displayManager1 = finalOutputImage;
-            displayManager2 = finalOutputImage;
-            displayManager3 = finalOutputImage;
+            windows[i] = glfwCreateWindow(400, 400, "Cabbage Engine ", nullptr, nullptr);
         }
 
-        glfwDestroyWindow(window0);
-        glfwDestroyWindow(window1);
-        glfwDestroyWindow(window2);
-        glfwDestroyWindow(window3);
+        std::atomic_bool running = true;
 
+        auto oneWindowThread = [&](void *surface) {
+            HardwareDisplayer displayManager(surface);
+
+            RasterizerUniformBufferObject rasterizerUniformBufferObject;
+            ComputeUniformBufferObject computeUniformData;
+
+            HardwareBuffer postionBuffer = HardwareBuffer(pos, BufferUsage::VertexBuffer);
+            HardwareBuffer normalBuffer = HardwareBuffer(normal, BufferUsage::VertexBuffer);
+            HardwareBuffer uvBuffer = HardwareBuffer(textureUV, BufferUsage::VertexBuffer);
+            HardwareBuffer colorBuffer = HardwareBuffer(color, BufferUsage::VertexBuffer);
+
+            HardwareBuffer indexBuffer = HardwareBuffer(indices, BufferUsage::IndexBuffer);
+
+            HardwareBuffer computeUniformBuffer = HardwareBuffer(sizeof(ComputeUniformBufferObject), BufferUsage::UniformBuffer);
+
+            HardwareBuffer rasterizerUniformBuffer = HardwareBuffer(sizeof(RasterizerUniformBufferObject), BufferUsage::UniformBuffer);
+
+            int width, height, channels;
+            unsigned char *data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &channels, 0);
+            HardwareImage texture(ktm::uvec2(width, height), ImageFormat::RGBA8_SRGB, ImageUsage::SampledImage, 1, data);
+
+            HardwareImage finalOutputImage(ktm::uvec2(800, 800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
+
+            RasterizerPipeline rasterizer(readStringFile(shaderPath + "/vert.glsl"), readStringFile(shaderPath + "/frag.glsl"));
+
+            ComputePipeline computer(readStringFile(shaderPath + "/compute.glsl"));
+
+            auto startTime = std::chrono::high_resolution_clock::now();
+
+            while (running)
+            {
+                float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
+
+                rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
+                rasterizerUniformBufferObject.model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+                rasterizerUniformBuffer.copyFromData(&rasterizerUniformBufferObject, sizeof(rasterizerUniformBufferObject));
+                rasterizer["pushConsts.uniformBufferIndex"] = rasterizerUniformBuffer.storeDescriptor();
+                rasterizer["inPosition"] = postionBuffer;
+                rasterizer["inColor"] = colorBuffer;
+                rasterizer["inTexCoord"] = uvBuffer;
+                rasterizer["inNormal"] = normalBuffer;
+                rasterizer["outColor"] = finalOutputImage;
+                rasterizer.recordGeomMesh(indexBuffer);
+                rasterizer.executePipeline(ktm::uvec2(800, 800));
+
+                computeUniformData.imageID = finalOutputImage.storeDescriptor();
+                computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
+                computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
+                computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
+
+                displayManager = finalOutputImage;
+            }
+        };
+
+        for (size_t i = 0; i < windows.size(); i++)
+        {
+            std::thread(oneWindowThread, glfwGetWin32Window(windows[i])).detach();
+        }
+
+        while (running)
+        {
+            glfwPollEvents();
+            for (size_t i = 0; i < windows.size(); i++)
+            {
+                if (glfwWindowShouldClose(windows[i]))
+                {
+                    running = false;
+                    break;
+                }
+            }
+        }
+
+        for (size_t i = 0; i < windows.size(); i++)
+        {
+            glfwDestroyWindow(windows[i]);
+        }
         glfwTerminate();
     }
 

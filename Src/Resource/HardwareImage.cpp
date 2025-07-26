@@ -5,8 +5,12 @@ std::unordered_map<uint64_t, ResourceManager::ImageHardwareWrap> imageGlobalPool
 std::unordered_map<uint64_t, uint64_t> imageRefCount;
 uint64_t currentImageID = 0;
 
+std::mutex imageMutex;
+
 HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 {
+    std::unique_lock<std::mutex> lock(imageMutex);
+
     if (imageGlobalPool.count(*other.imageID))
     {
         imageRefCount[*other.imageID]++;
@@ -27,11 +31,15 @@ HardwareImage& HardwareImage::operator= (const HardwareImage& other)
 
 HardwareImage::HardwareImage()
 {
+    std::unique_lock<std::mutex> lock(imageMutex);
+
     this->imageID = std::make_shared<uint64_t>(std::numeric_limits<uint64_t>::max());
 }
 
 HardwareImage::HardwareImage(const HardwareImage &other)
 {
+    std::unique_lock<std::mutex> lock(imageMutex);
+
     this->imageID = other.imageID;
     if (imageGlobalPool.count(*other.imageID))
     {
@@ -41,6 +49,8 @@ HardwareImage::HardwareImage(const HardwareImage &other)
 
 HardwareImage::~HardwareImage()
 {
+    std::unique_lock<std::mutex> lock(imageMutex);
+
     if (imageGlobalPool.count(*imageID))
     {
         imageRefCount[*imageID]--;
@@ -55,6 +65,8 @@ HardwareImage::~HardwareImage()
 
 HardwareImage::operator bool()
 {
+    std::unique_lock<std::mutex> lock(imageMutex);
+
     return imageID != nullptr &&
            imageGlobalPool.count(*imageID) &&
            imageGlobalPool[*imageID].imageHandle != VK_NULL_HANDLE;
@@ -62,6 +74,8 @@ HardwareImage::operator bool()
 
 uint32_t HardwareImage::storeDescriptor()
 {
+    std::unique_lock<std::mutex> lock(imageMutex);
+
     return globalHardwareContext.mainDevice->resourceManager.storeDescriptor(imageGlobalPool[*imageID]);
 }
 
@@ -82,6 +96,8 @@ bool HardwareImage::copyFromData(const void* inputData)
 
 HardwareImage::HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage, int arrayLayers, void* imageData)
 {
+    std::unique_lock<std::mutex> lock(imageMutex);
+
     this->imageID = std::make_shared<uint64_t>(currentImageID++);
 
 	imageRefCount[*this->imageID] = 1;
