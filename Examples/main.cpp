@@ -431,8 +431,9 @@ int main()
 
         std::atomic_bool running = true;
 
-        auto oneWindowThread = [&](void* surface) {
-            //HardwareDisplayer displayManager(surface);
+        auto oneWindowThread = [&](void* surface) 
+            {
+            HardwareDisplayer displayManager(surface);
 
             RasterizerUniformBufferObject rasterizerUniformBufferObject;
             ComputeUniformBufferObject computeUniformData;
@@ -459,7 +460,6 @@ int main()
             ComputePipeline computer(readStringFile(shaderPath + "/compute.glsl"));
 
             auto startTime = std::chrono::high_resolution_clock::now();
-
 
             while (running)
             {
