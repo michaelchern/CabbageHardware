@@ -30,7 +30,7 @@ HardwareDisplayer& HardwareDisplayer::operator = (const HardwareImage& image)
     std::unique_lock<std::mutex> lock(displayerMutex);
     if (displayerGlobalPool.count(surface))
     {
-        //displayerGlobalPool[surface]->displayFrame(surface,image);
+        displayerGlobalPool[surface]->displayFrame(surface,image);
     }
     return *this;
 }
