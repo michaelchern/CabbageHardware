@@ -8,10 +8,9 @@ std::mutex displayerMutex;
 
 HardwareDisplayer::HardwareDisplayer(void* surface): surface(surface)
 {
-    std::unique_lock<std::mutex> lock(displayerMutex);
-
     if (surface != nullptr && !displayerGlobalPool.count(surface))
     {
+        std::unique_lock<std::mutex> lock(displayerMutex);
         displayerGlobalPool[surface] = std::make_shared<DisplayManager>();
     }
 }
@@ -22,8 +21,6 @@ HardwareDisplayer::~HardwareDisplayer()
 
 HardwareDisplayer &HardwareDisplayer::operator=(const HardwareDisplayer &other)
 {
-    std::unique_lock<std::mutex> lock(displayerMutex);
-
     this->surface = other.surface;
     return *this;
 }
@@ -31,10 +28,9 @@ HardwareDisplayer &HardwareDisplayer::operator=(const HardwareDisplayer &other)
 HardwareDisplayer& HardwareDisplayer::operator = (const HardwareImage& image)
 {
     std::unique_lock<std::mutex> lock(displayerMutex);
-
     if (displayerGlobalPool.count(surface))
     {
-        displayerGlobalPool[surface]->displayFrame(surface,image);
+        //displayerGlobalPool[surface]->displayFrame(surface,image);
     }
     return *this;
 }

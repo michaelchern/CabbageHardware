@@ -347,6 +347,8 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
 
 bool DeviceManager::waitALL()
 {
+    std::unique_lock<std::mutex> lock(deviceMutex);
+
     VkSemaphoreWaitInfo waitInfo{};
     waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
     waitInfo.semaphoreCount = 1;

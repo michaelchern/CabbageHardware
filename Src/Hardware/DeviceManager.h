@@ -64,16 +64,12 @@ class DeviceManager
         return physicalDevice == other.physicalDevice && logicalDevice == other.logicalDevice;
     }
 
-    uint64_t semaphoreValue = 0;
-    VkSemaphore timelineSemaphore;
-
     DeviceManager();
 
     ~DeviceManager();
      
     void initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice);
 
-    void createTimelineSemaphore();
 
     bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType);
 
@@ -121,6 +117,13 @@ class DeviceManager
 
     bool createCommandBuffers();
 
+    void createTimelineSemaphore();
+
+    std::mutex deviceMutex;
+
+    uint64_t semaphoreValue = 0;
+    VkSemaphore timelineSemaphore;
+
     std::atomic_uint16_t currentGraphicsQueueIndex = 0;
     std::atomic_uint16_t currentComputeQueueIndex = 0;
     std::atomic_uint16_t currentTransferQueueIndex = 0;
@@ -128,25 +131,6 @@ class DeviceManager
     std::vector<QueueUtils> graphicsQueues;
     std::vector<QueueUtils> computeQueues;
     std::vector<QueueUtils> transferQueues;
-
-    
-    //QueueUtils getNextGraphicsQueues()
-    //{
-    //    currentGraphicsQueueIndex = (currentGraphicsQueueIndex + 1) % graphicsQueues.size();
-    //    return graphicsQueues[currentGraphicsQueueIndex];
-    //}
-
-    //QueueUtils getNextComputeQueues()
-    //{
-    //    currentComputeQueueIndex = (currentComputeQueueIndex + 1) % computeQueues.size();
-    //    return computeQueues[currentComputeQueueIndex];
-    //}
-
-    //QueueUtils getNextTransferQueues()
-    //{
-    //    currentTransferQueueIndex = (currentTransferQueueIndex + 1) % transferQueues.size();
-    //    return transferQueues[currentTransferQueueIndex];
-    //}
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
 };

@@ -481,7 +481,7 @@ int main()
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
                 computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
 
-                //displayManager = finalOutputImage;
+                displayManager = finalOutputImage;
             }
         };
 
