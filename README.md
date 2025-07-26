@@ -1,7 +1,7 @@
 # TODO
 - (紧急)重构多线程的锁
 - (紧急)Validation Error: [ UNASSIGNED-Threading-MultipleThreads-Write ] Object 0: handle = 0x1141bbf1ea0, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0xa05b236e | vkQueueSubmit(): THREADING ERROR : object of type VkQueue is simultaneously used in current thread 25780 and thread 14712
-- (紧急)每个pipeline自行维护Descriptor（减少多线程同步点）
+- (紧急)display中使用fance同步上下帧
 - (紧急)重构queue的任务间同步、根据使用关系自动推断同步
 - (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题
 - (紧急)BUG：内存泄漏(待定位)
