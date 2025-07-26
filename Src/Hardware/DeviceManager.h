@@ -73,7 +73,7 @@ class DeviceManager
 
     bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType);
 
-    bool waitALL();
+    //bool waitALL();
 
 
     std::vector<QueueUtils> pickAvailableQueues(std::function<bool(const QueueUtils &)> required)
@@ -119,7 +119,7 @@ class DeviceManager
 
     void createTimelineSemaphore();
 
-    std::mutex deviceMutex;
+    //std::mutex deviceMutex;
 
     uint64_t semaphoreValue = 0;
     VkSemaphore timelineSemaphore;

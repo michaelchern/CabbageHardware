@@ -298,7 +298,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             createSwapChain();
         }
 
-		displayDevice->deviceManager.waitALL();
+		//displayDevice->deviceManager.waitALL();
 
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, swapchainSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
