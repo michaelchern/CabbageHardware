@@ -224,49 +224,40 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     switch (queueType)
     {
     case QueueType::GraphicsQueue: {
-        uint16_t queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
         while (true)
         {
+            currentGraphicsQueueIndex.fetch_add(1);
+            uint16_t queueIndex = currentGraphicsQueueIndex.load() % graphicsQueues.size();
             if (graphicsQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &graphicsQueues[queueIndex];
                 break;
             }
-            else
-            {
-                queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
-            }
         }
         break;
     }
     case QueueType::ComputeQueue: {
-        uint16_t queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
         while (true)
         {
+            currentComputeQueueIndex.fetch_add(1);
+            uint16_t queueIndex = currentComputeQueueIndex.load() % computeQueues.size();
             if (computeQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &computeQueues[queueIndex];
                 break;
             }
-            else
-            {
-                queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
-            }
         }
         break;
     }
     case QueueType::TransferQueue: {
-        uint16_t queueIndex = currentTransferQueueIndex.fetch_add(1) % transferQueues.size();
         while (true)
         {
+            currentTransferQueueIndex.fetch_add(1);
+            uint16_t queueIndex = currentTransferQueueIndex.load() % transferQueues.size();
             if (transferQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &transferQueues[queueIndex];
                 break;
-            }
-            else
-            {
-                queueIndex = currentTransferQueueIndex.fetch_add(1) % transferQueues.size();
             }
         }
         break;
