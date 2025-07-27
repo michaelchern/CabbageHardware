@@ -407,7 +407,42 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
              presentInfo.pSwapchains = swapChains;
              presentInfo.pImageIndices = &imageIndex;
 
-             submitQueuePresent(presentInfo);
+             //submitQueuePresent(presentInfo);
+             DeviceManager::QueueUtils *queue;
+             uint16_t queueIndex = 0;
+
+             while (true)
+             {
+                 uint16_t queueIndex = currentQueueIndex.fetch_add(1) % presentQueues.size();
+                 queue = &presentQueues[queueIndex];
+
+                 if (queue->queueMutex->try_lock())
+                 {
+                     uint64_t timelineCounterValue = 0;
+                     vkGetSemaphoreCounterValue(displayDevice->deviceManager.logicalDevice, queue->timelineSemaphore, &timelineCounterValue);
+                     if (timelineCounterValue >= queue->timelineValue)
+                     {
+                         break;
+                     }
+                     else
+                     {
+                         queue->queueMutex->unlock();
+                     }
+                 }
+
+                 std::this_thread::yield();
+             }
+
+             // std::cout << "Present Queue Index: " << queueIndex << std::endl;
+
+             VkResult result = vkQueuePresentKHR(queue->vkQueue, &presentInfo);
+
+             queue->queueMutex->unlock();
+
+             if (result != VK_SUCCESS)
+             {
+                 throw std::runtime_error("failed to vkQueuePresentKHR for a frame!");
+             }
 
             currentFrame = (currentFrame + 1) % swapChainImages.size();
         }
