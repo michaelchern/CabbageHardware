@@ -406,7 +406,7 @@ struct RasterizerUniformBufferObject
     uint32_t textureIndex;
     ktm::fmat4x4 model = ktm::rotate3d_axis(ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
     ktm::fmat4x4 view = ktm::look_at_lh(ktm::fvec3(2.0f, 2.0f, 2.0f), ktm::fvec3(0.0f, 0.0f, 0.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
-    ktm::fmat4x4 proj = ktm::perspective_lh(ktm::radians(45.0f), 800.0f / 800.0f, 0.1f, 10.0f);
+    ktm::fmat4x4 proj = ktm::perspective_lh(ktm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 10.0f);
     ktm::fvec3 viewPos = ktm::fvec3(2.0f, 2.0f, 2.0f);
     ktm::fvec3 lightColor = ktm::fvec3(10.0f, 10.0f, 10.0f);
     ktm::fvec3 lightPos = ktm::fvec3(1.0f, 1.0f, 1.0f);
@@ -423,10 +423,10 @@ int main()
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        std::vector<GLFWwindow *> windows(8);
+        std::vector<GLFWwindow *> windows(1);
         for (size_t i = 0; i < windows.size(); i++)
         {
-            windows[i] = glfwCreateWindow(400, 400, "Cabbage Engine ", nullptr, nullptr);
+            windows[i] = glfwCreateWindow(1920, 1080, "Cabbage Engine ", nullptr, nullptr);
         }
 
         std::atomic_bool running = true;
@@ -452,7 +452,7 @@ int main()
             unsigned char *data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &channels, 0);
             HardwareImage texture(ktm::uvec2(width, height), ImageFormat::RGBA8_SRGB, ImageUsage::SampledImage, 1, data);
 
-            HardwareImage finalOutputImage(ktm::uvec2(800, 800), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
+            HardwareImage finalOutputImage(ktm::uvec2(1920, 1080), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
 
             RasterizerPipeline rasterizer(readStringFile(shaderPath + "/vert.glsl"), readStringFile(shaderPath + "/frag.glsl"));
 
@@ -460,27 +460,27 @@ int main()
 
             auto startTime = std::chrono::high_resolution_clock::now();
 
+            float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
+
+            rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
+            rasterizerUniformBufferObject.model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
+            rasterizerUniformBuffer.copyFromData(&rasterizerUniformBufferObject, sizeof(rasterizerUniformBufferObject));
+            rasterizer["pushConsts.uniformBufferIndex"] = rasterizerUniformBuffer.storeDescriptor();
+            rasterizer["inPosition"] = postionBuffer;
+            rasterizer["inColor"] = colorBuffer;
+            rasterizer["inTexCoord"] = uvBuffer;
+            rasterizer["inNormal"] = normalBuffer;
+            rasterizer["outColor"] = finalOutputImage;
+            rasterizer.recordGeomMesh(indexBuffer);
+
+            computeUniformData.imageID = finalOutputImage.storeDescriptor();
+            computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
+            computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
+
             while (running.load())
             {
-                float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
-
-                rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
-                rasterizerUniformBufferObject.model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
-                rasterizerUniformBuffer.copyFromData(&rasterizerUniformBufferObject, sizeof(rasterizerUniformBufferObject));
-                rasterizer["pushConsts.uniformBufferIndex"] = rasterizerUniformBuffer.storeDescriptor();
-                rasterizer["inPosition"] = postionBuffer;
-                rasterizer["inColor"] = colorBuffer;
-                rasterizer["inTexCoord"] = uvBuffer;
-                rasterizer["inNormal"] = normalBuffer;
-                rasterizer["outColor"] = finalOutputImage;
-                rasterizer.recordGeomMesh(indexBuffer);
-                rasterizer.executePipeline(ktm::uvec2(800, 800));
-
-                computeUniformData.imageID = finalOutputImage.storeDescriptor();
-                computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
-                computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
-                computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
-
+                rasterizer.executePipeline(ktm::uvec2(1920, 1080));
+                computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
                 displayManager = finalOutputImage;
             }
         };
