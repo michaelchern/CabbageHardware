@@ -217,7 +217,12 @@ void DisplayManager::createSwapChain()
 	createInfo.imageColorSpace = surfaceFormat.colorSpace;
 	createInfo.imageExtent = { this->displaySize.x, this->displaySize.y };
 	createInfo.imageArrayLayers = 1;
-	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    createInfo.imageUsage =  VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    
+    if ((capabilities.supportedUsageFlags & createInfo.imageUsage) != createInfo.imageUsage)
+    {
+        throw std::runtime_error("Swapchain does not support required image usage flags (COLOR_ATTACHMENT and TRANSFER_DST)!");
+    }
 
 	std::vector<uint32_t> queueFamilys(displayDevice->deviceManager.getQueueFamilyNumber());
     for (size_t i = 0; i < queueFamilys.size(); i++)
