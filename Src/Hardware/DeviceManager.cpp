@@ -218,7 +218,12 @@ bool DeviceManager::createCommandBuffers()
     return true;
 }
 
-bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType, VkSemaphore waitSemaphore, VkSemaphore signalSemaphore, VkFence signalFence)
+bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction,
+                                              QueueType queueType,
+                                              VkSemaphore waitSemaphore,
+                                              VkSemaphore signalSemaphore,
+                                              VkSemaphore signalTimelineSemaphore,
+                                              uint64_t signalTimelineValue)
 {
     QueueUtils *queue;
     switch (queueType)
@@ -261,15 +266,9 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     }
     }
 
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = queue->commandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = 1;
-
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
     vkBeginCommandBuffer(queue->commandBuffer, &beginInfo);
 
@@ -280,43 +279,54 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     VkCommandBufferSubmitInfo commandBufferSubmitInfo{};
     commandBufferSubmitInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
     commandBufferSubmitInfo.commandBuffer = queue->commandBuffer;
-
+    
     uint64_t waitValue = semaphoreValue.fetch_add(1);
 
     std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos;
-    VkSemaphoreSubmitInfo timelineWaitSemaphoreSubmitInfo{};
-    timelineWaitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    timelineWaitSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-    timelineWaitSemaphoreSubmitInfo.value = waitValue;
-    timelineWaitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-    waitSemaphoreInfos.push_back(timelineWaitSemaphoreSubmitInfo);
-
+    {
+        VkSemaphoreSubmitInfo timelineWaitSemaphoreSubmitInfo{};
+        timelineWaitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+        timelineWaitSemaphoreSubmitInfo.semaphore = timelineSemaphore;
+        timelineWaitSemaphoreSubmitInfo.value = waitValue;
+        timelineWaitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        waitSemaphoreInfos.push_back(timelineWaitSemaphoreSubmitInfo);
+    }
     if (waitSemaphore != VK_NULL_HANDLE)
     {
-        VkSemaphoreSubmitInfo externalWaitSemaphoreSubmitInfo{};
-        externalWaitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-        externalWaitSemaphoreSubmitInfo.semaphore = waitSemaphore;
-        externalWaitSemaphoreSubmitInfo.value = 0; // Assuming binary semaphore
-        externalWaitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-        waitSemaphoreInfos.push_back(externalWaitSemaphoreSubmitInfo);
+        VkSemaphoreSubmitInfo waitInfo{};
+        waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+        waitInfo.semaphore = waitSemaphore;
+        waitInfo.value = 0; // Assuming binary semaphore
+        waitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        waitSemaphoreInfos.push_back(waitInfo);
     }
 
     std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
-    VkSemaphoreSubmitInfo timelineSignalSemaphoreSubmitInfo{};
-    timelineSignalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    timelineSignalSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-    timelineSignalSemaphoreSubmitInfo.value = waitValue + 1;
-    timelineSignalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-    signalSemaphoreInfos.push_back(timelineSignalSemaphoreSubmitInfo);
-
+    {
+        VkSemaphoreSubmitInfo timelineSignalSemaphoreSubmitInfo{};
+        timelineSignalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+        timelineSignalSemaphoreSubmitInfo.semaphore = timelineSemaphore;
+        timelineSignalSemaphoreSubmitInfo.value = waitValue + 1;
+        timelineSignalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        signalSemaphoreInfos.push_back(timelineSignalSemaphoreSubmitInfo);
+    }
     if (signalSemaphore != VK_NULL_HANDLE)
     {
-        VkSemaphoreSubmitInfo externalSignalSemaphoreSubmitInfo{};
-        externalSignalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-        externalSignalSemaphoreSubmitInfo.semaphore = signalSemaphore;
-        externalSignalSemaphoreSubmitInfo.value = 0; // Assuming binary semaphore
-        externalSignalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-        signalSemaphoreInfos.push_back(externalSignalSemaphoreSubmitInfo);
+        VkSemaphoreSubmitInfo signalInfo{};
+        signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+        signalInfo.semaphore = signalSemaphore;
+        signalInfo.value = 0; // Assuming binary semaphore
+        signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        signalSemaphoreInfos.push_back(signalInfo);
+    }
+    if (signalTimelineSemaphore != VK_NULL_HANDLE)
+    {
+        VkSemaphoreSubmitInfo signalInfo{};
+        signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+        signalInfo.semaphore = signalTimelineSemaphore;
+        signalInfo.value = signalTimelineValue;
+        signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        signalSemaphoreInfos.push_back(signalInfo);
     }
 
     VkSubmitInfo2 submitInfo{};
@@ -328,7 +338,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     submitInfo.commandBufferInfoCount = 1;
     submitInfo.pCommandBufferInfos = &commandBufferSubmitInfo;
 
-    VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, signalFence);
+    VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
 
 
     queue->queueMutex->unlock();

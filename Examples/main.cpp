@@ -423,7 +423,7 @@ int main()
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        std::vector<GLFWwindow *> windows(4);
+        std::vector<GLFWwindow *> windows(1);
         for (size_t i = 0; i < windows.size(); i++)
         {
             windows[i] = glfwCreateWindow(400, 400, "Cabbage Engine ", nullptr, nullptr);

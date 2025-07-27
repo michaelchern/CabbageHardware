@@ -72,7 +72,12 @@ class DeviceManager
 
 
 
-	bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType, VkSemaphore waitSemaphore = VK_NULL_HANDLE, VkSemaphore signalSemaphore = VK_NULL_HANDLE, VkFence signalFence = VK_NULL_HANDLE);
+    bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction,
+                                   QueueType queueType = QueueType::GraphicsQueue,
+                                   VkSemaphore waitSemaphore = VK_NULL_HANDLE,
+                                   VkSemaphore signalSemaphore = VK_NULL_HANDLE,
+                                   VkSemaphore signalTimelineSemaphore = VK_NULL_HANDLE,
+                                   uint64_t signalTimelineValue = 0);
 
 
     std::vector<QueueUtils> pickAvailableQueues(std::function<bool(const QueueUtils &)> required)

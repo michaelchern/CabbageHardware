@@ -83,23 +83,30 @@ void DisplayManager::createSyncObjects()
 {
     imageAvailableSemaphores.resize(swapChainImages.size());
     renderFinishedSemaphores.resize(swapChainImages.size());
-    inFlightFences.resize(swapChainImages.size());
+    frameTimelineValues.resize(swapChainImages.size(), 0);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-    VkFenceCreateInfo fenceInfo{};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
     for (size_t i = 0; i < swapChainImages.size(); i++)
     {
         if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(displayDevice->deviceManager.logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
+            vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to create synchronization objects for a frame!");
+            throw std::runtime_error("failed to create binary semaphores for a frame!");
         }
+    }
+
+    VkSemaphoreTypeCreateInfo timelineCreateInfo{};
+    timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
+    timelineCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+    timelineCreateInfo.initialValue = 0;
+
+    semaphoreInfo.pNext = &timelineCreateInfo;
+
+    if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &timelineSemaphore) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create timeline semaphore for a frame!");
     }
 }
 
@@ -307,12 +314,19 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             createSwapChain();
         }
 
-		vkWaitForFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+        // 等待当前帧的 Timeline Semaphore
+        if (frameTimelineValues[currentFrame] > 0)
+        {
+            VkSemaphoreWaitInfo waitInfo{};
+            waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+            waitInfo.semaphoreCount = 1;
+            waitInfo.pSemaphores = &timelineSemaphore;
+            waitInfo.pValues = &frameTimelineValues[currentFrame];
+            vkWaitSemaphores(displayDevice->deviceManager.logicalDevice, &waitInfo, UINT64_MAX);
+        }
 
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
-
-        vkResetFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame]);
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
@@ -355,7 +369,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
-            displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, imageAvailableSemaphores[currentFrame], renderFinishedSemaphores[currentFrame], inFlightFences[currentFrame]);
+            displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, imageAvailableSemaphores[currentFrame], renderFinishedSemaphores[currentFrame]);
              // std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
 
             VkPresentInfoKHR presentInfo{};
