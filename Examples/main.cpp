@@ -423,7 +423,7 @@ int main()
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        std::vector<GLFWwindow *> windows(32);
+        std::vector<GLFWwindow *> windows(4);
         for (size_t i = 0; i < windows.size(); i++)
         {
             windows[i] = glfwCreateWindow(400, 400, "Cabbage Engine ", nullptr, nullptr);
@@ -460,7 +460,7 @@ int main()
 
             auto startTime = std::chrono::high_resolution_clock::now();
 
-            while (running)
+            while (running.load())
             {
                 float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
 
@@ -490,14 +490,14 @@ int main()
             std::thread(oneWindowThread, glfwGetWin32Window(windows[i])).detach();
         }
 
-        while (running)
+        while (running.load())
         {
             glfwPollEvents();
             for (size_t i = 0; i < windows.size(); i++)
             {
                 if (glfwWindowShouldClose(windows[i]))
                 {
-                    running.exchange(false);
+                    running.store(false);
                     break;
                 }
             }
