@@ -33,7 +33,8 @@ private:
 
 	ResourceManager::ImageHardwareWrap displayImage;
 
-    std::vector<VkSemaphore> swapchainSemaphore;
+    std::vector<VkSemaphore> imageAvailableSemaphores;
+    std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
     
     std::atomic_uint16_t currentQueueIndex = 0;
@@ -50,7 +51,7 @@ private:
 	void choosePresentDevice();
 
 
-	void createFrameSemaphores();
+	void createSyncObjects();
 
 	void createSwapChain();
 

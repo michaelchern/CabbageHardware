@@ -218,7 +218,7 @@ bool DeviceManager::createCommandBuffers()
     return true;
 }
 
-bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType)
+bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType, VkSemaphore waitSemaphore, VkSemaphore signalSemaphore, VkFence signalFence)
 {
     QueueUtils* queue;
     switch (queueType)
@@ -305,7 +305,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     submitInfo.commandBufferInfoCount = 1;
     submitInfo.pCommandBufferInfos = &commandBufferSubmitInfo;
 
-    VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, signalFence);
 
     queue->queueMutex->unlock();
 
@@ -316,17 +316,3 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
 
     return true;
 }
-
-//bool DeviceManager::waitALL()
-//{
-//    std::unique_lock<std::mutex> lock(deviceMutex);
-//
-//    VkSemaphoreWaitInfo waitInfo{};
-//    waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
-//    waitInfo.semaphoreCount = 1;
-//    waitInfo.pSemaphores = &timelineSemaphore;
-//    waitInfo.pValues = &semaphoreValue;
-//    vkWaitSemaphores(logicalDevice, &waitInfo, UINT64_MAX);
-//
-//    return true;
-//}

@@ -72,15 +72,19 @@ bool DisplayManager::initDisplayManager(void* surface)
 
 		createSwapChain();
 
-		createFrameSemaphores();
+		createSyncObjects();
 	}
 
 	return true;
 }
 
 
-void DisplayManager::createFrameSemaphores()
+void DisplayManager::createSyncObjects()
 {
+    imageAvailableSemaphores.resize(swapChainImages.size());
+    renderFinishedSemaphores.resize(swapChainImages.size());
+    inFlightFences.resize(swapChainImages.size());
+
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -88,17 +92,15 @@ void DisplayManager::createFrameSemaphores()
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-	swapchainSemaphore.resize(swapChainImages.size());
-    inFlightFences.resize(swapChainImages.size());
-
-	for (size_t i = 0; i < swapChainImages.size(); i++)
-	{
-		if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &swapchainSemaphore[i]) != VK_SUCCESS
-			&& vkCreateFence(displayDevice->deviceManager.logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create synchronization objects for a frame!");
-		}
-	}
+    for (size_t i = 0; i < swapChainImages.size(); i++)
+    {
+        if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+            vkCreateFence(displayDevice->deviceManager.logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create synchronization objects for a frame!");
+        }
+    }
 }
 
 
@@ -305,11 +307,14 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             createSwapChain();
         }
 
-		//displayDevice->deviceManager.waitALL();
+		vkWaitForFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
-        VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, swapchainSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
-        if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
+        VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+        vkResetFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame]);
+
+		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
             //auto start_time_ = std::chrono::high_resolution_clock::now();
             displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage);
@@ -350,13 +355,13 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
-             displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue);
-            //std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
+            displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, imageAvailableSemaphores[currentFrame], renderFinishedSemaphores[currentFrame], inFlightFences[currentFrame]);
+             // std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
 
             VkPresentInfoKHR presentInfo{};
             presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
             presentInfo.waitSemaphoreCount = 1;
-            presentInfo.pWaitSemaphores = &swapchainSemaphore[currentFrame];
+            presentInfo.pWaitSemaphores = &renderFinishedSemaphores[currentFrame];
 
             VkSwapchainKHR swapChains[] = {swapChain};
             presentInfo.swapchainCount = 1;
