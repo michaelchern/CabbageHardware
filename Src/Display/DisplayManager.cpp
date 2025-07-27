@@ -81,28 +81,16 @@ bool DisplayManager::initDisplayManager(void* surface)
 
 void DisplayManager::createSyncObjects()
 {
-    imageAvailableSemaphores.resize(swapChainImages.size());
-    renderFinishedSemaphores.resize(swapChainImages.size());
     frameTimelineValues.resize(swapChainImages.size(), 0);
+
+    VkSemaphoreTypeCreateInfo type_create_info{};
+    type_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO_KHR;
+    type_create_info.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE_KHR;
+    type_create_info.initialValue = 0;
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    for (size_t i = 0; i < swapChainImages.size(); i++)
-    {
-        if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create binary semaphores for a frame!");
-        }
-    }
-
-    VkSemaphoreTypeCreateInfo timelineCreateInfo{};
-    timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
-    timelineCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
-    timelineCreateInfo.initialValue = 0;
-
-    semaphoreInfo.pNext = &timelineCreateInfo;
+    semaphoreInfo.pNext = &type_create_info;
 
     if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &timelineSemaphore) != VK_SUCCESS)
     {
@@ -326,7 +314,8 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
         }
 
         uint32_t imageIndex;
-        VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+        VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, timelineSemaphore, VK_NULL_HANDLE, &imageIndex);
+        // We pass our timeline semaphore to be signaled with 'acquireValue' when the image is available.
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
@@ -369,13 +358,12 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
-            displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, imageAvailableSemaphores[currentFrame], renderFinishedSemaphores[currentFrame]);
-             // std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
+            displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue);
 
             VkPresentInfoKHR presentInfo{};
             presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
             presentInfo.waitSemaphoreCount = 1;
-            presentInfo.pWaitSemaphores = &renderFinishedSemaphores[currentFrame];
+            presentInfo.pWaitSemaphores = &timelineSemaphore;
 
             VkSwapchainKHR swapChains[] = {swapChain};
             presentInfo.swapchainCount = 1;

@@ -33,11 +33,11 @@ private:
 
 	ResourceManager::ImageHardwareWrap displayImage;
 
-    std::vector<VkSemaphore> imageAvailableSemaphores;
-    std::vector<VkSemaphore> renderFinishedSemaphores;
+    //std::vector<VkSemaphore> imageAvailableSemaphores;
+    //std::vector<VkSemaphore> renderFinishedSemaphores;
 
     VkSemaphore timelineSemaphore = VK_NULL_HANDLE;
-    uint64_t timelineCounter = 0;
+    uint64_t timelineValue = 0;
     std::vector<uint64_t> frameTimelineValues;
     
     std::atomic_uint16_t currentQueueIndex = 0;
@@ -85,16 +85,29 @@ private:
             std::this_thread::yield();
         }
 
-        //std::cout << "Present Queue Index: " << queueIndex << std::endl;
+        VkTimelineSemaphoreSubmitInfo timelineInfo{};
+        timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+        timelineInfo.waitSemaphoreValueCount = 1;
+        timelineInfo.pWaitSemaphoreValues = &timelineValue;
+
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.pNext = &timelineInfo;
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = &timelineSemaphore;
+        VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+        submitInfo.pWaitDstStageMask = &waitStage;
+
+        vkQueueSubmit(queue->vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
 
         VkResult result = vkQueuePresentKHR(queue->vkQueue, &persentInfo);
 
         queue->queueMutex->unlock();
 
-		if (result != VK_SUCCESS)
-		{
+        if (result != VK_SUCCESS)
+        {
             throw std::runtime_error("failed to vkQueuePresentKHR for a frame!");
-		}
+        }
         return true;
     }
 
