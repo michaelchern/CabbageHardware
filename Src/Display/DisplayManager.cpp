@@ -245,7 +245,7 @@ void DisplayManager::createSwapChain()
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 	createInfo.presentMode = presentMode;
 	createInfo.clipped = VK_TRUE;
-	createInfo.oldSwapchain = swapChain != VK_NULL_HANDLE ? swapChain : VK_NULL_HANDLE;
+	createInfo.oldSwapchain = swapChain;
 
 	if (vkCreateSwapchainKHR(displayDevice->deviceManager.logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS)
     {
