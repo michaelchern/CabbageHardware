@@ -82,7 +82,6 @@ bool DisplayManager::initDisplayManager(void* surface)
 void DisplayManager::createSyncObjects()
 {
     imageAvailableSemaphores.resize(swapChainImages.size());
-    renderFinishedSemaphores.resize(swapChainImages.size());
     frameTimelineValues.resize(swapChainImages.size(), 0);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
@@ -90,8 +89,7 @@ void DisplayManager::createSyncObjects()
 
     for (size_t i = 0; i < swapChainImages.size(); i++)
     {
-        if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)
+        if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create binary semaphores for a frame!");
         }
@@ -314,7 +312,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             createSwapChain();
         }
 
-        // 等待当前帧的 Timeline Semaphore
+        // 等待当前帧关联的GPU工作完成
         if (frameTimelineValues[currentFrame] > 0)
         {
             VkSemaphoreWaitInfo waitInfo{};
@@ -373,32 +371,43 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
              VkSemaphoreSubmitInfo waitInfo{};
              waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
              waitInfo.semaphore = imageAvailableSemaphores[currentFrame];
-             waitInfo.value = 0;
+             waitInfo.value = 0; // For binary semaphores, this must be 0
              waitInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
              waitSemaphoreInfos.push_back(waitInfo);
 
+             // 准备 timeline semaphore 发信
+             timelineCounter++;
              std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
              VkSemaphoreSubmitInfo signalInfo{};
              signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-             signalInfo.semaphore = renderFinishedSemaphores[currentFrame];
-             signalInfo.value = 0;
+             signalInfo.semaphore = timelineSemaphore;
+             signalInfo.value = timelineCounter; // 使用新的 timeline 值
              signalInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
              signalSemaphoreInfos.push_back(signalInfo);
 
              displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, waitSemaphoreInfos, signalSemaphoreInfos);
-             // std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
 
-            VkPresentInfoKHR presentInfo{};
-            presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-            presentInfo.waitSemaphoreCount = 1;
-            presentInfo.pWaitSemaphores = &renderFinishedSemaphores[currentFrame];
+             // 记录当前帧的 timeline 值
+             frameTimelineValues[imageIndex] = timelineCounter;
 
-            VkSwapchainKHR swapChains[] = {swapChain};
-            presentInfo.swapchainCount = 1;
-            presentInfo.pSwapchains = swapChains;
-            presentInfo.pImageIndices = &imageIndex;
+             // 准备呈现信息，等待 timeline semaphore
+             VkTimelineSemaphoreSubmitInfo timelineSubmitInfo{};
+             timelineSubmitInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+             timelineSubmitInfo.waitSemaphoreValueCount = 1;
+             timelineSubmitInfo.pWaitSemaphoreValues = &frameTimelineValues[imageIndex];
 
-            submitQueuePresent(presentInfo);
+             VkPresentInfoKHR presentInfo{};
+             presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+             presentInfo.pNext = &timelineSubmitInfo; // 链接 timeline info
+             presentInfo.waitSemaphoreCount = 1;
+             presentInfo.pWaitSemaphores = &timelineSemaphore;
+
+             VkSwapchainKHR swapChains[] = {swapChain};
+             presentInfo.swapchainCount = 1;
+             presentInfo.pSwapchains = swapChains;
+             presentInfo.pImageIndices = &imageIndex;
+
+             submitQueuePresent(presentInfo);
 
             currentFrame = (currentFrame + 1) % swapChainImages.size();
         }
