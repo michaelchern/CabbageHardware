@@ -345,19 +345,50 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 
 
 
-void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget)
+
+void RasterizerPipeline::executePipeline(ktm::uvec2 imageSize)
 {
+    //std::vector<ResourceManager::ImageHardwareWrap> rasterizerPipelineRenderTargets(renderTargets.size());
+    //for (size_t i = 0; i < renderTargets.size(); i++)
+    //{
+    //    rasterizerPipelineRenderTargets[i] = renderTargets[i].image;
+    //}
 
+    std::vector<RasterizerPipeline::GeomMeshDrawIndexed> rasterizerPipelineGeomMeshes(geomMeshes.size());
+    for (size_t geomMeshesIndex = 0; geomMeshesIndex < geomMeshes.size(); geomMeshesIndex++)
+    {
+        rasterizerPipelineGeomMeshes[geomMeshesIndex].pushConstant = geomMeshes[geomMeshesIndex].pushConstant;
+
+        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexCount = std::min(uint32_t(bufferGlobalPool[*(geomMeshes[geomMeshesIndex].indexBuffer.bufferID)].bufferAllocInfo.size / sizeof(uint32_t)), geomMeshes[geomMeshesIndex].indexCount);
+        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexOffset = geomMeshes[geomMeshesIndex].indexOffset;
+        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexBuffer = bufferGlobalPool[*(geomMeshes[geomMeshesIndex].indexBuffer.bufferID)];
+
+        rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers.resize(geomMeshes[geomMeshesIndex].vertexBuffers.size());
+        for (size_t vertexBufferIndex = 0; vertexBufferIndex < geomMeshes[geomMeshesIndex].vertexBuffers.size(); vertexBufferIndex++)
+        {
+            rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex] = bufferGlobalPool[*(geomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex].bufferID)];
+        }
+    }
+
+    if (!depthImage)
+    {
+        depthImage = HardwareImage(imageSize, ImageFormat::D32_FLOAT, ImageUsage::DepthImage);
+    }
+
+	//executePipeline(rasterizerPipelineGeomMeshes, depthImage, renderTargets);
+
+	std::vector<GeomMeshDrawIndexed> &geomMeshes = rasterizerPipelineGeomMeshes;
+	
 	if (this->depthImage)
-	{
-		this->renderTargets = renderTarget;
-		this->depthImage = depthImage;
+    {
+        //this->renderTargets = renderTargets;
+        //this->depthImage = depthImage;
 
-		createRenderPass(multiviewCount);
+        createRenderPass(multiviewCount);
 
-		createGraphicsPipeline(vertShaderCode, fragShaderCode);
-		createFramebuffers(imageGlobalPool[*depthImage.imageID].imageSize);
-	}
+        createGraphicsPipeline(vertShaderCode, fragShaderCode);
+        createFramebuffers(imageGlobalPool[*depthImage.imageID].imageSize);
+    }
 
     auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
         VkRenderPassBeginInfo renderPassInfo{};
@@ -369,9 +400,9 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
         renderPassInfo.renderArea.extent.height = imageGlobalPool[*depthImage.imageID].imageSize.y;
 
         std::vector<VkClearValue> clearValues;
-        for (size_t i = 0; i < renderTarget.size(); i++)
+        for (size_t i = 0; i < renderTargets.size(); i++)
         {
-            clearValues.push_back(imageGlobalPool[*renderTarget[i].imageID].clearValue);
+            clearValues.push_back(imageGlobalPool[*renderTargets[i].imageID].clearValue);
         }
         clearValues.push_back(imageGlobalPool[*depthImage.imageID].clearValue);
 
@@ -423,42 +454,6 @@ void RasterizerPipeline::executePipeline(std::vector<GeomMeshDrawIndexed> geomMe
     };
 
     globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue);
-}
-
-
-
-
-
-void RasterizerPipeline::executePipeline(ktm::uvec2 imageSize)
-{
-    //std::vector<ResourceManager::ImageHardwareWrap> rasterizerPipelineRenderTargets(renderTargets.size());
-    //for (size_t i = 0; i < renderTargets.size(); i++)
-    //{
-    //    rasterizerPipelineRenderTargets[i] = renderTargets[i].image;
-    //}
-
-    std::vector<RasterizerPipeline::GeomMeshDrawIndexed> rasterizerPipelineGeomMeshes(geomMeshes.size());
-    for (size_t geomMeshesIndex = 0; geomMeshesIndex < geomMeshes.size(); geomMeshesIndex++)
-    {
-        rasterizerPipelineGeomMeshes[geomMeshesIndex].pushConstant = geomMeshes[geomMeshesIndex].pushConstant;
-
-        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexCount = std::min(uint32_t(bufferGlobalPool[*(geomMeshes[geomMeshesIndex].indexBuffer.bufferID)].bufferAllocInfo.size / sizeof(uint32_t)), geomMeshes[geomMeshesIndex].indexCount);
-        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexOffset = geomMeshes[geomMeshesIndex].indexOffset;
-        rasterizerPipelineGeomMeshes[geomMeshesIndex].indexBuffer = bufferGlobalPool[*(geomMeshes[geomMeshesIndex].indexBuffer.bufferID)];
-
-        rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers.resize(geomMeshes[geomMeshesIndex].vertexBuffers.size());
-        for (size_t vertexBufferIndex = 0; vertexBufferIndex < geomMeshes[geomMeshesIndex].vertexBuffers.size(); vertexBufferIndex++)
-        {
-            rasterizerPipelineGeomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex] = bufferGlobalPool[*(geomMeshes[geomMeshesIndex].vertexBuffers[vertexBufferIndex].bufferID)];
-        }
-    }
-
-    if (!depthImage)
-    {
-        depthImage = HardwareImage(imageSize, ImageFormat::D32_FLOAT, ImageUsage::DepthImage);
-    }
-
-	executePipeline(rasterizerPipelineGeomMeshes, depthImage, renderTargets);
 
     geomMeshes.clear();
 }
