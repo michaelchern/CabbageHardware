@@ -34,6 +34,7 @@ private:
 	ResourceManager::ImageHardwareWrap displayImage;
 
     std::vector<VkSemaphore> imageAvailableSemaphores;
+    std::vector<VkSemaphore> renderFinishedSemaphores;
 
     VkSemaphore timelineSemaphore = VK_NULL_HANDLE;
     std::atomic_uint64_t timelineCounter = 0;

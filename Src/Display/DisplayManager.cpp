@@ -82,6 +82,7 @@ bool DisplayManager::initDisplayManager(void* surface)
 void DisplayManager::createSyncObjects()
 {
     imageAvailableSemaphores.resize(swapChainImages.size());
+    renderFinishedSemaphores.resize(swapChainImages.size());
     frameTimelineValues.resize(swapChainImages.size(), 0);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
@@ -89,7 +90,8 @@ void DisplayManager::createSyncObjects()
 
     for (size_t i = 0; i < swapChainImages.size(); i++)
     {
-        if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS)
+        if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create binary semaphores for a frame!");
         }
