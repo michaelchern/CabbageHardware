@@ -34,6 +34,7 @@ private:
 	ResourceManager::ImageHardwareWrap displayImage;
 
     std::vector<VkSemaphore> swapchainSemaphore;
+    std::vector<VkFence> inFlightFences;
     
     std::atomic_uint16_t currentQueueIndex = 0;
     std::vector<DeviceManager::QueueUtils> presentQueues;
