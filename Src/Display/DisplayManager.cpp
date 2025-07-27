@@ -83,35 +83,27 @@ void DisplayManager::createSyncObjects()
 {
     imageAvailableSemaphores.resize(swapChainImages.size());
     renderFinishedSemaphores.resize(swapChainImages.size());
-    frameTimelineValues.resize(swapChainImages.size(), 0);
+    inFlightFences.resize(swapChainImages.size());
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
     for (size_t i = 0; i < swapChainImages.size(); i++)
     {
         if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)
+            vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+            vkCreateFence(displayDevice->deviceManager.logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to create binary semaphores for a frame!");
+            throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
-    }
-
-    VkSemaphoreTypeCreateInfo timelineCreateInfo{};
-    timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
-    timelineCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
-    timelineCreateInfo.initialValue = 0;
-
-    semaphoreInfo.pNext = &timelineCreateInfo;
-
-    if (vkCreateSemaphore(displayDevice->deviceManager.logicalDevice, &semaphoreInfo, nullptr, &timelineSemaphore) != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to create timeline semaphore for a frame!");
     }
 }
 
-
-void DisplayManager::createVkSurface(void* surface)
+void DisplayManager::createVkSurface(void *surface)
 {
 #if _WIN32 || _WIN64
 	VkWin32SurfaceCreateInfoKHR createInfo{};
@@ -314,19 +306,12 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             createSwapChain();
         }
 
-        // 等待当前帧关联的GPU工作完成
-        if (frameTimelineValues[currentFrame] > 0)
-        {
-            VkSemaphoreWaitInfo waitInfo{};
-            waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
-            waitInfo.semaphoreCount = 1;
-            waitInfo.pSemaphores = &timelineSemaphore;
-            waitInfo.pValues = &frameTimelineValues[currentFrame];
-            vkWaitSemaphores(displayDevice->deviceManager.logicalDevice, &waitInfo, UINT64_MAX);
-        }
+        vkWaitForFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+        vkResetFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame]);
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
@@ -379,18 +364,8 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                 waitSemaphoreInfos.push_back(waitInfo);
             }
 
-            // 准备 timeline semaphore 发信
-            frameTimelineValues[imageIndex] = timelineCounter++;
 
             std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
-            {
-                VkSemaphoreSubmitInfo signalInfo{};
-                signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-                signalInfo.semaphore = timelineSemaphore;
-                signalInfo.value = frameTimelineValues[imageIndex]; // 使用新的 timeline 值
-                signalInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
-                signalSemaphoreInfos.push_back(signalInfo);
-            }
             {
                 VkSemaphoreSubmitInfo signalInfo{};
                 signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
@@ -400,7 +375,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                 signalSemaphoreInfos.push_back(signalInfo);
             }
 
-             displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, waitSemaphoreInfos, signalSemaphoreInfos);
+             displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, waitSemaphoreInfos, signalSemaphoreInfos, inFlightFences[currentFrame]);
 
 
              // 准备呈现信息，等待 timeline semaphore
@@ -414,7 +389,6 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
              presentInfo.pSwapchains = swapChains;
              presentInfo.pImageIndices = &imageIndex;
 
-             //submitQueuePresent(presentInfo);
              DeviceManager::QueueUtils *queue;
              uint16_t queueIndex = 0;
 

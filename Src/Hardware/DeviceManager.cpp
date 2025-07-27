@@ -238,7 +238,8 @@ bool DeviceManager::createCommandBuffers()
 bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction,
                                               QueueType queueType,
                                               std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos,
-                                              std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos)
+                                              std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos,
+                                              VkFence fence)
 {
     QueueUtils *queue = nullptr;
     uint16_t queueIndex = 0;
@@ -319,7 +320,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     submitInfo.commandBufferInfoCount = 1;
     submitInfo.pCommandBufferInfos = &commandBufferSubmitInfo;
 
-    VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, fence);
 
     // queue->signaledValue = waitValue + 1;
     queue->queueMutex->unlock();

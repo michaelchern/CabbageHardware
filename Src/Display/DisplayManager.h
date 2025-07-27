@@ -35,10 +35,11 @@ private:
 
     std::vector<VkSemaphore> imageAvailableSemaphores;
     std::vector<VkSemaphore> renderFinishedSemaphores;
+    std::vector<VkFence> inFlightFences;
 
-    VkSemaphore timelineSemaphore = VK_NULL_HANDLE;
-    uint64_t timelineCounter = 0;
-    std::vector<uint64_t> frameTimelineValues;
+    //VkSemaphore timelineSemaphore = VK_NULL_HANDLE;
+    //uint64_t timelineCounter = 0;
+    //std::vector<uint64_t> frameTimelineValues;
     
     std::atomic_uint16_t currentQueueIndex = 0;
     std::vector<DeviceManager::QueueUtils> presentQueues;
