@@ -37,7 +37,7 @@ private:
     std::vector<VkSemaphore> renderFinishedSemaphores;
 
     VkSemaphore timelineSemaphore = VK_NULL_HANDLE;
-    std::atomic_uint64_t timelineCounter = 0;
+    uint64_t timelineCounter = 0;
     std::vector<uint64_t> frameTimelineValues;
     
     std::atomic_uint16_t currentQueueIndex = 0;

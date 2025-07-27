@@ -330,15 +330,15 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
-            //auto start_time_ = std::chrono::high_resolution_clock::now();
+            // auto start_time_ = std::chrono::high_resolution_clock::now();
             displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage);
 
-             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
-               // // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-               //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
+                // // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+                // displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, imageGlobalPool[*displayImage.imageID], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-               // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-               //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+                // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+                // displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
                 VkImageBlit imageBlit;
                 imageBlit.dstOffsets[0] = VkOffset3D{0, 0, 0};
@@ -363,46 +363,51 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                                swapChainImages[imageIndex].imageHandle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
                                &imageBlit, VK_FILTER_LINEAR);
 
-               // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-               //displayDevice->resourceManager.transitionImageLayoutUnblocked(
-               //     commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-               //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+                // // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+                // displayDevice->resourceManager.transitionImageLayoutUnblocked(
+                //     commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
             std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos;
-             VkSemaphoreSubmitInfo waitInfo{};
-             waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-             waitInfo.semaphore = imageAvailableSemaphores[currentFrame];
-             waitInfo.value = 0; // For binary semaphores, this must be 0
-             waitInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
-             waitSemaphoreInfos.push_back(waitInfo);
+            {
+                VkSemaphoreSubmitInfo waitInfo{};
+                waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+                waitInfo.semaphore = imageAvailableSemaphores[currentFrame];
+                waitInfo.value = 0; // For binary semaphores, this must be 0
+                waitInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
+                waitSemaphoreInfos.push_back(waitInfo);
+            }
 
-             // 准备 timeline semaphore 发信
-             uint64_t signalValue = timelineCounter.fetch_add(1) + 1;
-             std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
-             VkSemaphoreSubmitInfo signalInfo{};
-             signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-             signalInfo.semaphore = timelineSemaphore;
-             signalInfo.value = signalValue; // 使用新的 timeline 值
-             signalInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
-             signalSemaphoreInfos.push_back(signalInfo);
+            // 准备 timeline semaphore 发信
+            frameTimelineValues[imageIndex] = timelineCounter++;
+
+            std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
+            {
+                VkSemaphoreSubmitInfo signalInfo{};
+                signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+                signalInfo.semaphore = timelineSemaphore;
+                signalInfo.value = frameTimelineValues[imageIndex]; // 使用新的 timeline 值
+                signalInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
+                signalSemaphoreInfos.push_back(signalInfo);
+            }
+            {
+                VkSemaphoreSubmitInfo signalInfo{};
+                signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+                signalInfo.semaphore = renderFinishedSemaphores[currentFrame];
+                signalInfo.value = 0; // Assuming binary semaphore
+                signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+                signalSemaphoreInfos.push_back(signalInfo);
+            }
 
              displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, waitSemaphoreInfos, signalSemaphoreInfos);
 
-             // 记录当前帧的 timeline 值
-             frameTimelineValues[imageIndex] = signalValue;
 
              // 准备呈现信息，等待 timeline semaphore
-             VkTimelineSemaphoreSubmitInfo timelineSubmitInfo{};
-             timelineSubmitInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-             timelineSubmitInfo.waitSemaphoreValueCount = 1;
-             timelineSubmitInfo.pWaitSemaphoreValues = &frameTimelineValues[imageIndex];
-
              VkPresentInfoKHR presentInfo{};
              presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-             presentInfo.pNext = &timelineSubmitInfo; // 链接 timeline info
              presentInfo.waitSemaphoreCount = 1;
-             presentInfo.pWaitSemaphores = &timelineSemaphore;
+             presentInfo.pWaitSemaphores = &renderFinishedSemaphores[currentFrame];
 
              VkSwapchainKHR swapChains[] = {swapChain};
              presentInfo.swapchainCount = 1;
