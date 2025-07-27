@@ -231,10 +231,8 @@ bool DeviceManager::createCommandBuffers()
 
 bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction,
                                               QueueType queueType,
-                                              VkSemaphore waitSemaphore,
-                                              VkSemaphore signalSemaphore,
-                                              VkSemaphore signalTimelineSemaphore,
-                                              uint64_t signalTimelineValue)
+                                              std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos,
+                                              std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos)
 {
     QueueUtils *queue = nullptr;
     uint16_t queueIndex = 0;
@@ -294,52 +292,52 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     
     //uint64_t waitValue = semaphoreValue.fetch_add(1);
 
-    std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos;
-    {
+    //std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos;
+    //{
         VkSemaphoreSubmitInfo timelineWaitSemaphoreSubmitInfo{};
         timelineWaitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
         timelineWaitSemaphoreSubmitInfo.semaphore = queue->timelineSemaphore;
         timelineWaitSemaphoreSubmitInfo.value = queue->timelineValue++;
         timelineWaitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         waitSemaphoreInfos.push_back(timelineWaitSemaphoreSubmitInfo);
-    }
-    if (waitSemaphore != VK_NULL_HANDLE)
-    {
-        VkSemaphoreSubmitInfo waitInfo{};
-        waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-        waitInfo.semaphore = waitSemaphore;
-        waitInfo.value = 0; // Assuming binary semaphore
-        waitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-        waitSemaphoreInfos.push_back(waitInfo);
-    }
+    //}
+    //if (waitSemaphore != VK_NULL_HANDLE)
+    //{
+    //    VkSemaphoreSubmitInfo waitInfo{};
+    //    waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    //    waitInfo.semaphore = waitSemaphore;
+    //    waitInfo.value = 0; // Assuming binary semaphore
+    //    waitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+    //    waitSemaphoreInfos.push_back(waitInfo);
+    //}
 
-    std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
-    {
+    //std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
+    //{
         VkSemaphoreSubmitInfo timelineSignalSemaphoreSubmitInfo{};
         timelineSignalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
         timelineSignalSemaphoreSubmitInfo.semaphore = queue->timelineSemaphore;
         timelineSignalSemaphoreSubmitInfo.value = queue->timelineValue;
         timelineSignalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         signalSemaphoreInfos.push_back(timelineSignalSemaphoreSubmitInfo);
-    }
-    if (signalSemaphore != VK_NULL_HANDLE)
-    {
-        VkSemaphoreSubmitInfo signalInfo{};
-        signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-        signalInfo.semaphore = signalSemaphore;
-        signalInfo.value = 0; // Assuming binary semaphore
-        signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-        signalSemaphoreInfos.push_back(signalInfo);
-    }
-    if (signalTimelineSemaphore != VK_NULL_HANDLE)
-    {
-        VkSemaphoreSubmitInfo signalInfo{};
-        signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-        signalInfo.semaphore = signalTimelineSemaphore;
-        signalInfo.value = signalTimelineValue;
-        signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-        signalSemaphoreInfos.push_back(signalInfo);
-    }
+    //}
+    //if (signalSemaphore != VK_NULL_HANDLE)
+    //{
+    //    VkSemaphoreSubmitInfo signalInfo{};
+    //    signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    //    signalInfo.semaphore = signalSemaphore;
+    //    signalInfo.value = 0; // Assuming binary semaphore
+    //    signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+    //    signalSemaphoreInfos.push_back(signalInfo);
+    //}
+    //if (signalTimelineSemaphore != VK_NULL_HANDLE)
+    //{
+    //    VkSemaphoreSubmitInfo signalInfo{};
+    //    signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    //    signalInfo.semaphore = signalTimelineSemaphore;
+    //    signalInfo.value = signalTimelineValue;
+    //    signalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+    //    signalSemaphoreInfos.push_back(signalInfo);
+    //}
 
     VkSubmitInfo2 submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;

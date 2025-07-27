@@ -369,7 +369,23 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                //     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
-            displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, imageAvailableSemaphores[currentFrame], renderFinishedSemaphores[currentFrame]);
+            std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos;
+             VkSemaphoreSubmitInfo waitInfo{};
+             waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+             waitInfo.semaphore = imageAvailableSemaphores[currentFrame];
+             waitInfo.value = 0;
+             waitInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
+             waitSemaphoreInfos.push_back(waitInfo);
+
+             std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
+             VkSemaphoreSubmitInfo signalInfo{};
+             signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+             signalInfo.semaphore = renderFinishedSemaphores[currentFrame];
+             signalInfo.value = 0;
+             signalInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
+             signalSemaphoreInfos.push_back(signalInfo);
+
+             displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, waitSemaphoreInfos, signalSemaphoreInfos);
              // std::cout << "Copy Time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start_time_) << std::endl;
 
             VkPresentInfoKHR presentInfo{};
