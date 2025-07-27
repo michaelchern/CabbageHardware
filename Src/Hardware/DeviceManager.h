@@ -39,6 +39,7 @@ class DeviceManager
     {
         std::shared_ptr<std::mutex> queueMutex;
         uint64_t signaledValue = 0;
+        VkSemaphore timelineSemaphore;
         uint32_t queueFamilyIndex = -1;
         VkQueue vkQueue = VK_NULL_HANDLE;
         VkCommandPool commandPool = VK_NULL_HANDLE;
@@ -124,10 +125,8 @@ class DeviceManager
 
     void createTimelineSemaphore();
 
-    //std::mutex deviceMutex;
 
     std::atomic_uint64_t semaphoreValue = 0;
-    VkSemaphore timelineSemaphore;
 
     std::atomic_uint16_t currentGraphicsQueueIndex = 0;
     std::atomic_uint16_t currentComputeQueueIndex = 0;

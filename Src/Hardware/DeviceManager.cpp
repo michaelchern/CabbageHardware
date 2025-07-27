@@ -23,8 +23,7 @@ void DeviceManager::initDeviceManager(const CreateCallback &createCallback, cons
 
 void DeviceManager::createTimelineSemaphore()
 {
-    // for (size_t i = 0; i < userDevices.size(); i++)
-    {
+    auto createTimelineSemaphore = [&](QueueUtils &queues) -> bool {
         VkSemaphoreTypeCreateInfo type_create_info{};
         type_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO_KHR;
         type_create_info.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE_KHR;
@@ -34,10 +33,22 @@ void DeviceManager::createTimelineSemaphore()
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
         semaphoreInfo.pNext = &type_create_info;
 
-        if (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &timelineSemaphore) != VK_SUCCESS)
+        if (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &queues.timelineSemaphore) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
+    };
+    for (size_t i = 0; i < graphicsQueues.size(); i++)
+    {
+        createTimelineSemaphore(graphicsQueues[i]);
+    }
+    for (size_t i = 0; i < computeQueues.size(); i++)
+    {
+        createTimelineSemaphore(computeQueues[i]);
+    }
+    for (size_t i = 0; i < transferQueues.size(); i++)
+    {
+        createTimelineSemaphore(transferQueues[i]);
     }
 }
 
@@ -225,53 +236,40 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
                                               VkSemaphore signalTimelineSemaphore,
                                               uint64_t signalTimelineValue)
 {
-    QueueUtils *queue;
+    QueueUtils *queue = nullptr;
 
-    uint64_t timelineCounterValue = 0;
-    vkGetSemaphoreCounterValue(logicalDevice, timelineSemaphore, &timelineCounterValue);
-
-    switch (queueType)
+    while (true)
     {
-    case QueueType::GraphicsQueue: {
-        while (true)
+        switch (queueType)
         {
-            uint16_t queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
-            if (timelineCounterValue >= graphicsQueues[queueIndex].signaledValue && graphicsQueues[queueIndex].queueMutex->try_lock())
+        case QueueType::GraphicsQueue:
+            queue = &graphicsQueues[currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size()];
+            break;
+        case QueueType::ComputeQueue:
+            queue = &computeQueues[currentComputeQueueIndex.fetch_add(1) % computeQueues.size()];
+            break;
+        case QueueType::TransferQueue:
+            queue = &transferQueues[currentTransferQueueIndex.fetch_add(1) % transferQueues.size()];
+            break;
+        }
+
+        if (queue->queueMutex->try_lock())
+        {
+            uint64_t timelineCounterValue = 0;
+            vkGetSemaphoreCounterValue(logicalDevice, queue->timelineSemaphore, &timelineCounterValue);
+            if (timelineCounterValue >= queue->signaledValue)
             {
-                queue = &graphicsQueues[queueIndex];
                 break;
             }
-            std::this_thread::yield();
-        }
-        break;
-    }
-    case QueueType::ComputeQueue: {
-        while (true)
-        {
-            uint16_t queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
-            if (timelineCounterValue >= computeQueues[queueIndex].signaledValue && computeQueues[queueIndex].queueMutex->try_lock())
+            else
             {
-                queue = &computeQueues[queueIndex];
-                break;
+                queue->queueMutex->unlock();
             }
-            std::this_thread::yield();
         }
-        break;
+
+        std::this_thread::yield();
     }
-    case QueueType::TransferQueue: {
-        while (true)
-        {
-            uint16_t queueIndex = currentTransferQueueIndex.fetch_add(1) % transferQueues.size();
-            if (timelineCounterValue >= transferQueues[queueIndex].signaledValue && transferQueues[queueIndex].queueMutex->try_lock())
-            {
-                queue = &transferQueues[queueIndex];
-                break;
-            }
-            std::this_thread::yield();
-        }
-        break;
-    }
-    }
+
 
     vkResetCommandBuffer(queue->commandBuffer, /*VkCommandBufferResetFlagBits*/ 0);
 
@@ -295,7 +293,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     {
         VkSemaphoreSubmitInfo timelineWaitSemaphoreSubmitInfo{};
         timelineWaitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-        timelineWaitSemaphoreSubmitInfo.semaphore = timelineSemaphore;
+        timelineWaitSemaphoreSubmitInfo.semaphore = queue->timelineSemaphore;
         timelineWaitSemaphoreSubmitInfo.value = waitValue;
         timelineWaitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         waitSemaphoreInfos.push_back(timelineWaitSemaphoreSubmitInfo);
@@ -314,7 +312,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     {
         VkSemaphoreSubmitInfo timelineSignalSemaphoreSubmitInfo{};
         timelineSignalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-        timelineSignalSemaphoreSubmitInfo.semaphore = timelineSemaphore;
+        timelineSignalSemaphoreSubmitInfo.semaphore = queue->timelineSemaphore;
         timelineSignalSemaphoreSubmitInfo.value = waitValue + 1;
         timelineSignalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         signalSemaphoreInfos.push_back(timelineSignalSemaphoreSubmitInfo);
