@@ -70,6 +70,7 @@ private:
                 queue = &presentQueues[queueIndex];
                 break;
             }
+            std::this_thread::yield();
         }
         //std::cout << "Present Queue Index: " << queueIndex << std::endl;
 

@@ -241,6 +241,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
                 queue = &graphicsQueues[queueIndex];
                 break;
             }
+            std::this_thread::yield();
         }
         break;
     }
@@ -253,6 +254,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
                 queue = &computeQueues[queueIndex];
                 break;
             }
+            std::this_thread::yield();
         }
         break;
     }
@@ -265,6 +267,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
                 queue = &transferQueues[queueIndex];
                 break;
             }
+            std::this_thread::yield();
         }
         break;
     }
