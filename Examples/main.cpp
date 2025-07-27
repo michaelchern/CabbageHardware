@@ -423,7 +423,7 @@ int main()
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        std::vector<GLFWwindow *> windows(1);
+        std::vector<GLFWwindow *> windows(8);
         for (size_t i = 0; i < windows.size(); i++)
         {
             windows[i] = glfwCreateWindow(400, 400, "Cabbage Engine ", nullptr, nullptr);
@@ -460,7 +460,8 @@ int main()
 
             auto startTime = std::chrono::high_resolution_clock::now();
 
-
+            while (running.load())
+            {
                 float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
 
                 rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
@@ -479,8 +480,7 @@ int main()
                 computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
                 computer.executePipeline(ktm::uvec3(800 / 8, 800 / 8, 1));
-                while (running.load())
-                {
+
                 displayManager = finalOutputImage;
             }
         };
