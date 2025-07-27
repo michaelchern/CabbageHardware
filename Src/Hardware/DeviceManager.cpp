@@ -226,13 +226,17 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
                                               uint64_t signalTimelineValue)
 {
     QueueUtils *queue;
+
+    uint64_t timelineCounterValue = 0;
+    vkGetSemaphoreCounterValue(logicalDevice, timelineSemaphore, &timelineCounterValue);
+
     switch (queueType)
     {
     case QueueType::GraphicsQueue: {
         while (true)
         {
             uint16_t queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
-            if (graphicsQueues[queueIndex].queueMutex->try_lock())
+            if (timelineCounterValue >= graphicsQueues[queueIndex].signaledValue && graphicsQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &graphicsQueues[queueIndex];
                 break;
@@ -244,7 +248,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         while (true)
         {
             uint16_t queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
-            if (computeQueues[queueIndex].queueMutex->try_lock())
+            if (timelineCounterValue >= computeQueues[queueIndex].signaledValue && computeQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &computeQueues[queueIndex];
                 break;
@@ -256,7 +260,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         while (true)
         {
             uint16_t queueIndex = currentTransferQueueIndex.fetch_add(1) % transferQueues.size();
-            if (transferQueues[queueIndex].queueMutex->try_lock())
+            if (timelineCounterValue >= transferQueues[queueIndex].signaledValue && transferQueues[queueIndex].queueMutex->try_lock())
             {
                 queue = &transferQueues[queueIndex];
                 break;
@@ -266,9 +270,11 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     }
     }
 
+    vkResetCommandBuffer(queue->commandBuffer, /*VkCommandBufferResetFlagBits*/ 0);
+
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
     vkBeginCommandBuffer(queue->commandBuffer, &beginInfo);
 
@@ -340,7 +346,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
 
     VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
 
-
+    queue->signaledValue = waitValue + 1;
     queue->queueMutex->unlock();
 
     if (result != VK_SUCCESS)

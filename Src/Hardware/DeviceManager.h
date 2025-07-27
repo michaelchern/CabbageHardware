@@ -38,6 +38,7 @@ class DeviceManager
     struct QueueUtils
     {
         std::shared_ptr<std::mutex> queueMutex;
+        uint64_t signaledValue = 0;
         uint32_t queueFamilyIndex = -1;
         VkQueue vkQueue = VK_NULL_HANDLE;
         VkCommandPool commandPool = VK_NULL_HANDLE;
