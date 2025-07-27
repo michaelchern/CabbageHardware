@@ -38,7 +38,7 @@ class DeviceManager
     struct QueueUtils
     {
         std::shared_ptr<std::mutex> queueMutex;
-        uint64_t signaledValue = 0;
+        uint64_t timelineValue = 0;
         VkSemaphore timelineSemaphore;
         uint32_t queueFamilyIndex = -1;
         VkQueue vkQueue = VK_NULL_HANDLE;
@@ -124,9 +124,6 @@ class DeviceManager
     bool createCommandBuffers();
 
     void createTimelineSemaphore();
-
-
-    std::atomic_uint64_t semaphoreValue = 0;
 
     std::atomic_uint16_t currentGraphicsQueueIndex = 0;
     std::atomic_uint16_t currentComputeQueueIndex = 0;

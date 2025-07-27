@@ -237,19 +237,23 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
                                               uint64_t signalTimelineValue)
 {
     QueueUtils *queue = nullptr;
+    uint16_t queueIndex = 0;
 
     while (true)
     {
         switch (queueType)
         {
         case QueueType::GraphicsQueue:
-            queue = &graphicsQueues[currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size()];
+            queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
+            queue = &graphicsQueues[queueIndex];
             break;
         case QueueType::ComputeQueue:
-            queue = &computeQueues[currentComputeQueueIndex.fetch_add(1) % computeQueues.size()];
+            queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
+            queue = &computeQueues[queueIndex];
             break;
         case QueueType::TransferQueue:
-            queue = &transferQueues[currentTransferQueueIndex.fetch_add(1) % transferQueues.size()];
+            queueIndex = currentTransferQueueIndex.fetch_add(1) % transferQueues.size();
+            queue = &transferQueues[queueIndex];
             break;
         }
 
@@ -257,7 +261,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         {
             uint64_t timelineCounterValue = 0;
             vkGetSemaphoreCounterValue(logicalDevice, queue->timelineSemaphore, &timelineCounterValue);
-            if (timelineCounterValue >= queue->signaledValue)
+            if (timelineCounterValue >= queue->timelineValue)
             {
                 break;
             }
@@ -270,6 +274,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         std::this_thread::yield();
     }
 
+    //std::cout << "Executing index: " << queueIndex << std::endl;
 
     vkResetCommandBuffer(queue->commandBuffer, /*VkCommandBufferResetFlagBits*/ 0);
 
@@ -287,14 +292,14 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     commandBufferSubmitInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
     commandBufferSubmitInfo.commandBuffer = queue->commandBuffer;
     
-    uint64_t waitValue = semaphoreValue.fetch_add(1);
+    //uint64_t waitValue = semaphoreValue.fetch_add(1);
 
     std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos;
     {
         VkSemaphoreSubmitInfo timelineWaitSemaphoreSubmitInfo{};
         timelineWaitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
         timelineWaitSemaphoreSubmitInfo.semaphore = queue->timelineSemaphore;
-        timelineWaitSemaphoreSubmitInfo.value = waitValue;
+        timelineWaitSemaphoreSubmitInfo.value = queue->timelineValue++;
         timelineWaitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         waitSemaphoreInfos.push_back(timelineWaitSemaphoreSubmitInfo);
     }
@@ -313,7 +318,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         VkSemaphoreSubmitInfo timelineSignalSemaphoreSubmitInfo{};
         timelineSignalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
         timelineSignalSemaphoreSubmitInfo.semaphore = queue->timelineSemaphore;
-        timelineSignalSemaphoreSubmitInfo.value = waitValue + 1;
+        timelineSignalSemaphoreSubmitInfo.value = queue->timelineValue;
         timelineSignalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         signalSemaphoreInfos.push_back(timelineSignalSemaphoreSubmitInfo);
     }
@@ -347,7 +352,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
 
     VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, VK_NULL_HANDLE);
 
-    queue->signaledValue = waitValue + 1;
+    //queue->signaledValue = waitValue + 1;
     queue->queueMutex->unlock();
 
     if (result != VK_SUCCESS)
