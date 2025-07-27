@@ -220,7 +220,7 @@ bool DeviceManager::createCommandBuffers()
 
 bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction, QueueType queueType, VkSemaphore waitSemaphore, VkSemaphore signalSemaphore, VkFence signalFence)
 {
-    QueueUtils* queue;
+    QueueUtils *queue;
     switch (queueType)
     {
     case QueueType::GraphicsQueue: {
@@ -261,7 +261,6 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     }
     }
 
-
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = queue->commandPool;
@@ -284,28 +283,53 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
 
     uint64_t waitValue = semaphoreValue.fetch_add(1);
 
-    VkSemaphoreSubmitInfo waitSemaphoreSubmitInfo{};
-    waitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    waitSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-    waitSemaphoreSubmitInfo.value = waitValue;
-    waitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+    std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos;
+    VkSemaphoreSubmitInfo timelineWaitSemaphoreSubmitInfo{};
+    timelineWaitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    timelineWaitSemaphoreSubmitInfo.semaphore = timelineSemaphore;
+    timelineWaitSemaphoreSubmitInfo.value = waitValue;
+    timelineWaitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+    waitSemaphoreInfos.push_back(timelineWaitSemaphoreSubmitInfo);
 
-    VkSemaphoreSubmitInfo signalSemaphoreSubmitInfo{};
-    signalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    signalSemaphoreSubmitInfo.semaphore = timelineSemaphore;
-    signalSemaphoreSubmitInfo.value = waitValue + 1;
-    signalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+    if (waitSemaphore != VK_NULL_HANDLE)
+    {
+        VkSemaphoreSubmitInfo externalWaitSemaphoreSubmitInfo{};
+        externalWaitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+        externalWaitSemaphoreSubmitInfo.semaphore = waitSemaphore;
+        externalWaitSemaphoreSubmitInfo.value = 0; // Assuming binary semaphore
+        externalWaitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        waitSemaphoreInfos.push_back(externalWaitSemaphoreSubmitInfo);
+    }
+
+    std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
+    VkSemaphoreSubmitInfo timelineSignalSemaphoreSubmitInfo{};
+    timelineSignalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    timelineSignalSemaphoreSubmitInfo.semaphore = timelineSemaphore;
+    timelineSignalSemaphoreSubmitInfo.value = waitValue + 1;
+    timelineSignalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+    signalSemaphoreInfos.push_back(timelineSignalSemaphoreSubmitInfo);
+
+    if (signalSemaphore != VK_NULL_HANDLE)
+    {
+        VkSemaphoreSubmitInfo externalSignalSemaphoreSubmitInfo{};
+        externalSignalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+        externalSignalSemaphoreSubmitInfo.semaphore = signalSemaphore;
+        externalSignalSemaphoreSubmitInfo.value = 0; // Assuming binary semaphore
+        externalSignalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        signalSemaphoreInfos.push_back(externalSignalSemaphoreSubmitInfo);
+    }
 
     VkSubmitInfo2 submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
-    submitInfo.waitSemaphoreInfoCount = 1;
-    submitInfo.pWaitSemaphoreInfos = &waitSemaphoreSubmitInfo;
-    submitInfo.signalSemaphoreInfoCount = 1;
-    submitInfo.pSignalSemaphoreInfos = &signalSemaphoreSubmitInfo;
+    submitInfo.waitSemaphoreInfoCount = static_cast<uint32_t>(waitSemaphoreInfos.size());
+    submitInfo.pWaitSemaphoreInfos = waitSemaphoreInfos.data();
+    submitInfo.signalSemaphoreInfoCount = static_cast<uint32_t>(signalSemaphoreInfos.size());
+    submitInfo.pSignalSemaphoreInfos = signalSemaphoreInfos.data();
     submitInfo.commandBufferInfoCount = 1;
     submitInfo.pCommandBufferInfos = &commandBufferSubmitInfo;
 
     VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, signalFence);
+
 
     queue->queueMutex->unlock();
 
