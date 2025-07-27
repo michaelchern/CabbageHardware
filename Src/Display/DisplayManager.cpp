@@ -376,19 +376,19 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
              waitSemaphoreInfos.push_back(waitInfo);
 
              // 准备 timeline semaphore 发信
-             timelineCounter++;
+             uint64_t signalValue = timelineCounter.fetch_add(1) + 1;
              std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos;
              VkSemaphoreSubmitInfo signalInfo{};
              signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
              signalInfo.semaphore = timelineSemaphore;
-             signalInfo.value = timelineCounter; // 使用新的 timeline 值
+             signalInfo.value = signalValue; // 使用新的 timeline 值
              signalInfo.stageMask = VK_PIPELINE_STAGE_2_BLIT_BIT;
              signalSemaphoreInfos.push_back(signalInfo);
 
              displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, waitSemaphoreInfos, signalSemaphoreInfos);
 
              // 记录当前帧的 timeline 值
-             frameTimelineValues[imageIndex] = timelineCounter;
+             frameTimelineValues[imageIndex] = signalValue;
 
              // 准备呈现信息，等待 timeline semaphore
              VkTimelineSemaphoreSubmitInfo timelineSubmitInfo{};
