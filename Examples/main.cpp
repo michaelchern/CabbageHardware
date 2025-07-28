@@ -460,12 +460,12 @@ int main()
 
             auto startTime = std::chrono::high_resolution_clock::now();
 
-            while (running.load())
-            {
-                float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
 
+            while (running.load())
+            {           
                 auto start = std::chrono::high_resolution_clock::now();
 
+                float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
                 rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
                 rasterizerUniformBufferObject.model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
                 rasterizerUniformBuffer.copyFromData(&rasterizerUniformBufferObject, sizeof(rasterizerUniformBufferObject));
@@ -475,18 +475,19 @@ int main()
                 rasterizer["inTexCoord"] = uvBuffer;
                 rasterizer["inNormal"] = normalBuffer;
                 rasterizer["outColor"] = finalOutputImage;
-                rasterizer.recordGeomMesh(indexBuffer);
+
+                rasterizer.startRecord(ktm::uvec2(1920, 1080)) << indexBuffer << rasterizer.endRecord();
 
                 computeUniformData.imageID = finalOutputImage.storeDescriptor();
                 computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
-
-                rasterizer.executePipeline(ktm::uvec2(1920, 1080));
                 computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
+
                 displayManager = finalOutputImage;
 
                 auto timeD = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - start);
                 std::cout << "  Time: " << timeD << std::endl;
+
             }
         };
 
