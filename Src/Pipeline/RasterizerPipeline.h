@@ -75,16 +75,25 @@ struct RasterizerPipeline
         throw resourceName;
     }
 
-    void recordGeomMesh(const HardwareBuffer &indexBuffer, uint32_t indexOffset = 0, uint32_t indexCount = std::numeric_limits<uint32_t>::max())
+
+    RasterizerPipeline &startRecord(ktm::uvec2 imageSize);
+    RasterizerPipeline &endRecord();
+    RasterizerPipeline &operator<<(const RasterizerPipeline &)
     {
-        TriangleGeomMesh temp;
-        temp.indexOffset = indexOffset;
-        temp.indexCount = indexCount;
-        temp.indexBuffer = indexBuffer;
-        temp.vertexBuffers = tempVertexBuffers;
-        temp.pushConstant = tempPushConstant;
-        geomMeshes.push_back(temp);
+        return *this;
     }
+    RasterizerPipeline &operator<<(const HardwareBuffer &indexBuffer);
+
+    //void recordGeomMesh()
+    //{
+    //    TriangleGeomMesh temp;
+    //    temp.indexOffset = indexOffset;
+    //    temp.indexCount = indexCount;
+    //    temp.indexBuffer = indexBuffer;
+    //    temp.vertexBuffers = tempVertexBuffers;
+    //    temp.pushConstant = tempPushConstant;
+    //    geomMeshes.push_back(temp);
+    //}
 
 private:
 
@@ -114,16 +123,16 @@ private:
     ShaderCodeCompiler vertexShaderCompiler;
     ShaderCodeCompiler fragmentShaderCompiler;
 
-    struct TriangleGeomMesh
-    {
-        uint32_t indexOffset;
-        uint32_t indexCount;
-        HardwareBuffer indexBuffer;
-        std::vector<HardwareBuffer> vertexBuffers;
+    //struct TriangleGeomMesh
+    //{
+    //    uint32_t indexOffset;
+    //    uint32_t indexCount;
+    //    HardwareBuffer indexBuffer;
+    //    std::vector<HardwareBuffer> vertexBuffers;
 
-        HardwarePushConstant pushConstant;
-    };
-    std::vector<TriangleGeomMesh> geomMeshes;
+    //    HardwarePushConstant pushConstant;
+    //};
+    //std::vector<TriangleGeomMesh> geomMeshes;
 
     HardwarePushConstant tempPushConstant;
 
