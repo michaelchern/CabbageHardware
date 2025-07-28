@@ -111,9 +111,9 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
     for (auto item : vertShaderCode.shaderResources.stageInputs)
     {
         VkFormat temp;
-        if (item.typeName == "float")
+        if (item.second.typeName == "float")
         {
-            switch (item.elementCount)
+            switch (item.second.elementCount)
             {
             case 1:
                 temp = VK_FORMAT_R32_SFLOAT;
@@ -131,9 +131,9 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
                 break;
             }
         }
-        if (item.typeName == "int")
+        if (item.second.typeName == "int")
         {
-            switch (item.elementCount)
+            switch (item.second.elementCount)
             {
             case 1:
                 temp = VK_FORMAT_R32_SINT;
@@ -151,9 +151,9 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
                 break;
             }
         }
-        if (item.typeName == "uint")
+        if (item.second.typeName == "uint")
         {
-            switch (item.elementCount)
+            switch (item.second.elementCount)
             {
             case 1:
                 temp = VK_FORMAT_R32_UINT;
