@@ -136,8 +136,8 @@ private:
 
     std::vector<HardwareBuffer> tempVertexBuffers;
 
-    std::unordered_map<std::string, ShaderCodeModule::ShaderResources::ShaderBindInfo *> vertexStageInputs;
-    std::unordered_map<std::string, ShaderCodeModule::ShaderResources::ShaderBindInfo *> vertexStageOutputs;
-    std::unordered_map<std::string, ShaderCodeModule::ShaderResources::ShaderBindInfo *> fragmentStageInputs;
-    std::unordered_map<std::string, ShaderCodeModule::ShaderResources::ShaderBindInfo *> fragmentStageOutputs;
+    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo *> vertexStageInputs;
+    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo *> vertexStageOutputs;
+    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo *> fragmentStageInputs;
+    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo *> fragmentStageOutputs;
 };
