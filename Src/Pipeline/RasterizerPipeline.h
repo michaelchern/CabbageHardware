@@ -40,37 +40,38 @@ struct RasterizerPipeline
         ShaderCodeModule::ShaderResources::ShaderBindInfo *vertexResource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
         ShaderCodeModule::ShaderResources::ShaderBindInfo *fragmentResource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
 
-        if (vertexResource != nullptr)
-        {
-            switch (vertexResource->bindType)
-            {
-            case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
-                return std::move(HardwarePushConstant(vertexResource->typeSize, vertexResource->byteOffset, &tempPushConstant));
+        //if (vertexResource != nullptr)
+        //{
+        //    switch (vertexResource->bindType)
+        //    {
+        //    case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
+        //        return std::move(HardwarePushConstant(vertexResource->typeSize, vertexResource->byteOffset, &tempPushConstant));
 
-            default:
-                break;
-            }
-        }
-        else
-        {
-            if (fragmentResource != nullptr)
-            {
-                switch (fragmentResource->bindType)
-                {
-                case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
-                    return std::move(HardwarePushConstant(fragmentResource->typeSize, fragmentResource->byteOffset, &tempPushConstant));
+        //    default:
+        //        break;
+        //    }
+        //}
+        //else
+        //{
+        //    if (fragmentResource != nullptr)
+        //    {
+        //        switch (fragmentResource->bindType)
+        //        {
+        //        case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
+        //            return std::move(HardwarePushConstant(fragmentResource->typeSize, fragmentResource->byteOffset, &tempPushConstant));
 
-                default:
-                    break;
-                }
-            }
-            else
-            {
-                throw std::runtime_error("Resource not found: " + resourceName);
-            }
-        }
+        //        default:
+        //            break;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        throw std::runtime_error("Resource not found: " + resourceName);
+        //    }
+        //}
 
-        throw std::runtime_error("Resource not found: " + resourceName);
+        //throw std::runtime_error("Resource not found: " + resourceName);
+        return std::move(HardwarePushConstant());
     }
 
 
