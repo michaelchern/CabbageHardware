@@ -73,31 +73,19 @@ class DeviceManager
      
     void initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice);
 
-    struct HardwareCommand
-    {
-        HardwareCommand &start()
-        {
-        }
-        HardwareCommand &end()
-        {
-        }
-        HardwareCommand &operator<<(const HardwareCommand &)
-        {
-            return *this;
-        }
 
-        HardwareCommand &operator<<(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction)
-        {
-            return *this;
-        }
-    } hardwareCommand;
-
-    bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction,
-                                   QueueType queueType = QueueType::GraphicsQueue,
-                                   std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos = std::vector<VkSemaphoreSubmitInfo>(),
-                                   std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos = std::vector<VkSemaphoreSubmitInfo>(),
-                                   VkFence fence = VK_NULL_HANDLE);
-
+    DeviceManager &startCommands(QueueType queueType = QueueType::GraphicsQueue);
+    DeviceManager &endCommands(std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos = std::vector<VkSemaphoreSubmitInfo>(),
+                               std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos = std::vector<VkSemaphoreSubmitInfo>(),
+                               VkFence fence = VK_NULL_HANDLE);
+    //DeviceManager &operator<<(const DeviceManager &)
+    //{
+    //    return *this;
+    //}
+    DeviceManager &operator<<(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction);
+    
+    QueueUtils *currentRecordQueue = nullptr;
+ 
 
     std::vector<QueueUtils> pickAvailableQueues(std::function<bool(const QueueUtils &)> required)
     {

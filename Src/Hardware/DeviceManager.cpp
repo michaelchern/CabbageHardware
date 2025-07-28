@@ -240,15 +240,9 @@ bool DeviceManager::createCommandBuffers()
     return true;
 }
 
-bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction,
-                                              QueueType queueType,
-                                              std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos,
-                                              std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos,
-                                              VkFence fence)
-{
-    auto startTime = std::chrono::high_resolution_clock::now();
 
-    QueueUtils *queue = nullptr;
+DeviceManager &DeviceManager::startCommands(QueueType queueType)
+{
     uint16_t queueIndex = 0;
 
     while (true)
@@ -257,62 +251,65 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         {
         case QueueType::GraphicsQueue:
             queueIndex = currentGraphicsQueueIndex.fetch_add(1) % graphicsQueues.size();
-            queue = &graphicsQueues[queueIndex];
+            currentRecordQueue = &graphicsQueues[queueIndex];
             break;
         case QueueType::ComputeQueue:
             queueIndex = currentComputeQueueIndex.fetch_add(1) % computeQueues.size();
-            queue = &computeQueues[queueIndex];
+            currentRecordQueue = &computeQueues[queueIndex];
             break;
         case QueueType::TransferQueue:
             queueIndex = currentTransferQueueIndex.fetch_add(1) % transferQueues.size();
-            queue = &transferQueues[queueIndex];
+            currentRecordQueue = &transferQueues[queueIndex];
             break;
         }
 
-        if (queue->queueMutex->try_lock())
+        if (currentRecordQueue->queueMutex->try_lock())
         {
             uint64_t timelineCounterValue = 0;
-            vkGetSemaphoreCounterValue(logicalDevice, queue->timelineSemaphore, &timelineCounterValue);
-            if (timelineCounterValue >= queue->timelineValue)
+            vkGetSemaphoreCounterValue(logicalDevice, currentRecordQueue->timelineSemaphore, &timelineCounterValue);
+            if (timelineCounterValue >= currentRecordQueue->timelineValue)
             {
                 break;
             }
             else
             {
-                queue->queueMutex->unlock();
+                currentRecordQueue->queueMutex->unlock();
             }
         }
 
         std::this_thread::yield();
     }
 
-    vkResetCommandBuffer(queue->commandBuffer, /*VkCommandBufferResetFlagBits*/ 0);
+    vkResetCommandBuffer(currentRecordQueue->commandBuffer, 0);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    vkBeginCommandBuffer(queue->commandBuffer, &beginInfo);
+    vkBeginCommandBuffer(currentRecordQueue->commandBuffer, &beginInfo);
+}
 
-    commandsFunction(queue->commandBuffer);
-
-    vkEndCommandBuffer(queue->commandBuffer);
+DeviceManager &DeviceManager::endCommands(std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos,
+                                          std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos,
+                                          VkFence fence)
+{
+    vkEndCommandBuffer(currentRecordQueue->commandBuffer);
 
     VkCommandBufferSubmitInfo commandBufferSubmitInfo{};
     commandBufferSubmitInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-    commandBufferSubmitInfo.commandBuffer = queue->commandBuffer;
+    commandBufferSubmitInfo.commandBuffer = currentRecordQueue->commandBuffer;
 
     VkSemaphoreSubmitInfo timelineWaitSemaphoreSubmitInfo{};
     timelineWaitSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    timelineWaitSemaphoreSubmitInfo.semaphore = queue->timelineSemaphore;
-    timelineWaitSemaphoreSubmitInfo.value = queue->timelineValue++;
+    timelineWaitSemaphoreSubmitInfo.semaphore = currentRecordQueue->timelineSemaphore;
+    timelineWaitSemaphoreSubmitInfo.value = currentRecordQueue->timelineValue++;
     timelineWaitSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
     waitSemaphoreInfos.push_back(timelineWaitSemaphoreSubmitInfo);
 
     VkSemaphoreSubmitInfo timelineSignalSemaphoreSubmitInfo{};
     timelineSignalSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    timelineSignalSemaphoreSubmitInfo.semaphore = queue->timelineSemaphore;
-    timelineSignalSemaphoreSubmitInfo.value = queue->timelineValue;
+    timelineSignalSemaphoreSubmitInfo.semaphore = currentRecordQueue->timelineSemaphore;
+    timelineSignalSemaphoreSubmitInfo.value = currentRecordQueue->timelineValue;
     timelineSignalSemaphoreSubmitInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
     signalSemaphoreInfos.push_back(timelineSignalSemaphoreSubmitInfo);
 
@@ -325,24 +322,17 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     submitInfo.commandBufferInfoCount = 1;
     submitInfo.pCommandBufferInfos = &commandBufferSubmitInfo;
 
-    VkResult result = vkQueueSubmit2(queue->vkQueue, 1, &submitInfo, fence);
+    VkResult result = vkQueueSubmit2(currentRecordQueue->vkQueue, 1, &submitInfo, fence);
 
-    // queue->signaledValue = waitValue + 1;
-    queue->queueMutex->unlock();
+    currentRecordQueue->queueMutex->unlock();
 
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to submit command buffer!");
     }
+}
 
-    auto time = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - startTime);
-
-    //std::cout << "Executing index: " << queueIndex << "  Time: " << time << std::endl;
-   
-    //if (time.count()>1.0f)
-    //{
-    //    std::cout << std::endl;
-    //}
-
-    return true;
+DeviceManager& DeviceManager::operator<<(std::function<void(const VkCommandBuffer& commandBuffer)> commandsFunction)
+{
+    commandsFunction(currentRecordQueue->commandBuffer);
 }
