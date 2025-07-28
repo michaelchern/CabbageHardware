@@ -73,7 +73,24 @@ class DeviceManager
      
     void initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice);
 
+    struct HardwareCommand
+    {
+        HardwareCommand &start()
+        {
+        }
+        HardwareCommand &end()
+        {
+        }
+        HardwareCommand &operator<<(const HardwareCommand &)
+        {
+            return *this;
+        }
 
+        HardwareCommand &operator<<(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction)
+        {
+            return *this;
+        }
+    } hardwareCommand;
 
     bool executeSingleTimeCommands(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction,
                                    QueueType queueType = QueueType::GraphicsQueue,
@@ -134,19 +151,4 @@ class DeviceManager
     std::vector<QueueUtils> transferQueues;
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
-};
-
-
-
-struct HardwareCommand
-{
-    inline HardwareCommand &operator<<(const HardwareCommand &)
-    {
-        return *this;
-    }
-
-    inline HardwareCommand &operator<<(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction)
-    {
-        return *this;
-    }
 };

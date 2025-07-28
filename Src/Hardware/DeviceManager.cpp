@@ -19,6 +19,11 @@ void DeviceManager::initDeviceManager(const CreateCallback &createCallback, cons
     createCommandBuffers();
 
     createTimelineSemaphore();
+
+    HardwareCommand hardwareCommand1;
+    HardwareCommand hardwareCommand2;
+    HardwareCommand hardwareCommand3;
+    hardwareCommand.start() << hardwareCommand1 << hardwareCommand2 << hardwareCommand3<< hardwareCommand.end();
 }
 
 void DeviceManager::createTimelineSemaphore()
