@@ -241,10 +241,10 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
                                               std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos,
                                               VkFence fence)
 {
+    auto startTime = std::chrono::high_resolution_clock::now();
+
     QueueUtils *queue = nullptr;
     uint16_t queueIndex = 0;
-
-auto startTime = std::chrono::high_resolution_clock::now();
 
     while (true)
     {
@@ -280,9 +280,6 @@ auto startTime = std::chrono::high_resolution_clock::now();
 
         std::this_thread::yield();
     }
-    auto time = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - startTime);
-
-     std::cout << "Executing index: " << queueIndex << "  Time: " << time << std::endl;
 
     vkResetCommandBuffer(queue->commandBuffer, /*VkCommandBufferResetFlagBits*/ 0);
 
@@ -332,6 +329,15 @@ auto startTime = std::chrono::high_resolution_clock::now();
     {
         throw std::runtime_error("Failed to submit command buffer!");
     }
+
+    auto time = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - startTime);
+
+    std::cout << "Executing index: " << queueIndex << "  Time: " << time << std::endl;
+   
+    //if (time.count()>1.0f)
+    //{
+    //    std::cout << std::endl;
+    //}
 
     return true;
 }
