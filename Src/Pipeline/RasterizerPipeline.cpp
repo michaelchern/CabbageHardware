@@ -355,9 +355,7 @@ RasterizerPipeline &RasterizerPipeline::startRecord(ktm::uvec2 imageSize)
     if (!depthImage)
     {
         depthImage = HardwareImage(imageSize, ImageFormat::D32_FLOAT, ImageUsage::DepthImage);
-    }
-    if (this->depthImage)
-    {
+
         createRenderPass(multiviewCount);
 
         createGraphicsPipeline(vertShaderCode, fragShaderCode);
