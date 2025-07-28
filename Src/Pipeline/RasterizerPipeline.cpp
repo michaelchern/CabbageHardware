@@ -201,16 +201,17 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
 
     std::vector<VkVertexInputBindingDescription> bindingDescriptions(vertShaderCode.shaderResources.stageInputs.size());
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions(vertShaderCode.shaderResources.stageInputs.size());
-    for (uint32_t index = 0; index < vertShaderCode.shaderResources.stageInputs.size(); index++)
+    //for (uint32_t index = 0; index < vertShaderCode.shaderResources.stageInputs.size(); index++)
+    for (auto item : vertShaderCode.shaderResources.stageInputs)
     {
-        bindingDescriptions[index].binding = vertShaderCode.shaderResources.stageInputs[index].location;
-        bindingDescriptions[index].stride = vertShaderCode.shaderResources.stageInputs[index].typeSize;
-        bindingDescriptions[index].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        bindingDescriptions[item.second.location].binding = item.second.location;
+        bindingDescriptions[item.second.location].stride = item.second.typeSize;
+        bindingDescriptions[item.second.location].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-        attributeDescriptions[index].binding = vertShaderCode.shaderResources.stageInputs[index].location;
-        attributeDescriptions[index].location = vertShaderCode.shaderResources.stageInputs[index].location;
-        attributeDescriptions[index].format = vertexBindingsVkFormat[index];
-        attributeDescriptions[index].offset = 0;
+        attributeDescriptions[item.second.location].binding = item.second.location;
+        attributeDescriptions[item.second.location].location = item.second.location;
+        attributeDescriptions[item.second.location].format = vertexBindingsVkFormat[item.second.location];
+        attributeDescriptions[item.second.location].offset = 0;
     }
 
     vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)bindingDescriptions.size();
