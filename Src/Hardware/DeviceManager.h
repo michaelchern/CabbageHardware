@@ -135,3 +135,18 @@ class DeviceManager
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
 };
+
+
+
+struct HardwareCommand
+{
+    inline HardwareCommand &operator<<(const HardwareCommand &)
+    {
+        return *this;
+    }
+
+    inline HardwareCommand &operator<<(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction)
+    {
+        return *this;
+    }
+};
