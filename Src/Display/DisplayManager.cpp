@@ -380,8 +380,8 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                 signalSemaphoreInfos.push_back(signalInfo);
             }
 
-             displayDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue, waitSemaphoreInfos, signalSemaphoreInfos, inFlightFences[currentFrame]);
-
+             displayDevice->deviceManager.startCommands() << runCommand 
+                 << displayDevice->deviceManager.endCommands(waitSemaphoreInfos, signalSemaphoreInfos, inFlightFences[currentFrame]);
 
              // 准备呈现信息，等待 timeline semaphore
              VkPresentInfoKHR presentInfo{};

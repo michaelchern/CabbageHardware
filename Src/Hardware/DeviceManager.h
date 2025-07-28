@@ -78,10 +78,10 @@ class DeviceManager
     DeviceManager &endCommands(std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos = std::vector<VkSemaphoreSubmitInfo>(),
                                std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos = std::vector<VkSemaphoreSubmitInfo>(),
                                VkFence fence = VK_NULL_HANDLE);
-    //DeviceManager &operator<<(const DeviceManager &)
-    //{
-    //    return *this;
-    //}
+    DeviceManager &operator<<(const DeviceManager &)
+    {
+        return *this;
+    }
     DeviceManager &operator<<(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction);
     
     QueueUtils *currentRecordQueue = nullptr;

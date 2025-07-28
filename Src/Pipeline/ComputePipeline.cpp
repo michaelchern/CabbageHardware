@@ -80,6 +80,7 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 				vkCmdDispatch(commandBuffer, groupCount.x, groupCount.y, groupCount.z);
 			};
 
-		globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::ComputeQueue);
+        globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::ComputeQueue) << runCommand
+			<< globalHardwareContext.mainDevice->deviceManager.endCommands();
 	}
 }

@@ -453,7 +453,7 @@ void RasterizerPipeline::executePipeline(ktm::uvec2 imageSize)
         vkCmdEndRenderPass(commandBuffer);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.executeSingleTimeCommands(runCommand, DeviceManager::GraphicsQueue);
+    globalHardwareContext.mainDevice->deviceManager.startCommands() << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
 
     geomMeshes.clear();
 }

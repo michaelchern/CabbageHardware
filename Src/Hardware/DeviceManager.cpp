@@ -19,11 +19,6 @@ void DeviceManager::initDeviceManager(const CreateCallback &createCallback, cons
     createCommandBuffers();
 
     createTimelineSemaphore();
-
-    HardwareCommand hardwareCommand1;
-    HardwareCommand hardwareCommand2;
-    HardwareCommand hardwareCommand3;
-    hardwareCommand.start() << hardwareCommand1 << hardwareCommand2 << hardwareCommand3<< hardwareCommand.end();
 }
 
 void DeviceManager::createTimelineSemaphore()
@@ -287,6 +282,8 @@ DeviceManager &DeviceManager::startCommands(QueueType queueType)
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
     vkBeginCommandBuffer(currentRecordQueue->commandBuffer, &beginInfo);
+
+    return *this;
 }
 
 DeviceManager &DeviceManager::endCommands(std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos,
@@ -323,16 +320,18 @@ DeviceManager &DeviceManager::endCommands(std::vector<VkSemaphoreSubmitInfo> wai
     submitInfo.pCommandBufferInfos = &commandBufferSubmitInfo;
 
     VkResult result = vkQueueSubmit2(currentRecordQueue->vkQueue, 1, &submitInfo, fence);
-
-    currentRecordQueue->queueMutex->unlock();
-
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to submit command buffer!");
     }
+
+    currentRecordQueue->queueMutex->unlock();
+
+    return *this;
 }
 
 DeviceManager& DeviceManager::operator<<(std::function<void(const VkCommandBuffer& commandBuffer)> commandsFunction)
 {
     commandsFunction(currentRecordQueue->commandBuffer);
+    return *this;
 }
