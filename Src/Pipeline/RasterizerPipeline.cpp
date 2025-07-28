@@ -17,11 +17,27 @@ RasterizerPipeline::RasterizerPipeline(std::string vertexShaderCode, std::string
     auto vertexResources = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
     auto fragmentResources = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
 
-    for (auto item : vertexResources.bindInfoPool)
+    for (auto &[name, bindInfo] : vertexResources.bindInfoPool)
     {
+        if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageInputs)
+        {
+            vertexStageInputs.push_back(&bindInfo);
+        }
+        if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageOutputs)
+        {
+            vertexStageOutputs.push_back(&bindInfo);
+        }
     }
-    for (auto item : fragmentResources.bindInfoPool)
+    for (auto &[name, bindInfo] : fragmentResources.bindInfoPool)
     {
+        if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageInputs)
+        {
+            fragmentStageInputs.push_back(&bindInfo);
+        }
+        if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageOutputs)
+        {
+            fragmentStageOutputs.push_back(&bindInfo);
+        }
     }
     tempVertexBuffers.resize(vertexStageInputs.size());
     renderTargets.resize(fragmentStageOutputs.size());
