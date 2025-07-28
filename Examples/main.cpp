@@ -464,6 +464,8 @@ int main()
             {
                 float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
 
+                auto start = std::chrono::high_resolution_clock::now();
+
                 rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
                 rasterizerUniformBufferObject.model = ktm::rotate3d_axis(time * ktm::radians(90.0f), ktm::fvec3(0.0f, 0.0f, 1.0f));
                 rasterizerUniformBuffer.copyFromData(&rasterizerUniformBufferObject, sizeof(rasterizerUniformBufferObject));
@@ -482,6 +484,9 @@ int main()
                 rasterizer.executePipeline(ktm::uvec2(1920, 1080));
                 computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
                 displayManager = finalOutputImage;
+
+                auto timeD = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - start);
+                std::cout << "  Time: " << timeD << std::endl;
             }
         };
 

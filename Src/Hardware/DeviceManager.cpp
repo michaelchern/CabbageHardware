@@ -332,7 +332,7 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
 
     auto time = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - startTime);
 
-    std::cout << "Executing index: " << queueIndex << "  Time: " << time << std::endl;
+    //std::cout << "Executing index: " << queueIndex << "  Time: " << time << std::endl;
    
     //if (time.count()>1.0f)
     //{
