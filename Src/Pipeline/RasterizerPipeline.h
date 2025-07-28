@@ -37,43 +37,40 @@ struct RasterizerPipeline
 
     std::variant<HardwarePushConstant, HardwareBuffer, HardwareImage> operator[](const std::string& resourceName)
     {
-        //std::string pushConstanName = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
-        ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(resourceName);
-        if (resource != nullptr)
-        {
-            //std::string pushConstanMemberName = resourceName.substr(pushConstanName.size() + 1, resourceName.size());
+        ShaderCodeModule::ShaderResources::ShaderBindInfo *vertexResource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
+        ShaderCodeModule::ShaderResources::ShaderBindInfo *fragmentResource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
 
-            if (resource != nullptr)
+        if (vertexResource != nullptr)
+        {
+            switch (vertexResource->bindType)
             {
-                return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant));
-            }
-            else
-            {
-                ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(resourceName);
-                if (resource != nullptr)
-                {
-                    return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant));
-                }
+            case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
+                return std::move(HardwarePushConstant(vertexResource->typeSize, vertexResource->byteOffset, &tempPushConstant));
+
+            default:
+                break;
             }
         }
         else
         {
+            if (fragmentResource != nullptr)
             {
-                ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findStageOutputs(resourceName);
-                if (resource != nullptr)
+                switch (fragmentResource->bindType)
                 {
-                    return renderTargets[resource->location];
+                case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
+                    return std::move(HardwarePushConstant(fragmentResource->typeSize, fragmentResource->byteOffset, &tempPushConstant));
+
+                default:
+                    break;
                 }
             }
+            else
             {
-                ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findStageInputs(resourceName);
-                if (resource != nullptr)
-                {
-                    return tempVertexBuffers[resource->location];
-                }
+                throw std::runtime_error("Resource not found: " + resourceName);
             }
         }
-        throw resourceName;
+
+        throw std::runtime_error("Resource not found: " + resourceName);
     }
 
 
@@ -138,4 +135,9 @@ private:
     HardwarePushConstant tempPushConstant;
 
     std::vector<HardwareBuffer> tempVertexBuffers;
+
+    std::unordered_map<std::string, ShaderCodeModule::ShaderResources::ShaderBindInfo *> vertexStageInputs;
+    std::unordered_map<std::string, ShaderCodeModule::ShaderResources::ShaderBindInfo *> vertexStageOutputs;
+    std::unordered_map<std::string, ShaderCodeModule::ShaderResources::ShaderBindInfo *> fragmentStageInputs;
+    std::unordered_map<std::string, ShaderCodeModule::ShaderResources::ShaderBindInfo *> fragmentStageOutputs;
 };

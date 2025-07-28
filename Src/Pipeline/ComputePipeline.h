@@ -21,16 +21,14 @@ struct ComputePipeline
 	
     std::variant<HardwarePushConstant> operator[](const std::string& resourceName)
     {
-        // std::string pushConstanName = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
-        // std::string pushConstanMemberName = resourceName.substr(pushConstanName.size() + 1, resourceName.size());
-        ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(resourceName);
-        if (resource != nullptr)
+        ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
+        if (resource != nullptr && resource->bindType == ShaderCodeModule::ShaderResources::BindType::pushConstantMembers)
         {
             return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant));
         }
         else
         {
-            throw std::runtime_error("failed to find with name!");
+            throw std::runtime_error("failed to find with name!" + resourceName);
         }
     }
 
