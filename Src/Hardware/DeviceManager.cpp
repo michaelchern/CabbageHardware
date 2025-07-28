@@ -280,8 +280,7 @@ auto startTime = std::chrono::high_resolution_clock::now();
 
         std::this_thread::yield();
     }
-
-    float time = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
+    auto time = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - startTime);
 
      std::cout << "Executing index: " << queueIndex << "  Time: " << time << std::endl;
 
