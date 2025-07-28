@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <chrono>
 #include <mutex>
 #include <memory>
 #include <functional>

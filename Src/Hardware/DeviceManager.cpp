@@ -244,6 +244,8 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
     QueueUtils *queue = nullptr;
     uint16_t queueIndex = 0;
 
+auto startTime = std::chrono::high_resolution_clock::now();
+
     while (true)
     {
         switch (queueType)
@@ -279,7 +281,9 @@ bool DeviceManager::executeSingleTimeCommands(std::function<void(const VkCommand
         std::this_thread::yield();
     }
 
-    // std::cout << "Executing index: " << queueIndex << std::endl;
+    float time = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
+
+     std::cout << "Executing index: " << queueIndex << "  Time: " << time << std::endl;
 
     vkResetCommandBuffer(queue->commandBuffer, /*VkCommandBufferResetFlagBits*/ 0);
 
