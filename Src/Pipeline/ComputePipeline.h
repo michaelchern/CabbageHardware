@@ -21,17 +21,17 @@ struct ComputePipeline
 	
     std::variant<HardwarePushConstant> operator[](std::string resourceName)
     {
-        std::string pushConstanName = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
-        if (resourceName.substr(0, pushConstanName.size() + 1) == pushConstanName + ".")
+        // std::string pushConstanName = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
+        // std::string pushConstanMemberName = resourceName.substr(pushConstanName.size() + 1, resourceName.size());
+        ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(resourceName);
+        if (resource != nullptr)
         {
-            std::string pushConstanMemberName = resourceName.substr(pushConstanName.size() + 1, resourceName.size());
-            ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
-            if (resource != nullptr)
-            {
-                return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant));
-            }
+            return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant));
         }
-        throw std::runtime_error("failed to find with name!");
+        else
+        {
+            throw std::runtime_error("failed to find with name!");
+        }
     }
 
 	//init and execute is all used this API

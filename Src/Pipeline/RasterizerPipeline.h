@@ -37,18 +37,19 @@ struct RasterizerPipeline
 
     std::variant<HardwarePushConstant, HardwareBuffer, HardwareImage> operator[](std::string resourceName)
     {
-        std::string pushConstanName = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
-        if (resourceName.substr(0, pushConstanName.size() + 1) == pushConstanName + ".")
+        //std::string pushConstanName = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantName;
+        ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(resourceName);
+        if (resource != nullptr)
         {
-            std::string pushConstanMemberName = resourceName.substr(pushConstanName.size() + 1, resourceName.size());
-            ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
+            //std::string pushConstanMemberName = resourceName.substr(pushConstanName.size() + 1, resourceName.size());
+
             if (resource != nullptr)
             {
                 return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant));
             }
             else
             {
-                ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(pushConstanMemberName);
+                ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findPushConstantMembers(resourceName);
                 if (resource != nullptr)
                 {
                     return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &tempPushConstant));
