@@ -483,12 +483,6 @@ int main()
                 computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
 
-                rasterizer.startRecord(ktm::uvec2(1920, 1080)) << indexBuffer << rasterizer.endRecord();
-
-                computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
-
-                displayManager = finalOutputImage;
-
                 auto timeD = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - start);
                 totalTimeMs += timeD.count();
                 frameCount++;
@@ -497,7 +491,15 @@ int main()
                     std::cout << "Average time over " << frameCount << " frames: " << totalTimeMs / frameCount << " ms" << std::endl;
                     totalTimeMs = 0.0;
                     frameCount = 0;
-                }    
+                }  
+
+                rasterizer.startRecord(ktm::uvec2(1920, 1080)) << indexBuffer << rasterizer.endRecord();
+
+                computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
+
+                displayManager = finalOutputImage;
+
+  
             }
         };
 
