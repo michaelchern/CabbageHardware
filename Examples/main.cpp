@@ -488,7 +488,7 @@ int main()
                 frameCount++;
                 if (frameCount >= 100)
                 {
-                    std::cout << "Average time over " << frameCount << " frames: " << totalTimeMs / frameCount << " ms" << std::endl;
+                    //std::cout << "Average time over " << frameCount << " frames: " << totalTimeMs / frameCount << " ms" << std::endl;
                     totalTimeMs = 0.0;
                     frameCount = 0;
                 }    

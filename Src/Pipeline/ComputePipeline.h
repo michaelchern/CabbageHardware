@@ -21,7 +21,10 @@ struct ComputePipeline
 	
     std::variant<HardwarePushConstant> operator[](const std::string& resourceName)
     {
+        auto start = std::chrono::high_resolution_clock::now();
         ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.tireTree.findShaderBindInfo(resourceName);
+        auto timeD = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - start);
+        std::cout << "Average time over " << timeD << std::endl;
         if (resource != nullptr && resource->bindType == ShaderCodeModule::ShaderResources::BindType::pushConstantMembers)
         {
             return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant));
