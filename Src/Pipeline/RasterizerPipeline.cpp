@@ -12,6 +12,9 @@ RasterizerPipeline::RasterizerPipeline(std::string vertexShaderCode, std::string
     vertShaderCode = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV);
     fragShaderCode = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV);
 
+    vertexResource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
+    fragmentResource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
+
     tempPushConstant = HardwarePushConstant(vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantSize, 0);
 
     auto vertexResources = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
