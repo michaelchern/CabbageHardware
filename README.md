@@ -5,7 +5,7 @@
 - (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题
 - (紧急)BUG：内存泄漏(待定位)
 - binldess拆成多个（有可能和amd的bug相关）
-- 性能瓶颈：cpu上由反射的数据更新
+- 性能瓶颈：vkQueuePresentKHR
 - 程序关闭时资源释放问题
 - BUG：mutiview初始化黑屏
 - 支持跨device传输（Vulkan与CUDA）
