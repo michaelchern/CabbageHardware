@@ -464,15 +464,6 @@ int main()
             while (running.load())
             {           
                 auto start = std::chrono::high_resolution_clock::now();
-                rasterizer["pushConsts.uniformBufferIndex"];
-                rasterizer["inPosition"];
-                rasterizer["inColor"];
-                rasterizer["inTexCoord"];
-                rasterizer["inNormal"];
-                rasterizer["outColor"];
-                computer["pushConsts.uniformBufferIndex"];
-                auto timeD = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - start);
-                std::cout << "  Time: " << timeD << std::endl;
 
                 float time = std::chrono::duration<float, std::chrono::seconds::period>(std::chrono::high_resolution_clock::now() - startTime).count();
                 rasterizerUniformBufferObject.textureIndex = texture.storeDescriptor();
@@ -493,6 +484,9 @@ int main()
                 computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
 
                 displayManager = finalOutputImage;
+
+                auto timeD = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - start);
+                std::cout << "  Time: " << timeD << std::endl;
             }
         };
 

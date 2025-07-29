@@ -21,22 +21,22 @@ RasterizerPipeline::RasterizerPipeline(std::string vertexShaderCode, std::string
     {
         if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageInputs)
         {
-            vertexStageInputs.push_back(&bindInfo);
+            vertexStageInputs.push_back(bindInfo);
         }
         if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageOutputs)
         {
-            vertexStageOutputs.push_back(&bindInfo);
+            vertexStageOutputs.push_back(bindInfo);
         }
     }
     for (auto &[name, bindInfo] : fragmentResources.bindInfoPool)
     {
         if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageInputs)
         {
-            fragmentStageInputs.push_back(&bindInfo);
+            fragmentStageInputs.push_back(bindInfo);
         }
         if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageOutputs)
         {
-            fragmentStageOutputs.push_back(&bindInfo);
+            fragmentStageOutputs.push_back(bindInfo);
         }
     }
     tempVertexBuffers.resize(vertexStageInputs.size());
@@ -132,13 +132,12 @@ void RasterizerPipeline::createRenderPass(int multiviewCount)
 
 void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode, ShaderCodeModule fragShaderCode)
 {
-    std::vector<VkFormat> vertexBindingsVkFormat;
-    for (auto item : vertexStageInputs)
-    {
-        VkFormat temp;
-        if (item->typeName == "float")
+    auto getVkFormat = [](const std::string &typeName, uint32_t elementCount) -> VkFormat
         {
-            switch (item->elementCount)
+        VkFormat temp;
+        if (typeName == "float")
+        {
+            switch (elementCount)
             {
             case 1:
                 temp = VK_FORMAT_R32_SFLOAT;
@@ -156,9 +155,9 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
                 break;
             }
         }
-        if (item->typeName == "int")
+        if (typeName == "int")
         {
-            switch (item->elementCount)
+            switch (elementCount)
             {
             case 1:
                 temp = VK_FORMAT_R32_SINT;
@@ -176,9 +175,9 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
                 break;
             }
         }
-        if (item->typeName == "uint")
+        if (typeName == "uint")
         {
-            switch (item->elementCount)
+            switch (elementCount)
             {
             case 1:
                 temp = VK_FORMAT_R32_UINT;
@@ -196,8 +195,10 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
                 break;
             }
         }
-        vertexBindingsVkFormat.push_back(temp);
-    }
+
+        return temp; 
+        };
+    
 
     VkShaderModule vertShaderModule = globalHardwareContext.mainDevice->resourceManager.createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = globalHardwareContext.mainDevice->resourceManager.createShaderModule(fragShaderCode);
@@ -229,14 +230,14 @@ void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode,
     //for (uint32_t index = 0; index < vertShaderCode.shaderResources.stageInputs.size(); index++)
     for (auto item : vertexStageInputs)
     {
-        bindingDescriptions[item->location].binding = item->location;
-        bindingDescriptions[item->location].stride = item->typeSize;
-        bindingDescriptions[item->location].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        bindingDescriptions[item.location].binding = item.location;
+        bindingDescriptions[item.location].stride = item.typeSize;
+        bindingDescriptions[item.location].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-        attributeDescriptions[item->location].binding = item->location;
-        attributeDescriptions[item->location].location = item->location;
-        attributeDescriptions[item->location].format = vertexBindingsVkFormat[item->location];
-        attributeDescriptions[item->location].offset = 0;
+        attributeDescriptions[item.location].binding = item.location;
+        attributeDescriptions[item.location].location = item.location;
+        attributeDescriptions[item.location].format = getVkFormat(item.typeName,item.elementCount);
+        attributeDescriptions[item.location].offset = 0;
     }
 
     vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)bindingDescriptions.size();

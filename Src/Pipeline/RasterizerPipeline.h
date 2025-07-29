@@ -40,42 +40,25 @@ struct RasterizerPipeline
         ShaderCodeModule::ShaderResources::ShaderBindInfo *vertexResource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
         if (vertexResource != nullptr)
         {
+            switch (vertexResource->bindType)
+            {
+                case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
+                    return std::move(HardwarePushConstant(vertexResource->typeSize, vertexResource->byteOffset, &tempPushConstant));
+                case ShaderCodeModule::ShaderResources::BindType::stageInputs:
+                    return tempVertexBuffers[vertexResource->location];
+            }
         }
         else
         {
             ShaderCodeModule::ShaderResources::ShaderBindInfo *fragmentResource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
+            switch (fragmentResource->bindType)
+            {
+            case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
+                return std::move(HardwarePushConstant(fragmentResource->typeSize, fragmentResource->byteOffset, &tempPushConstant));
+            case ShaderCodeModule::ShaderResources::BindType::stageOutputs:
+                return renderTargets[fragmentResource->location];
+            }
         }
-        //if (vertexResource != nullptr)
-        //{
-        //    switch (vertexResource->bindType)
-        //    {
-        //    case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
-        //        return std::move(HardwarePushConstant(vertexResource->typeSize, vertexResource->byteOffset, &tempPushConstant));
-
-        //    default:
-        //        break;
-        //    }
-        //}
-        //else
-        //{
-        //    if (fragmentResource != nullptr)
-        //    {
-        //        switch (fragmentResource->bindType)
-        //        {
-        //        case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
-        //            return std::move(HardwarePushConstant(fragmentResource->typeSize, fragmentResource->byteOffset, &tempPushConstant));
-
-        //        default:
-        //            break;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        throw std::runtime_error("Resource not found: " + resourceName);
-        //    }
-        //}
-
-        //throw std::runtime_error("Resource not found: " + resourceName);
         return std::move(HardwarePushConstant());
     }
 
@@ -142,8 +125,8 @@ private:
 
     std::vector<HardwareBuffer> tempVertexBuffers;
 
-    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo *> vertexStageInputs;
-    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo *> vertexStageOutputs;
-    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo *> fragmentStageInputs;
-    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo *> fragmentStageOutputs;
+    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo> vertexStageInputs;
+    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo> vertexStageOutputs;
+    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo> fragmentStageInputs;
+    std::vector<ShaderCodeModule::ShaderResources::ShaderBindInfo> fragmentStageOutputs;
 };
