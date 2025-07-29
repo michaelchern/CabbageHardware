@@ -487,6 +487,8 @@ int main()
 
                 computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
 
+                displayManager = finalOutputImage;
+
                 auto timeD = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - start);
                 totalTimeMs += timeD.count();
                 frameCount++;
@@ -496,8 +498,6 @@ int main()
                     totalTimeMs = 0.0;
                     frameCount = 0;
                 }
-
-                displayManager = finalOutputImage;
             }
         };
 
