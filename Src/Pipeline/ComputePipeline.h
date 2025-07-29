@@ -21,7 +21,7 @@ struct ComputePipeline
 	
     std::variant<HardwarePushConstant> operator[](const std::string& resourceName)
     {
-        ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
+        ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.tireTree.findShaderBindInfo(resourceName);
         if (resource != nullptr && resource->bindType == ShaderCodeModule::ShaderResources::BindType::pushConstantMembers)
         {
             return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant));

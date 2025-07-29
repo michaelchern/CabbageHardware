@@ -37,7 +37,7 @@ struct RasterizerPipeline
 
     std::variant<HardwarePushConstant, HardwareBuffer, HardwareImage> operator[](const std::string& resourceName)
     {
-        ShaderCodeModule::ShaderResources::ShaderBindInfo *vertexResource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
+        ShaderCodeModule::ShaderResources::ShaderBindInfo *vertexResource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.tireTree.findShaderBindInfo(resourceName);
         if (vertexResource != nullptr)
         {
             switch (vertexResource->bindType)
@@ -50,7 +50,7 @@ struct RasterizerPipeline
         }
         else
         {
-            ShaderCodeModule::ShaderResources::ShaderBindInfo *fragmentResource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.findShaderBindInfo(resourceName);
+            ShaderCodeModule::ShaderResources::ShaderBindInfo *fragmentResource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.tireTree.findShaderBindInfo(resourceName);
             switch (fragmentResource->bindType)
             {
             case ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
