@@ -460,6 +460,8 @@ int main()
 
             auto startTime = std::chrono::high_resolution_clock::now();
 
+            double totalTimeMs = 0.0;
+            int frameCount = 0;
 
             while (running.load())
             {           
@@ -486,7 +488,14 @@ int main()
                 displayManager = finalOutputImage;
 
                 auto timeD = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - start);
-                std::cout << "  Time: " << timeD << std::endl;
+                totalTimeMs += timeD.count();
+                frameCount++;
+                if (frameCount >= 100)
+                {
+                    std::cout << "Average time over " << frameCount << " frames: " << totalTimeMs / frameCount << " ms" << std::endl;
+                    totalTimeMs = 0.0;
+                    frameCount = 0;
+                }    
             }
         };
 
