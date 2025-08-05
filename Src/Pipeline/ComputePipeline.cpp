@@ -2,15 +2,15 @@
 
 #include<Hardware/GlobalContext.h>
 
-using namespace EmbeddedShader;
+//using namespace EmbeddedShader;
 
-ComputePipeline::ComputePipeline(std::string shaderCode, ShaderLanguage language, const std::source_location &sourceLocation)
-    : shaderCodeCompiler(ShaderCodeCompiler(shaderCode, ShaderStage::ComputeShader, language, sourceLocation))
+ComputePipeline::ComputePipeline(std::string shaderCode, EmbeddedShader::ShaderLanguage language, const std::source_location &sourceLocation)
+    : shaderCodeCompiler(EmbeddedShader::ShaderCodeCompiler(shaderCode, EmbeddedShader::ShaderStage::ComputeShader, language, sourceLocation))
 {
-    this->shaderCode = this->shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV);
-    this->pushConstant = HardwarePushConstant(shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantSize, 0);
+    this->shaderCode = this->shaderCodeCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV);
+    this->pushConstant = HardwarePushConstant(shaderCodeCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources.pushConstantSize, 0);
 
-	shaderResource = shaderCodeCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
+	shaderResource = shaderCodeCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
 }
 
 //ComputePipeline::~ComputePipeline()

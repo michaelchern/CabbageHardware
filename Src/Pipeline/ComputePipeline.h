@@ -9,7 +9,7 @@
 
 #include"../CabbageDisplayer.h"
 
-using namespace EmbeddedShader;
+//using namespace EmbeddedShader;
 
 struct ComputePipeline
 {
@@ -17,13 +17,13 @@ struct ComputePipeline
 	~ComputePipeline() = default;
 
 	
-    ComputePipeline(std::string shaderCode, ShaderLanguage language = ShaderLanguage::GLSL, const std::source_location &sourceLocation = std::source_location::current());
+    ComputePipeline(std::string shaderCode, EmbeddedShader::ShaderLanguage language = EmbeddedShader::ShaderLanguage::GLSL, const std::source_location &sourceLocation = std::source_location::current());
 
 	
     std::variant<HardwarePushConstant> operator[](const std::string& resourceName)
     {
-        ShaderCodeModule::ShaderResources::ShaderBindInfo* resource = shaderResource.findShaderBindInfo(resourceName);
-        if (resource != nullptr && resource->bindType == ShaderCodeModule::ShaderResources::BindType::pushConstantMembers)
+        EmbeddedShader::ShaderCodeModule::ShaderResources::ShaderBindInfo *resource = shaderResource.findShaderBindInfo(resourceName);
+        if (resource != nullptr && resource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::BindType::pushConstantMembers)
         {
             return std::move(HardwarePushConstant(resource->typeSize, resource->byteOffset, &pushConstant));
         }
@@ -44,9 +44,9 @@ private:
 
 	HardwarePushConstant pushConstant;
     //HardwarePushConstant tempPushConstantMember;
-    ShaderCodeModule::ShaderResources shaderResource;
+    EmbeddedShader::ShaderCodeModule::ShaderResources shaderResource;
 
 
-    ShaderCodeCompiler shaderCodeCompiler;
-	ShaderCodeModule shaderCode;
+    EmbeddedShader::ShaderCodeCompiler shaderCodeCompiler;
+    EmbeddedShader::ShaderCodeModule shaderCode;
 };
