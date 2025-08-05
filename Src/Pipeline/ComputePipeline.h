@@ -9,6 +9,7 @@
 
 #include"../CabbageDisplayer.h"
 
+using namespace EmbeddedShader;
 
 struct ComputePipeline
 {

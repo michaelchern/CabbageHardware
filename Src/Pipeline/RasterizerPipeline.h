@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <vector>
 
 #include"../Hardware/DeviceManager.h"
 #include"../Hardware/ResourceManager.h"
@@ -7,6 +8,7 @@
 
 #include "../CabbageDisplayer.h"
 
+using namespace EmbeddedShader;
 
 struct RasterizerPipeline
 {
