@@ -5,39 +5,39 @@
 #include <Hardware/GlobalContext.h>
 
 RasterizerPipeline::RasterizerPipeline(std::string vertexShaderCode, std::string fragmentShaderCode, uint32_t multiviewCount,
-                                       ShaderLanguage vertexShaderLanguage, ShaderLanguage fragmentShaderLanguage, const std::source_location &sourceLocation)
-    : vertexShaderCompiler(ShaderCodeCompiler(vertexShaderCode, ShaderStage::VertexShader, vertexShaderLanguage, sourceLocation)),
-      fragmentShaderCompiler(ShaderCodeCompiler(fragmentShaderCode, ShaderStage::FragmentShader, fragmentShaderLanguage, sourceLocation))
+                                       EmbeddedShader::ShaderLanguage vertexShaderLanguage, EmbeddedShader::ShaderLanguage fragmentShaderLanguage, const std::source_location &sourceLocation)
+    : vertexShaderCompiler(EmbeddedShader::ShaderCodeCompiler(vertexShaderCode, EmbeddedShader::ShaderStage::VertexShader, vertexShaderLanguage, sourceLocation)),
+      fragmentShaderCompiler(EmbeddedShader::ShaderCodeCompiler(fragmentShaderCode, EmbeddedShader::ShaderStage::FragmentShader, fragmentShaderLanguage, sourceLocation))
 {
-    vertShaderCode = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV);
-    fragShaderCode = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV);
+    vertShaderCode = vertexShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV);
+    fragShaderCode = fragmentShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV);
 
-    vertexResource = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
-    fragmentResource = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
+    vertexResource = vertexShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
+    fragmentResource = fragmentShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
 
-    tempPushConstant = HardwarePushConstant(vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources.pushConstantSize, 0);
+    tempPushConstant = HardwarePushConstant(vertexShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources.pushConstantSize, 0);
 
-    auto vertexResources = vertexShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
-    auto fragmentResources = fragmentShaderCompiler.getShaderCode(ShaderLanguage::SpirV).shaderResources;
+    auto vertexResources = vertexShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
+    auto fragmentResources = fragmentShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
 
     for (auto &[name, bindInfo] : vertexResources.bindInfoPool)
     {
-        if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageInputs)
+        if (bindInfo.bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::BindType::stageInputs)
         {
             vertexStageInputs.push_back(bindInfo);
         }
-        if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageOutputs)
+        if (bindInfo.bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::BindType::stageOutputs)
         {
             vertexStageOutputs.push_back(bindInfo);
         }
     }
     for (auto &[name, bindInfo] : fragmentResources.bindInfoPool)
     {
-        if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageInputs)
+        if (bindInfo.bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::BindType::stageInputs)
         {
             fragmentStageInputs.push_back(bindInfo);
         }
-        if (bindInfo.bindType == ShaderCodeModule::ShaderResources::BindType::stageOutputs)
+        if (bindInfo.bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::BindType::stageOutputs)
         {
             fragmentStageOutputs.push_back(bindInfo);
         }
@@ -133,7 +133,7 @@ void RasterizerPipeline::createRenderPass(int multiviewCount)
     }
 }
 
-void RasterizerPipeline::createGraphicsPipeline(ShaderCodeModule vertShaderCode, ShaderCodeModule fragShaderCode)
+void RasterizerPipeline::createGraphicsPipeline(EmbeddedShader::ShaderCodeModule vertShaderCode, EmbeddedShader::ShaderCodeModule fragShaderCode)
 {
     auto getVkFormat = [](const std::string &typeName, uint32_t elementCount) -> VkFormat
         {
