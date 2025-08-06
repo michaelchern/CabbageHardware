@@ -315,11 +315,16 @@ void RasterizerPipeline::createGraphicsPipeline(EmbeddedShader::ShaderCodeModule
     push_constant_ranges.offset = 0;
     push_constant_ranges.size = pushConstantSize;
 
-    VkDescriptorSetLayout pSetLayouts[1] = {globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSetLayout};
+    std::vector<VkDescriptorSetLayout> setLayouts;
+    setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.uniformBindlessDescriptor.descriptorSetLayout);
+    setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.textureBindlessDescriptor.descriptorSetLayout);
+    setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.storageBufferBindlessDescriptor.descriptorSetLayout);
+    setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.storageImageBindlessDescriptor.descriptorSetLayout);
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = pSetLayouts;
+    pipelineLayoutInfo.setLayoutCount = setLayouts.size();
+    pipelineLayoutInfo.pSetLayouts = setLayouts.data();
 
     pipelineLayoutInfo.pushConstantRangeCount = 1;
     pipelineLayoutInfo.pPushConstantRanges = &push_constant_ranges;
@@ -462,8 +467,14 @@ RasterizerPipeline &RasterizerPipeline::operator<<(const HardwareBuffer &indexBu
 
         vkCmdBindIndexBuffer(commandBuffer, bufferGlobalPool[*indexBuffer.bufferID].bufferHandle, 0 * sizeof(uint32_t), VK_INDEX_TYPE_UINT32);
 
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
+        std::vector<VkDescriptorSet> descriptorSets;
+        descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.uniformBindlessDescriptor.descriptorSet);
+        descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.textureBindlessDescriptor.descriptorSet);
+        descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.storageBufferBindlessDescriptor.descriptorSet);
+        descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.storageImageBindlessDescriptor.descriptorSet);
 
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, (uint32_t)descriptorSets.size(), descriptorSets.data(), 0, nullptr);
+        
         void *data = tempPushConstant.getData();
         vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, pushConstantSize, data);
 
