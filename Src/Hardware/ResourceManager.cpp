@@ -784,29 +784,25 @@ void ResourceManager::createBindlessDescriptorSet()
             }
         }
 
-    }
-
-    {
-        uint32_t max_binding[4] = {k_max_bindless_resources[0], k_max_bindless_resources[1], k_max_bindless_resources[2], k_max_bindless_resources[3]};
-
-        VkDescriptorSetVariableDescriptorCountAllocateInfo count_info{};
-        count_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
-        count_info.descriptorSetCount = 1;
-        count_info.pDescriptorCounts = max_binding;
-        count_info.pNext = nullptr;
-
-        VkDescriptorSetAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool = bindlessDescriptor.descriptorPool;
-        allocInfo.descriptorSetCount = 1;
-        allocInfo.pSetLayouts = &bindlessDescriptor.descriptorSetLayout;
-        allocInfo.pNext = &count_info;
-
-        // uboDescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-        VkResult result = vkAllocateDescriptorSets(this->device->logicalDevice, &allocInfo, &bindlessDescriptor.descriptorSet);
-        if (result != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to allocate descriptor sets!");
+            VkDescriptorSetVariableDescriptorCountAllocateInfo count_info{};
+            count_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
+            count_info.descriptorSetCount = 1;
+            count_info.pDescriptorCounts = &k_max_bindless_resources[i];
+            count_info.pNext = nullptr;
+
+            VkDescriptorSetAllocateInfo allocInfo{};
+            allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            allocInfo.descriptorPool = bindlessDescriptors[i].descriptorPool;
+            allocInfo.descriptorSetCount = 1;
+            allocInfo.pSetLayouts = &bindlessDescriptors[i].descriptorSetLayout;
+            allocInfo.pNext = &count_info;
+
+            VkResult result = vkAllocateDescriptorSets(this->device->logicalDevice, &allocInfo, &bindlessDescriptors[i].descriptorSet);
+            if (result != VK_SUCCESS)
+            {
+                throw std::runtime_error("failed to allocate descriptor sets!");
+            }
         }
     }
 }
