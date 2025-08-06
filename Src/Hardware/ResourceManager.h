@@ -53,7 +53,7 @@ struct ResourceManager
         VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
         VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
         VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-    } uniformBindlessDescriptor, textureBindlessDescriptor, storageBufferBindlessDescriptor, storageImageBindlessDescriptor;
+    } bindlessDescriptors[4];
     
 
 	ResourceManager();

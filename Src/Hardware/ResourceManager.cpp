@@ -748,10 +748,7 @@ void ResourceManager::createBindlessDescriptorSet()
         bindings.at(i).descriptorType = types.at(i);
         bindings.at(i).stageFlags = VK_SHADER_STAGE_ALL;
         flags.at(i) = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
-    }
 
-    for (size_t i = 0; i < 4; i++)
-    {
         descriptorSetLayoutBindingFlagsCreateInfo[i].sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
         descriptorSetLayoutBindingFlagsCreateInfo[i].pNext = nullptr;
         descriptorSetLayoutBindingFlagsCreateInfo[i].pBindingFlags = &flags[i];
@@ -762,51 +759,31 @@ void ResourceManager::createBindlessDescriptorSet()
         descriptorSetLayoutCreateInfos[i].pBindings = &bindings[i];
         descriptorSetLayoutCreateInfos[i].flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
         descriptorSetLayoutCreateInfos[i].pNext = &descriptorSetLayoutBindingFlagsCreateInfo[i];
-    }
 
-    VkResult result = vkCreateDescriptorSetLayout(this->device->logicalDevice, &descriptorSetLayoutCreateInfos[0], nullptr, &uniformBindlessDescriptor.descriptorSetLayout);
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to create descriptor set layout!");
-    }
-    result = vkCreateDescriptorSetLayout(this->device->logicalDevice, &descriptorSetLayoutCreateInfos[1], nullptr, &textureBindlessDescriptor.descriptorSetLayout);
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to create descriptor set layout!");
-    }
-    result = vkCreateDescriptorSetLayout(this->device->logicalDevice, &descriptorSetLayoutCreateInfos[2], nullptr, &storageBufferBindlessDescriptor.descriptorSetLayout);
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to create descriptor set layout!");
-    }
-    result = vkCreateDescriptorSetLayout(this->device->logicalDevice, &descriptorSetLayoutCreateInfos[3], nullptr, &storageImageBindlessDescriptor.descriptorSetLayout);
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to create descriptor set layout!");
-    }
-
-    {
-        std::array<VkDescriptorPoolSize, 4> poolSizes{};
-        poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        poolSizes[0].descriptorCount = k_max_bindless_resources[0];
-        poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        poolSizes[1].descriptorCount = k_max_bindless_resources[1];
-        poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        poolSizes[2].descriptorCount = k_max_bindless_resources[2];
-        poolSizes[3].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-        poolSizes[3].descriptorCount = k_max_bindless_resources[3];
-
-        VkDescriptorPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        poolInfo.poolSizeCount = (uint32_t)poolSizes.size();
-        poolInfo.pPoolSizes = poolSizes.data();
-        poolInfo.maxSets = k_max_bindless_resources[0] + k_max_bindless_resources[1] + k_max_bindless_resources[2] + k_max_bindless_resources[3];
-        poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
-
-        if (vkCreateDescriptorPool(this->device->logicalDevice, &poolInfo, nullptr, &bindlessDescriptor.descriptorPool) != VK_SUCCESS)
+        VkResult result = vkCreateDescriptorSetLayout(this->device->logicalDevice, &descriptorSetLayoutCreateInfos[i], nullptr, &bindlessDescriptors[i].descriptorSetLayout);
+        if (result != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to create descriptor pool!");
+            throw std::runtime_error("failed to create descriptor set layout!");
         }
+ 
+        {
+            std::array<VkDescriptorPoolSize, 1> poolSizes{};
+            poolSizes[0].type = types[i];
+            poolSizes[0].descriptorCount = k_max_bindless_resources[i];
+
+            VkDescriptorPoolCreateInfo poolInfo{};
+            poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+            poolInfo.poolSizeCount = (uint32_t)poolSizes.size();
+            poolInfo.pPoolSizes = poolSizes.data();
+            poolInfo.maxSets = k_max_bindless_resources[i];
+            poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+
+            if (vkCreateDescriptorPool(this->device->logicalDevice, &poolInfo, nullptr, &bindlessDescriptors[i].descriptorPool) != VK_SUCCESS)
+            {
+                throw std::runtime_error("failed to create descriptor pool!");
+            }
+        }
+
     }
 
     {
