@@ -744,7 +744,7 @@ void ResourceManager::createBindlessDescriptorSet()
     for (uint32_t i = 0; i < 4; ++i)
     {
         bindings[i].descriptorCount = k_max_bindless_resources[i];
-        bindings.at(i).binding = i;
+        bindings.at(i).binding = 0;
         bindings.at(i).descriptorType = types.at(i);
         bindings.at(i).stageFlags = VK_SHADER_STAGE_ALL;
         flags.at(i) = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
@@ -865,12 +865,12 @@ uint32_t ResourceManager::storeDescriptor(ImageHardwareWrap image)
         if (write.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
         {
             write.dstSet = bindlessDescriptors[TextureBinding].descriptorSet;
-            write.dstBinding = TextureBinding;
+            write.dstBinding = 0;
         }
         if (write.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
         {
             write.dstSet = bindlessDescriptors[StorageImageBinding].descriptorSet;
-            write.dstBinding = StorageImageBinding;
+            write.dstBinding = 0;
         }
 
         vkUpdateDescriptorSets(this->device->logicalDevice, 1, &write, 0, nullptr);
@@ -937,12 +937,12 @@ uint32_t ResourceManager::storeDescriptor(BufferHardwareWrap buffer)
         if (writes.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
         {
             writes.dstSet = bindlessDescriptors[UniformBinding].descriptorSet;
-            writes.dstBinding = UniformBinding;
+            writes.dstBinding = 0;
         }
         if (writes.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
         {
             writes.dstSet = bindlessDescriptors[StorageBufferBinding].descriptorSet;
-            writes.dstBinding = StorageBufferBinding;
+            writes.dstBinding = 0;
         }
 
         vkUpdateDescriptorSets(this->device->logicalDevice, 1, &writes, 0, nullptr);

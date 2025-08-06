@@ -85,7 +85,7 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
                     descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.bindlessDescriptors[i].descriptorSet);
                 }
 
-                vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, (uint32_t)descriptorSets.size(), descriptorSets.data(), 0, nullptr);
+                vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, (uint32_t)descriptorSets.size(), descriptorSets.data(), 0, nullptr);
 
 				//void* pushContastValue = EmbededShader::testAst.getFinalPushConstBytes();
                 void* data = pushConstant.getData();
