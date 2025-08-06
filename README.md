@@ -4,11 +4,11 @@
 - (紧急)重构queue的任务间同步、vkCmdPipelineBarrier 
 - (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题
 - (紧急)BUG：内存泄漏(待定位)
-- binldess拆成多个（有可能和amd的bug相关）
 - 性能瓶颈：vkQueuePresentKHR
 - 程序关闭时资源释放问题
 - BUG：mutiview初始化黑屏
 - 支持跨device传输（Vulkan与CUDA）
-- Intel核显（6600T、7700HQ）：bindless会导致纹理错位
-- AMD核显：bindless创建时，查询到的数量和实际数量不符
-- MacOS、AMD核显：bindless创建时，同一个Pool不同descriptorCount会寄
+- （待验证）：binldess拆成多个是否解决
+  - （MacOS、AMD核显）bindless创建时同一个Pool不同descriptorCount会寄
+  - （AMD核显）bindless创建时查询到的数量和实际数量不符
+  - （Intel核显6600T、7700HQ）bindless会导致纹理错位
