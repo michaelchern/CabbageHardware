@@ -45,10 +45,17 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 		//pushConstant.size = EmbededShader::testAst.getFinalPushConstSize();
 		pushConstant.size = shaderCode.shaderResources.pushConstantSize;
 
+
+		std::vector<VkDescriptorSetLayout> setLayouts;
+        setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.uniformBindlessDescriptor.descriptorSetLayout);
+        setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.textureBindlessDescriptor.descriptorSetLayout);
+        setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.storageBufferBindlessDescriptor.descriptorSetLayout);
+        setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.storageImageBindlessDescriptor.descriptorSetLayout);
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 1;
-        pipelineLayoutInfo.pSetLayouts = &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSetLayout;
+        pipelineLayoutInfo.setLayoutCount = setLayouts.size();
+        pipelineLayoutInfo.pSetLayouts = setLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
 
@@ -70,8 +77,15 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 	{
 		auto runCommand = [&](const VkCommandBuffer& commandBuffer)
 			{
-				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &globalHardwareContext.mainDevice->resourceManager.bindlessDescriptor.descriptorSet, 0, nullptr);
+                vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+
+                std::vector<VkDescriptorSet> descriptorSets;
+                descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.uniformBindlessDescriptor.descriptorSet);
+                descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.textureBindlessDescriptor.descriptorSet);
+                descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.storageBufferBindlessDescriptor.descriptorSet);
+                descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.storageImageBindlessDescriptor.descriptorSet);
+
+                vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, (uint32_t)descriptorSets.size(), descriptorSets.data(), 0, nullptr);
 
 				//void* pushContastValue = EmbededShader::testAst.getFinalPushConstBytes();
                 void* data = pushConstant.getData();
