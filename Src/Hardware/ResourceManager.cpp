@@ -858,17 +858,18 @@ uint32_t ResourceManager::storeDescriptor(ImageHardwareWrap image)
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write.descriptorType = descriptorType;
-        write.dstSet = bindlessDescriptor.descriptorSet;
         write.descriptorCount = 1;
         write.dstArrayElement = textureIndex;
         write.pImageInfo = &imageInfo;
 
         if (write.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
         {
+            write.dstSet = bindlessDescriptors[TextureBinding].descriptorSet;
             write.dstBinding = TextureBinding;
         }
         if (write.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
         {
+            write.dstSet = bindlessDescriptors[StorageImageBinding].descriptorSet;
             write.dstBinding = StorageImageBinding;
         }
 
@@ -928,7 +929,6 @@ uint32_t ResourceManager::storeDescriptor(BufferHardwareWrap buffer)
 
         VkWriteDescriptorSet writes{};
         writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writes.dstSet = bindlessDescriptor.descriptorSet;
         writes.descriptorCount = 1;
         writes.pBufferInfo = &bufferInfo;
         writes.descriptorType = descriptorType;
@@ -936,10 +936,12 @@ uint32_t ResourceManager::storeDescriptor(BufferHardwareWrap buffer)
 
         if (writes.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
         {
+            writes.dstSet = bindlessDescriptors[UniformBinding].descriptorSet;
             writes.dstBinding = UniformBinding;
         }
         if (writes.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
         {
+            writes.dstSet = bindlessDescriptors[StorageBufferBinding].descriptorSet;
             writes.dstBinding = StorageBufferBinding;
         }
 
