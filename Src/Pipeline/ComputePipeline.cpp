@@ -47,10 +47,10 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
 
 
 		std::vector<VkDescriptorSetLayout> setLayouts;
-        setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.uniformBindlessDescriptor.descriptorSetLayout);
-        setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.textureBindlessDescriptor.descriptorSetLayout);
-        setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.storageBufferBindlessDescriptor.descriptorSetLayout);
-        setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.storageImageBindlessDescriptor.descriptorSetLayout);
+        for (size_t i = 0; i < 4; i++)
+        {
+            setLayouts.push_back(globalHardwareContext.mainDevice->resourceManager.bindlessDescriptors[i].descriptorSetLayout);
+        }
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -80,10 +80,10 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
                 vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
 
                 std::vector<VkDescriptorSet> descriptorSets;
-                descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.uniformBindlessDescriptor.descriptorSet);
-                descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.textureBindlessDescriptor.descriptorSet);
-                descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.storageBufferBindlessDescriptor.descriptorSet);
-                descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.storageImageBindlessDescriptor.descriptorSet);
+                for (size_t i = 0; i < 4; i++)
+                {
+                    descriptorSets.push_back(globalHardwareContext.mainDevice->resourceManager.bindlessDescriptors[i].descriptorSet);
+                }
 
                 vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, (uint32_t)descriptorSets.size(), descriptorSets.data(), 0, nullptr);
 
