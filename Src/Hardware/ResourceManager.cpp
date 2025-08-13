@@ -739,18 +739,25 @@ void ResourceManager::createBindlessDescriptorSet()
 
     uint32_t k_max_bindless_resources[4] = {
         std::min({indexingProperties.maxUpdateAfterBindDescriptorsInAllPools / 4,
-                  indexingProperties.maxPerStageDescriptorUpdateAfterBindUniformBuffers
+                  indexingProperties.maxPerStageUpdateAfterBindResources / 4,
+                  indexingProperties.maxPerStageDescriptorUpdateAfterBindUniformBuffers,
+                  indexingProperties.maxDescriptorSetUpdateAfterBindUniformBuffers
             }),
         std::min({indexingProperties.maxUpdateAfterBindDescriptorsInAllPools / 4,
-                  indexingProperties.maxPerStageDescriptorUpdateAfterBindSampledImages
+                  indexingProperties.maxPerStageUpdateAfterBindResources / 4,
+                  indexingProperties.maxPerStageDescriptorUpdateAfterBindSampledImages,
+                  indexingProperties.maxDescriptorSetUpdateAfterBindSampledImages
             }),
         std::min({indexingProperties.maxUpdateAfterBindDescriptorsInAllPools / 4,
-                  indexingProperties.maxPerStageDescriptorUpdateAfterBindStorageBuffers
+                  indexingProperties.maxPerStageUpdateAfterBindResources / 4,
+                  indexingProperties.maxPerStageDescriptorUpdateAfterBindStorageBuffers,
+                  indexingProperties.maxDescriptorSetUpdateAfterBindStorageBuffers
             }),
         std::min({indexingProperties.maxUpdateAfterBindDescriptorsInAllPools / 4,
-                  indexingProperties.maxPerStageDescriptorUpdateAfterBindStorageImages
+                  indexingProperties.maxPerStageUpdateAfterBindResources / 4,
+                  indexingProperties.maxPerStageDescriptorUpdateAfterBindStorageImages,
+                  indexingProperties.maxDescriptorSetUpdateAfterBindStorageImages
             })};
-
 
 
     std::vector<VkDescriptorSetLayoutBindingFlagsCreateInfo> descriptorSetLayoutBindingFlagsCreateInfo(4);
