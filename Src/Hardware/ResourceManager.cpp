@@ -329,8 +329,16 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
             {
                 VkDeviceSize imageSizeBytes = source.imageSize.x * source.imageSize.y * source.pixelSize;
 
-                ResourceManager::BufferHardwareWrap srcStaging = source.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-                ResourceManager::BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+                ResourceManager::BufferHardwareWrap tempSrcStaging;
+                ResourceManager::BufferHardwareWrap tempDstStaging;
+                if (srcStaging == nullptr && dstStaging == nullptr)
+                {
+                    tempSrcStaging = source.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+                    tempDstStaging = destination.resourceManager->createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+                }
+                else
+                {
+                }
 
                 auto srcCopyCmd = [&](const VkCommandBuffer& commandBuffer) {
                     VkBufferImageCopy region{};
@@ -343,17 +351,17 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
                     region.imageSubresource.layerCount = 1;
                     region.imageOffset = {0, 0, 0};
                     region.imageExtent = {source.imageSize.x, source.imageSize.y, 1};
-                    vkCmdCopyImageToBuffer(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, srcStaging.bufferHandle, 1, &region);
+                    vkCmdCopyImageToBuffer(commandBuffer, source.imageHandle, VK_IMAGE_LAYOUT_GENERAL, tempSrcStaging.bufferHandle, 1, &region);
                 };
                 source.device->startCommands(DeviceManager::TransferQueue) << srcCopyCmd << source.device->endCommands();
 
                 void *mappedData = nullptr;
                 void *dstMappedData = nullptr;
-                vmaMapMemory(g_hAllocator, srcStaging.bufferAlloc, &mappedData);
-                vmaMapMemory(g_hAllocator, dstStaging.bufferAlloc, &dstMappedData);
+                vmaMapMemory(g_hAllocator, tempSrcStaging.bufferAlloc, &mappedData);
+                vmaMapMemory(g_hAllocator, tempDstStaging.bufferAlloc, &dstMappedData);
                 memcpy(dstMappedData, mappedData, imageSizeBytes);
-                vmaUnmapMemory(g_hAllocator, srcStaging.bufferAlloc);
-                vmaUnmapMemory(g_hAllocator, dstStaging.bufferAlloc);
+                vmaUnmapMemory(g_hAllocator, tempSrcStaging.bufferAlloc);
+                vmaUnmapMemory(g_hAllocator, tempDstStaging.bufferAlloc);
 
                 auto dstCopyCmd = [&](const VkCommandBuffer& commandBuffer) {
                     VkBufferImageCopy region{};
@@ -366,12 +374,15 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
                     region.imageSubresource.layerCount = 1;
                     region.imageOffset = {0, 0, 0};
                     region.imageExtent = {destination.imageSize.x, destination.imageSize.y, 1};
-                    vkCmdCopyBufferToImage(commandBuffer, dstStaging.bufferHandle, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
+                    vkCmdCopyBufferToImage(commandBuffer, tempDstStaging.bufferHandle, destination.imageHandle, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
                 };
                 destination.device->startCommands(DeviceManager::TransferQueue) << dstCopyCmd << destination.device->endCommands();
 
-                source.resourceManager->destroyBuffer(srcStaging);
-                destination.resourceManager->destroyBuffer(dstStaging);
+                if (srcStaging == nullptr && dstStaging == nullptr)
+                {
+                    source.resourceManager->destroyBuffer(tempSrcStaging);
+                    destination.resourceManager->destroyBuffer(tempDstStaging);
+                }
 
                 return true;
             }
