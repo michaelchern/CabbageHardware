@@ -318,7 +318,7 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
     return resultImage;
 }
 
-bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWrap &destination, ImageHardwareWrap *srcStaging, ImageHardwareWrap *dstStaging)
+bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWrap &destination, BufferHardwareWrap *srcStaging, BufferHardwareWrap *dstStaging)
 {
     //if (source.pixelSize == destination.pixelSize)
     //{
@@ -338,6 +338,8 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
                 }
                 else
                 {
+                    tempSrcStaging = *srcStaging;
+                    tempDstStaging = *dstStaging;
                 }
 
                 auto srcCopyCmd = [&](const VkCommandBuffer& commandBuffer) {
