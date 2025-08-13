@@ -23,7 +23,7 @@ void DeviceManager::initDeviceManager(const CreateCallback &createCallback, cons
 
 void DeviceManager::createTimelineSemaphore()
 {
-    auto createTimelineSemaphore = [&](QueueUtils &queues) -> bool {
+    auto createTimelineSemaphore = [&](QueueUtils &queues) {
         VkSemaphoreTypeCreateInfo type_create_info{};
         type_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO_KHR;
         type_create_info.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE_KHR;
@@ -38,6 +38,7 @@ void DeviceManager::createTimelineSemaphore()
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
     };
+    
     for (size_t i = 0; i < graphicsQueues.size(); i++)
     {
         createTimelineSemaphore(graphicsQueues[i]);
@@ -235,7 +236,6 @@ bool DeviceManager::createCommandBuffers()
     return true;
 }
 
-
 DeviceManager &DeviceManager::startCommands(QueueType queueType)
 {
     uint16_t queueIndex = 0;
@@ -330,7 +330,7 @@ DeviceManager &DeviceManager::endCommands(std::vector<VkSemaphoreSubmitInfo> wai
     return *this;
 }
 
-DeviceManager& DeviceManager::operator<<(std::function<void(const VkCommandBuffer& commandBuffer)> commandsFunction)
+DeviceManager &DeviceManager::operator<<(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction)
 {
     commandsFunction(currentRecordQueue->commandBuffer);
     return *this;
