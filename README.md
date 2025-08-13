@@ -2,7 +2,6 @@
 - （待验证）：binldess拆成多个是否解决
   - （MacOS、AMD核显）bindless创建时同一个Pool不同descriptorCount会寄
   - （AMD核显）bindless创建时查询到的数量和实际数量不符
-  - （Intel核显6600T、7700HQ）bindless会导致纹理错位
 - (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题
 - (紧急)（性能瓶颈）重构queue的任务间同步、vkCmdPipelineBarrier
   - 自动记录Barrier
