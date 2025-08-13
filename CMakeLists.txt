@@ -2,16 +2,16 @@ cmake_minimum_required(VERSION 4.0)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 project(
-    CabbageDisplayer
+    CabbageHardware
     VERSION 0.5.0
-    HOMEPAGE_URL "https://github.com/CoronaEngine/CabbageDisplayer"
+    HOMEPAGE_URL "https://github.com/CoronaEngine/CabbageHardware"
     LANGUAGES C CXX
 )
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    option(CABBAGE_RASTERIZER_BUILD_EXAMPLES "是否构建 CabbageDisplayer 示例" ON)
+    option(CABBAGE_RASTERIZER_BUILD_EXAMPLES "是否构建 CabbageHardware 示例" ON)
 else()
-    option(CABBAGE_RASTERIZER_BUILD_EXAMPLES "是否构建 CabbageDisplayer 示例" OFF)
+    option(CABBAGE_RASTERIZER_BUILD_EXAMPLES "是否构建 CabbageHardware 示例" OFF)
 endif()
 
 add_compile_definitions(
