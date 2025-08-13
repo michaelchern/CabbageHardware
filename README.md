@@ -1,9 +1,9 @@
 # TODO
-- (紧急)重构多线程的锁
-- (紧急)Validation Error: [ UNASSIGNED-Threading-MultipleThreads-Write ] Object 0: handle = 0x1141bbf1ea0, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0xa05b236e | vkQueueSubmit(): THREADING ERROR : object of type VkQueue is simultaneously used in current thread 25780 and thread 14712
+- (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题
 - (紧急)（性能瓶颈）重构queue的任务间同步、vkCmdPipelineBarrier
   - 自动记录Barrier
-- (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题
+- (紧急)重构多线程的锁
+- (紧急)Validation Error: [ UNASSIGNED-Threading-MultipleThreads-Write ] Object 0: handle = 0x1141bbf1ea0, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0xa05b236e | vkQueueSubmit(): THREADING ERROR : object of type VkQueue is simultaneously used in current thread 25780 and thread 14712
 - (紧急)BUG：内存泄漏(待定位)
 - 程序关闭时资源释放问题
 - BUG：mutiview初始化黑屏
