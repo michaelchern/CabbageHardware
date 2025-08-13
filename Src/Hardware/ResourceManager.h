@@ -14,6 +14,9 @@ struct ResourceManager
 
 	struct BufferHardwareWrap
 	{
+        VkPipelineStageFlags stageMask;
+        VkAccessFlags accessMask;
+
 		VkBuffer bufferHandle = VK_NULL_HANDLE;
 		VmaAllocation bufferAlloc = VK_NULL_HANDLE;
 		VmaAllocationInfo bufferAllocInfo = {};
@@ -25,6 +28,9 @@ struct ResourceManager
 
 	struct ImageHardwareWrap
 	{
+        VkPipelineStageFlags stageMask;
+        VkAccessFlags accessMask;
+
 		uint32_t pixelSize = 0;
 		ktm::uvec2 imageSize = ktm::uvec2(0, 0);
 		VkFormat imageFormat = VK_FORMAT_MAX_ENUM;
