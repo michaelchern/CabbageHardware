@@ -82,7 +82,7 @@ struct ResourceManager
 	//uint32_t storeDescriptor(VkAccelerationStructureKHR m_tlas);
 
 
-	bool copyImageMemory(ImageHardwareWrap& source, ImageHardwareWrap& destination);
+	bool copyImageMemory(ImageHardwareWrap &source, ImageHardwareWrap &destination, ImageHardwareWrap *srcStaging = nullptr, ImageHardwareWrap *dstStaging = nullptr);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
