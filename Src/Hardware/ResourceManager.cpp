@@ -728,23 +728,30 @@ void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDevic
 
 void ResourceManager::createBindlessDescriptorSet()
 {
-    auto &limits = device->deviceFeaturesUtils.supportedProperties.properties.limits;
+    VkPhysicalDeviceDescriptorIndexingProperties indexingProperties = {};
+    indexingProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES_EXT;
+
+    VkPhysicalDeviceProperties2 deviceProperties = {};
+    deviceProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+    deviceProperties.pNext = &indexingProperties;
+
+    vkGetPhysicalDeviceProperties2(device->physicalDevice, &deviceProperties);
 
     uint32_t k_max_bindless_resources[4] = {
-        std::min({limits.maxPerStageResources / 4,
-                  limits.maxPerStageDescriptorUniformBuffers,
-                  limits.maxDescriptorSetUniformBuffers}),
-        std::min({limits.maxPerStageResources / 4,
-                  limits.maxPerStageDescriptorSampledImages,
-                  limits.maxDescriptorSetSampledImages,
-                  limits.maxPerStageDescriptorSamplers,
-                  limits.maxDescriptorSetSamplers}),
-        std::min({limits.maxPerStageResources / 4,
-                  limits.maxPerStageDescriptorStorageBuffers,
-                  limits.maxDescriptorSetStorageBuffers}),
-        std::min({limits.maxPerStageResources / 4,
-                  limits.maxPerStageDescriptorStorageImages,
-                  limits.maxDescriptorSetStorageImages})};
+        std::min({indexingProperties.maxUpdateAfterBindDescriptorsInAllPools / 4,
+                  indexingProperties.maxPerStageDescriptorUpdateAfterBindUniformBuffers
+            }),
+        std::min({indexingProperties.maxUpdateAfterBindDescriptorsInAllPools / 4,
+                  indexingProperties.maxPerStageDescriptorUpdateAfterBindSampledImages
+            }),
+        std::min({indexingProperties.maxUpdateAfterBindDescriptorsInAllPools / 4,
+                  indexingProperties.maxPerStageDescriptorUpdateAfterBindStorageBuffers
+            }),
+        std::min({indexingProperties.maxUpdateAfterBindDescriptorsInAllPools / 4,
+                  indexingProperties.maxPerStageDescriptorUpdateAfterBindStorageImages
+            })};
+
+
 
     std::vector<VkDescriptorSetLayoutBindingFlagsCreateInfo> descriptorSetLayoutBindingFlagsCreateInfo(4);
     std::vector<VkDescriptorSetLayoutCreateInfo> descriptorSetLayoutCreateInfos(4);

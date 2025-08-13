@@ -82,6 +82,8 @@ void HardwareContext::prepareFeaturesChain()
         std::set<const char *> requiredExtensions;
         requiredExtensions.insert(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
+        requiredExtensions.insert(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+
         requiredExtensions.insert(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
         requiredExtensions.insert(VK_KHR_MULTIVIEW_EXTENSION_NAME);
         requiredExtensions.insert(VK_AMD_GPU_SHADER_HALF_FLOAT_EXTENSION_NAME);
@@ -114,6 +116,7 @@ void HardwareContext::prepareFeaturesChain()
         deviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
         deviceFeatures12.bufferDeviceAddress = VK_TRUE;
         deviceFeatures12.shaderFloat16 = VK_TRUE;
+
         deviceFeatures12.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
         deviceFeatures12.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
         deviceFeatures12.shaderUniformBufferArrayNonUniformIndexing = VK_TRUE;
@@ -123,6 +126,8 @@ void HardwareContext::prepareFeaturesChain()
         deviceFeatures12.descriptorBindingPartiallyBound = VK_TRUE;
         deviceFeatures12.runtimeDescriptorArray = VK_TRUE;
         deviceFeatures12.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE;
+        deviceFeatures12.descriptorBindingVariableDescriptorCount = VK_TRUE;
+
         deviceFeatures12.timelineSemaphore = VK_TRUE;
 
         VkPhysicalDeviceVulkan11Features deviceFeatures11{};
