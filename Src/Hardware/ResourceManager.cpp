@@ -307,7 +307,10 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
         VmaAllocationCreateInfo imageAllocCreateInfo = {};
         imageAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
-        vmaCreateImage(g_hAllocator, &imageInfo, &imageAllocCreateInfo, &resultImage.imageHandle, &resultImage.imageAlloc, &resultImage.imageAllocInfo);
+        if (vmaCreateImage(g_hAllocator, &imageInfo, &imageAllocCreateInfo, &resultImage.imageHandle, &resultImage.imageAlloc, &resultImage.imageAllocInfo) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create image!");
+        }
 
         resultImage.imageView = createImageView(resultImage);
     }
