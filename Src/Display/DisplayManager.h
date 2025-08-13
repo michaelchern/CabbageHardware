@@ -59,6 +59,8 @@ private:
 
 	void createSwapChain();
 
+    ResourceManager::BufferHardwareWrap srcStaging;
+    ResourceManager::BufferHardwareWrap dstStaging;
 
 	uint32_t currentFrame = 0;
 };
