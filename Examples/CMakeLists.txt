@@ -11,8 +11,6 @@ add_executable(CabbageHardwareExamples ${EXAMPLES_SOURCE_FILES})
 set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT CabbageHardwareExamples)
 
 set_target_properties(CabbageHardwareExamples PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/$<CONFIG>
-    PDB_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/$<CONFIG>
     VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:CabbageHardwareExamples>
 )
 
