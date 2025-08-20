@@ -9,12 +9,14 @@ add_library(CabbageHardware STATIC ${SOURCE_FILES})
 
 target_include_directories(CabbageHardware PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${PROJECT_SOURCE_DIR}/Env/Helicon/Src"
-    "${PROJECT_SOURCE_DIR}/Env/ktm"
-    "${PROJECT_SOURCE_DIR}/Env/vulkan"
-    "${PROJECT_SOURCE_DIR}/Env/vulkan/volk"
-    "${PROJECT_SOURCE_DIR}/Env/vulkan/Vulkan-Headers/include"
-    "${PROJECT_SOURCE_DIR}/Env/vulkan/VulkanMemoryAllocator/include"
+    "${Helicon_SOURCE_DIR}"
 )
 
-target_link_libraries(CabbageHardware PUBLIC Helicon)
+# 链接库依赖
+target_link_libraries(volk PUBLIC Vulkan-Headers)
+
+target_link_libraries(CabbageHardware PUBLIC
+    Helicon
+    volk
+    Vulkan-Headers
+    VulkanMemoryAllocator)

@@ -15,9 +15,11 @@ set_target_properties(CabbageHardwareExamples PROPERTIES
 )
 
 target_include_directories(CabbageHardwareExamples PRIVATE
-    "${PROJECT_SOURCE_DIR}/Env/glfw/include"
-    "${PROJECT_SOURCE_DIR}/Env/stb")
+    "${glfw_SOURCE_DIR}/include"
+    "${stb_SOURCE_DIR}")
 
 target_link_libraries(CabbageHardwareExamples PRIVATE
     glfw
     CabbageHardware)
+
+helicon_install_runtime_deps(CabbageHardwareExamples)

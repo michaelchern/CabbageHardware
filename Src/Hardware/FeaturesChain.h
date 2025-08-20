@@ -5,7 +5,7 @@
 #include<functional>
 
 #define VK_NO_PROTOTYPES
-#include<volk/volk.h>
+#include<volk.h>
 
 struct DeviceFeaturesChain
 {

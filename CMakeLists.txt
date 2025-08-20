@@ -8,19 +8,12 @@ project(
     LANGUAGES C CXX
 )
 
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     option(CABBAGE_HARDWARE_BUILD_EXAMPLES "是否构建 CabbageHardware 示例" ON)
 else()
     option(CABBAGE_HARDWARE_BUILD_EXAMPLES "是否构建 CabbageHardware 示例" OFF)
-endif()
-
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib/$<CONFIG>)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib/$<CONFIG>)
-
-if(CABBAGE_HARDWARE_BUILD_EXAMPLES)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
-    set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
 endif()
 
 add_compile_definitions(
@@ -29,14 +22,62 @@ add_compile_definitions(
 
     $<$<CONFIG:Debug>:CABBAGE_ENGINE_DEBUG>
     $<$<CONFIG:RelWithDebInfo>:CABBAGE_ENGINE_DEBUG>
+    $<$<CONFIG:Release>:CABBAGE_ENGINE_RELEASE>
+    $<$<CONFIG:MinSizeRel>:CABBAGE_ENGINE_RELEASE>
 )
 
-# ==== 子仓库与第三方库 ====
-set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(Env/Helicon EXCLUDE_FROM_ALL)
+include(FetchContent)
+
+FetchContent_Declare(
+    Helicon
+    GIT_REPOSITORY https://github.com/CoronaEngine/Helicon.git
+    GIT_TAG main
+    EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(Helicon)
+
+FetchContent_Declare(
+    stb
+    GIT_REPOSITORY https://github.com/nothings/stb.git
+    GIT_TAG master
+    EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(stb)
+
+FetchContent_Declare(
+    volk
+    GIT_REPOSITORY https://github.com/zeux/volk.git
+    GIT_TAG master
+    EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(volk)
+
+FetchContent_Declare(
+    Vulkan-Headers
+    GIT_REPOSITORY https://github.com/KhronosGroup/Vulkan-Headers.git
+    GIT_TAG main
+    EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(Vulkan-Headers)
+
+FetchContent_Declare(
+    VulkanMemoryAllocator
+    GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+    GIT_TAG master
+    EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(VulkanMemoryAllocator)
+
 add_subdirectory(Src)
 
 if(CABBAGE_HARDWARE_BUILD_EXAMPLES)
-    add_subdirectory(Env/glfw EXCLUDE_FROM_ALL)
+    FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG master
+        EXCLUDE_FROM_ALL
+    )
+    FetchContent_MakeAvailable(glfw)
+
     add_subdirectory(Examples)
 endif()

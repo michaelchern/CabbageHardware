@@ -3,7 +3,7 @@
 #include <algorithm>
 #include<vector>
 
-#include<Volk/volk.h>
+#include<volk.h>
 
 #include<Hardware/GlobalContext.h>
 

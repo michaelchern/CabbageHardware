@@ -22,7 +22,7 @@
 #endif
 
 #define VK_NO_PROTOTYPES
-#include <volk/volk.h>
+#include <volk.h>
 
 #include "FeaturesChain.h"
 

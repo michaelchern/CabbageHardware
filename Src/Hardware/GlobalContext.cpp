@@ -1,7 +1,7 @@
 #include<Hardware/GlobalContext.h>
 
 #define VOLK_IMPLEMENTATION
-#include <Volk/volk.h>
+#include <volk.h>
 
 HardwareContext globalHardwareContext;
 
