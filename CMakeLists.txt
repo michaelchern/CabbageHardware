@@ -37,14 +37,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Helicon)
 
 FetchContent_Declare(
-    stb
-    GIT_REPOSITORY https://github.com/nothings/stb.git
-    GIT_TAG master
-    EXCLUDE_FROM_ALL
-)
-FetchContent_MakeAvailable(stb)
-
-FetchContent_Declare(
     volk
     GIT_REPOSITORY https://github.com/zeux/volk.git
     GIT_TAG master
@@ -71,6 +63,14 @@ FetchContent_MakeAvailable(VulkanMemoryAllocator)
 add_subdirectory(Src)
 
 if(CABBAGE_HARDWARE_BUILD_EXAMPLES)
+    FetchContent_Declare(
+        stb
+        GIT_REPOSITORY https://github.com/nothings/stb.git
+        GIT_TAG master
+        EXCLUDE_FROM_ALL
+    )
+    FetchContent_MakeAvailable(stb)
+
     FetchContent_Declare(
         glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
