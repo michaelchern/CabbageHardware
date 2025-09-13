@@ -1,6 +1,4 @@
-﻿#pragma once
-
-#include "RasterizerPipeline.h"
+﻿#include "RasterizerPipeline.h"
 
 #include <Hardware/GlobalContext.h>
 
