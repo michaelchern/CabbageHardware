@@ -2,21 +2,37 @@
 
 #include <Hardware/GlobalContext.h>
 
+RasterizerPipeline::RasterizerPipeline()
+{
+}
+
 RasterizerPipeline::RasterizerPipeline(std::string vertexShaderCode, std::string fragmentShaderCode, uint32_t multiviewCount,
                                        EmbeddedShader::ShaderLanguage vertexShaderLanguage, EmbeddedShader::ShaderLanguage fragmentShaderLanguage, const std::source_location &sourceLocation)
-    : vertexShaderCompiler(EmbeddedShader::ShaderCodeCompiler(vertexShaderCode, EmbeddedShader::ShaderStage::VertexShader, vertexShaderLanguage, EmbeddedShader::CompilerOption(), sourceLocation)),
-      fragmentShaderCompiler(EmbeddedShader::ShaderCodeCompiler(fragmentShaderCode, EmbeddedShader::ShaderStage::FragmentShader, fragmentShaderLanguage, EmbeddedShader::CompilerOption(), sourceLocation))
 {
-    vertShaderCode = vertexShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV);
-    fragShaderCode = fragmentShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV);
+    initialize(std::move(vertexShaderCode), std::move(fragmentShaderCode), multiviewCount, vertexShaderLanguage, fragmentShaderLanguage, sourceLocation);
+}
 
-    vertexResource = vertexShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
-    fragmentResource = fragmentShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
+void RasterizerPipeline::initialize(std::string vertexShaderCode, std::string fragmentShaderCode, uint32_t multiviewCount,
+                                    EmbeddedShader::ShaderLanguage vertexShaderLanguage, EmbeddedShader::ShaderLanguage fragmentShaderLanguage, const std::source_location &sourceLocation)
+{
+    EmbeddedShader::ShaderCodeCompiler vertexShaderCompilerLocal(vertexShaderCode, EmbeddedShader::ShaderStage::VertexShader, vertexShaderLanguage, EmbeddedShader::CompilerOption(), sourceLocation);
+    EmbeddedShader::ShaderCodeCompiler fragmentShaderCompilerLocal(fragmentShaderCode, EmbeddedShader::ShaderStage::FragmentShader, fragmentShaderLanguage, EmbeddedShader::CompilerOption(), sourceLocation);
 
-    tempPushConstant = HardwarePushConstant(vertexShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources.pushConstantSize, 0);
+    vertShaderCode = vertexShaderCompilerLocal.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV);
+    fragShaderCode = fragmentShaderCompilerLocal.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV);
 
-    auto vertexResources = vertexShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
-    auto fragmentResources = fragmentShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
+    vertexResource = vertexShaderCompilerLocal.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
+    fragmentResource = fragmentShaderCompilerLocal.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
+
+    tempPushConstant = HardwarePushConstant(vertexShaderCompilerLocal.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources.pushConstantSize, 0);
+
+    auto vertexResources = vertexShaderCompilerLocal.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
+    auto fragmentResources = fragmentShaderCompilerLocal.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
+
+    vertexStageInputs.clear();
+    vertexStageOutputs.clear();
+    fragmentStageInputs.clear();
+    fragmentStageOutputs.clear();
 
     for (auto &[name, bindInfo] : vertexResources.bindInfoPool)
     {
@@ -51,6 +67,8 @@ RasterizerPipeline::RasterizerPipeline(std::string vertexShaderCode, std::string
     {
         throw "shader error";
     }
+
+    initialized_ = true;
 }
 
 void RasterizerPipeline::createRenderPass(int multiviewCount)
@@ -133,8 +151,7 @@ void RasterizerPipeline::createRenderPass(int multiviewCount)
 
 void RasterizerPipeline::createGraphicsPipeline(EmbeddedShader::ShaderCodeModule vertShaderCode, EmbeddedShader::ShaderCodeModule fragShaderCode)
 {
-    auto getVkFormat = [](const std::string &typeName, uint32_t elementCount) -> VkFormat
-        {
+    auto getVkFormat = [](const std::string &typeName, uint32_t elementCount) -> VkFormat {
         VkFormat temp;
         if (typeName == "float")
         {
@@ -197,9 +214,8 @@ void RasterizerPipeline::createGraphicsPipeline(EmbeddedShader::ShaderCodeModule
             }
         }
 
-        return temp; 
-        };
-    
+        return temp;
+    };
 
     VkShaderModule vertShaderModule = globalHardwareContext.mainDevice->resourceManager.createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = globalHardwareContext.mainDevice->resourceManager.createShaderModule(fragShaderCode);
@@ -228,7 +244,7 @@ void RasterizerPipeline::createGraphicsPipeline(EmbeddedShader::ShaderCodeModule
 
     std::vector<VkVertexInputBindingDescription> bindingDescriptions(vertexStageInputs.size());
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions(vertexStageInputs.size());
-    //for (uint32_t index = 0; index < vertShaderCode.shaderResources.stageInputs.size(); index++)
+    // for (uint32_t index = 0; index < vertShaderCode.shaderResources.stageInputs.size(); index++)
     for (auto item : vertexStageInputs)
     {
         bindingDescriptions[item.location].binding = item.location;
@@ -237,7 +253,7 @@ void RasterizerPipeline::createGraphicsPipeline(EmbeddedShader::ShaderCodeModule
 
         attributeDescriptions[item.location].binding = item.location;
         attributeDescriptions[item.location].location = item.location;
-        attributeDescriptions[item.location].format = getVkFormat(item.typeName,item.elementCount);
+        attributeDescriptions[item.location].format = getVkFormat(item.typeName, item.elementCount);
         attributeDescriptions[item.location].offset = 0;
     }
 
@@ -385,6 +401,10 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
 
 RasterizerPipeline &RasterizerPipeline::startRecord(ktm::uvec2 imageSize)
 {
+    if (!initialized_)
+    {
+        throw std::runtime_error("RasterizerPipeline not initialized. Call initialize(...) first or use the parameterized constructor.");
+    }
     if (!depthImage)
     {
         depthImage = HardwareImage(imageSize, ImageFormat::D32_FLOAT, ImageUsage::DepthImage);
@@ -472,7 +492,7 @@ RasterizerPipeline &RasterizerPipeline::operator<<(const HardwareBuffer &indexBu
         }
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, (uint32_t)descriptorSets.size(), descriptorSets.data(), 0, nullptr);
-        
+
         void *data = tempPushConstant.getData();
         vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, pushConstantSize, data);
 
