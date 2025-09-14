@@ -6,12 +6,12 @@ std::unordered_map < void *, std::shared_ptr<DisplayManager>> displayerGlobalPoo
 std::mutex displayerMutex;
 
 
-HardwareDisplayer::HardwareDisplayer(void* surface): surface(surface)
+HardwareDisplayer::HardwareDisplayer(void* surface): displaySurface(surface)
 {
-    if (surface != nullptr && !displayerGlobalPool.count(surface))
+    if (displaySurface != nullptr && !displayerGlobalPool.count(displaySurface))
     {
         std::unique_lock<std::mutex> lock(displayerMutex);
-        displayerGlobalPool[surface] = std::make_shared<DisplayManager>();
+        displayerGlobalPool[displaySurface] = std::make_shared<DisplayManager>();
     }
 }
 
@@ -21,16 +21,26 @@ HardwareDisplayer::~HardwareDisplayer()
 
 HardwareDisplayer &HardwareDisplayer::operator=(const HardwareDisplayer &other)
 {
-    this->surface = other.surface;
+    displaySurface = other.displaySurface;
     return *this;
 }
 
 HardwareDisplayer& HardwareDisplayer::operator = (const HardwareImage& image)
 {
     std::unique_lock<std::mutex> lock(displayerMutex);
-    if (displayerGlobalPool.count(surface))
+    if (displayerGlobalPool.count(displaySurface))
     {
-        displayerGlobalPool[surface]->displayFrame(surface,image);
+        displayerGlobalPool[displaySurface]->displayFrame(displaySurface,image);
     }
     return *this;
+}
+
+void HardwareDisplayer::setSurface(void *surface)
+{
+    if (surface != nullptr && !displayerGlobalPool.count(surface))
+    {
+        displaySurface = surface;
+        std::unique_lock<std::mutex> lock(displayerMutex);
+        displayerGlobalPool[displaySurface] = std::make_shared<DisplayManager>();
+    }
 }

@@ -148,8 +148,9 @@ struct HardwareDisplayer
     HardwareDisplayer(void *surface = nullptr);
     ~HardwareDisplayer();
 
-	HardwareDisplayer &operator=(const HardwareImage &image);
+    HardwareDisplayer &operator=(const HardwareImage &image);
     HardwareDisplayer &operator=(const HardwareDisplayer &other);
+    void setSurface(void *surface);
 
-    void *surface = nullptr;
+    void *displaySurface = nullptr;
 };
