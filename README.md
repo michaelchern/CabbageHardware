@@ -10,5 +10,4 @@
 - 支持跨device传输（Vulkan与CUDA）
 
 # 9.17 TODO
-- 提交记录中细节的确认
 - CoronaEngine渲染细节确认
