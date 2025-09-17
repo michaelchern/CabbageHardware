@@ -8,6 +8,3 @@
 - 程序关闭时资源释放问题
 - BUG：mutiview初始化黑屏
 - 支持跨device传输（Vulkan与CUDA）
-
-# 9.17 TODO
-- CoronaEngine渲染细节确认
