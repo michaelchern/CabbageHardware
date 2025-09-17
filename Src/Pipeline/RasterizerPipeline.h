@@ -1,89 +1,69 @@
 ﻿#pragma once
-#include <cstdint>
-#include <ktm/ktm.h>
-#include <source_location>
-#include <stdexcept>
-#include <string>
-#include <variant>
 #include <vector>
 
-#include "Compiler/ShaderCodeCompiler.h"
+#include"../Hardware/DeviceManager.h"
+#include"../Hardware/ResourceManager.h"
 
-#include "CabbageDisplayer.h"
+#include"Compiler/ShaderCodeCompiler.h"
 
-// using namespace EmbeddedShader;
+#include "../CabbageDisplayer.h"
 
-// Forward declare Vulkan handle types to avoid including Vulkan headers here
-struct VkRenderPass_T;
-typedef VkRenderPass_T *VkRenderPass;
-struct VkPipeline_T;
-typedef VkPipeline_T *VkPipeline;
-struct VkPipelineLayout_T;
-typedef VkPipelineLayout_T *VkPipelineLayout;
-struct VkFramebuffer_T;
-typedef VkFramebuffer_T *VkFramebuffer;
+//using namespace EmbeddedShader;
 
 struct RasterizerPipeline
 {
-    struct GeomMeshDrawIndexed
-    {
-        uint32_t indexOffset = 0;
-        uint32_t indexCount = 0;
-        HardwareBuffer indexBuffer;
-        std::vector<HardwareBuffer> vertexBuffers;
+	struct GeomMeshDrawIndexed
+	{
+		uint32_t indexOffset;
+		uint32_t indexCount;
+		ResourceManager::BufferHardwareWrap indexBuffer;
+		std::vector<ResourceManager::BufferHardwareWrap> vertexBuffers;
 
         HardwarePushConstant pushConstant;
-    };
+	};
 
-    RasterizerPipeline();
-    ~RasterizerPipeline() = default;
+	RasterizerPipeline() = default;
+	~RasterizerPipeline() = default;
 
-    RasterizerPipeline(std::string vertexShaderCode, std::string fragmentShaderCode, uint32_t multiviewCount = 1,
+	RasterizerPipeline(std::string vertexShaderCode, std::string fragmentShaderCode, uint32_t multiviewCount = 1,
                        EmbeddedShader::ShaderLanguage vertexShaderLanguage = EmbeddedShader::ShaderLanguage::GLSL, EmbeddedShader::ShaderLanguage fragmentShaderLanguage = EmbeddedShader::ShaderLanguage::GLSL,
                        const std::source_location &sourceLocation = std::source_location::current());
-
-    // 新增：分离初始化接口，允许默认构造后再初始化
-    void initialize(std::string vertexShaderCode, std::string fragmentShaderCode, uint32_t multiviewCount = 1,
-                    EmbeddedShader::ShaderLanguage vertexShaderLanguage = EmbeddedShader::ShaderLanguage::GLSL,
-                    EmbeddedShader::ShaderLanguage fragmentShaderLanguage = EmbeddedShader::ShaderLanguage::GLSL,
-                    const std::source_location &sourceLocation = std::source_location::current());
 
     HardwareImage &getDepthImage()
     {
         return depthImage;
     }
 
-    // void executePipeline(std::vector<GeomMeshDrawIndexed> GeomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget);
+	//void executePipeline(std::vector<GeomMeshDrawIndexed> GeomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget);
     void executePipeline(ktm::uvec2 imageSize);
 
-    std::variant<HardwarePushConstant, HardwareBuffer, HardwareImage> operator[](const std::string &resourceName)
+    std::variant<HardwarePushConstant, HardwareBuffer, HardwareImage> operator[](const std::string& resourceName)
     {
-        if (auto *vertexResource = this->vertexResource.findShaderBindInfo(resourceName))
+        EmbeddedShader::ShaderCodeModule::ShaderResources::ShaderBindInfo *vertexResource = this->vertexResource.findShaderBindInfo(resourceName);
+        if (vertexResource != nullptr)
         {
-            if (vertexResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::pushConstantMembers)
-                return HardwarePushConstant(vertexResource->typeSize, vertexResource->byteOffset, &tempPushConstant);
-            if (vertexResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::stageInputs)
-                return tempVertexBuffers[vertexResource->location];
-            if (vertexResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::stageOutputs)
-                return renderTargets[vertexResource->location];
-            if (vertexResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::uniformBuffers ||
-                vertexResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::sampledImages)
-                throw std::runtime_error("Unsupported vertex resource bind type for operator[]: " + resourceName);
+            switch (vertexResource->bindType)
+            {
+            case EmbeddedShader::ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
+                    return std::move(HardwarePushConstant(vertexResource->typeSize, vertexResource->byteOffset, &tempPushConstant));
+            case EmbeddedShader::ShaderCodeModule::ShaderResources::BindType::stageInputs:
+                    return tempVertexBuffers[vertexResource->location];
+            }
         }
-        else if (auto *fragmentResource = this->fragmentResource.findShaderBindInfo(resourceName))
+        else
         {
-            if (fragmentResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::pushConstantMembers)
-                return HardwarePushConstant(fragmentResource->typeSize, fragmentResource->byteOffset, &tempPushConstant);
-            if (fragmentResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::stageOutputs)
+            EmbeddedShader::ShaderCodeModule::ShaderResources::ShaderBindInfo *fragmentResource = this->fragmentResource.findShaderBindInfo(resourceName);
+            switch (fragmentResource->bindType)
+            {
+            case EmbeddedShader::ShaderCodeModule::ShaderResources::BindType::pushConstantMembers:
+                return std::move(HardwarePushConstant(fragmentResource->typeSize, fragmentResource->byteOffset, &tempPushConstant));
+            case EmbeddedShader::ShaderCodeModule::ShaderResources::BindType::stageOutputs:
                 return renderTargets[fragmentResource->location];
-            if (fragmentResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::stageInputs)
-                return tempVertexBuffers[fragmentResource->location];
-            if (fragmentResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::uniformBuffers ||
-                fragmentResource->bindType == EmbeddedShader::ShaderCodeModule::ShaderResources::sampledImages)
-                throw std::runtime_error("Unsupported fragment resource bind type for operator[]: " + resourceName);
+            }
         }
-        return HardwarePushConstant();
+        return std::move(HardwarePushConstant());
     }
+
 
     RasterizerPipeline &startRecord(ktm::uvec2 imageSize);
     RasterizerPipeline &endRecord();
@@ -93,53 +73,55 @@ struct RasterizerPipeline
     }
     RasterizerPipeline &operator<<(const HardwareBuffer &indexBuffer);
 
-    // void recordGeomMesh()
+    //void recordGeomMesh()
     //{
-    //     TriangleGeomMesh temp;
-    //     temp.indexOffset = indexOffset;
-    //     temp.indexCount = indexCount;
-    //     temp.indexBuffer = indexBuffer;
-    //     temp.vertexBuffers = tempVertexBuffers;
-    //     temp.pushConstant = tempPushConstant;
-    //     geomMeshes.push_back(temp);
-    // }
+    //    TriangleGeomMesh temp;
+    //    temp.indexOffset = indexOffset;
+    //    temp.indexCount = indexCount;
+    //    temp.indexBuffer = indexBuffer;
+    //    temp.vertexBuffers = tempVertexBuffers;
+    //    temp.pushConstant = tempPushConstant;
+    //    geomMeshes.push_back(temp);
+    //}
 
-  private:
-    void createRenderPass(int multiviewCount = 1);
-    void createGraphicsPipeline(EmbeddedShader::ShaderCodeModule vertShaderCode, EmbeddedShader::ShaderCodeModule fragShaderCode);
-    void createFramebuffers(ktm::uvec2 imageSize);
+private:
 
-    uint32_t pushConstantSize;
+	void createRenderPass(int multiviewCount = 1);
+  void createGraphicsPipeline(EmbeddedShader::ShaderCodeModule vertShaderCode, EmbeddedShader::ShaderCodeModule fragShaderCode);
+	void createFramebuffers(ktm::uvec2 imageSize);
+	
+	uint32_t pushConstantSize;
 
-    int multiviewCount = 1;
+	int multiviewCount = 1;
 
-    VkRenderPass renderPass{};
-    VkPipeline graphicsPipeline{};
-    VkPipelineLayout pipelineLayout{};
+	VkRenderPass renderPass;
+	VkPipeline graphicsPipeline;
+	VkPipelineLayout pipelineLayout;
 
-    VkFramebuffer frameBuffers{};
+	VkFramebuffer frameBuffers;
 
-    // std::vector<ResourceManager::ImageHardwareWrap> renderTarget;
+	//std::vector<ResourceManager::ImageHardwareWrap> renderTarget;
     HardwareImage depthImage;
 
-    EmbeddedShader::ShaderCodeModule vertShaderCode;
+	EmbeddedShader::ShaderCodeModule vertShaderCode;
     EmbeddedShader::ShaderCodeModule fragShaderCode;
 
-    // HardwareImage depthImage;
+    //HardwareImage depthImage;
     std::vector<HardwareImage> renderTargets;
 
-    // 编译器仅在 initialize 内部临时使用，无需作为成员保留
+    EmbeddedShader::ShaderCodeCompiler vertexShaderCompiler;
+    EmbeddedShader::ShaderCodeCompiler fragmentShaderCompiler;
 
-    // struct TriangleGeomMesh
+    //struct TriangleGeomMesh
     //{
-    //     uint32_t indexOffset;
-    //     uint32_t indexCount;
-    //     HardwareBuffer indexBuffer;
-    //     std::vector<HardwareBuffer> vertexBuffers;
+    //    uint32_t indexOffset;
+    //    uint32_t indexCount;
+    //    HardwareBuffer indexBuffer;
+    //    std::vector<HardwareBuffer> vertexBuffers;
 
     //    HardwarePushConstant pushConstant;
     //};
-    // std::vector<TriangleGeomMesh> geomMeshes;
+    //std::vector<TriangleGeomMesh> geomMeshes;
 
     HardwarePushConstant tempPushConstant;
 
@@ -152,6 +134,4 @@ struct RasterizerPipeline
 
     EmbeddedShader::ShaderCodeModule::ShaderResources vertexResource;
     EmbeddedShader::ShaderCodeModule::ShaderResources fragmentResource;
-
-    bool initialized_ = false;
 };
