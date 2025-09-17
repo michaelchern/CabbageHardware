@@ -4,9 +4,10 @@
 
 RasterizerPipeline::RasterizerPipeline(std::string vertexShaderCode, std::string fragmentShaderCode, uint32_t multiviewCount,
                                        EmbeddedShader::ShaderLanguage vertexShaderLanguage, EmbeddedShader::ShaderLanguage fragmentShaderLanguage, const std::source_location &sourceLocation)
-    : vertexShaderCompiler(EmbeddedShader::ShaderCodeCompiler(vertexShaderCode, EmbeddedShader::ShaderStage::VertexShader, vertexShaderLanguage, EmbeddedShader::CompilerOption(), sourceLocation)),
-      fragmentShaderCompiler(EmbeddedShader::ShaderCodeCompiler(fragmentShaderCode, EmbeddedShader::ShaderStage::FragmentShader, fragmentShaderLanguage, EmbeddedShader::CompilerOption(), sourceLocation))
 {
+    EmbeddedShader::ShaderCodeCompiler vertexShaderCompiler(EmbeddedShader::ShaderCodeCompiler(vertexShaderCode, EmbeddedShader::ShaderStage::VertexShader, vertexShaderLanguage, EmbeddedShader::CompilerOption(), sourceLocation));
+    EmbeddedShader::ShaderCodeCompiler fragmentShaderCompiler(EmbeddedShader::ShaderCodeCompiler(fragmentShaderCode, EmbeddedShader::ShaderStage::FragmentShader, fragmentShaderLanguage, EmbeddedShader::CompilerOption(), sourceLocation));
+
     vertShaderCode = vertexShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV);
     fragShaderCode = fragmentShaderCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV);
 

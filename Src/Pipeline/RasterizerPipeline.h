@@ -22,8 +22,15 @@ struct RasterizerPipeline
         HardwarePushConstant pushConstant;
 	};
 
-	RasterizerPipeline() = default;
-	~RasterizerPipeline() = default;
+    RasterizerPipeline()
+    {
+
+    }
+
+    ~RasterizerPipeline()
+    {
+
+    }
 
 	RasterizerPipeline(std::string vertexShaderCode, std::string fragmentShaderCode, uint32_t multiviewCount = 1,
                        EmbeddedShader::ShaderLanguage vertexShaderLanguage = EmbeddedShader::ShaderLanguage::GLSL, EmbeddedShader::ShaderLanguage fragmentShaderLanguage = EmbeddedShader::ShaderLanguage::GLSL,
@@ -109,8 +116,8 @@ private:
     //HardwareImage depthImage;
     std::vector<HardwareImage> renderTargets;
 
-    EmbeddedShader::ShaderCodeCompiler vertexShaderCompiler;
-    EmbeddedShader::ShaderCodeCompiler fragmentShaderCompiler;
+    //EmbeddedShader::ShaderCodeCompiler vertexShaderCompiler;
+    //EmbeddedShader::ShaderCodeCompiler fragmentShaderCompiler;
 
     //struct TriangleGeomMesh
     //{

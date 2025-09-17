@@ -13,8 +13,15 @@
 
 struct ComputePipeline
 {
-	ComputePipeline() = default;
-	~ComputePipeline() = default;
+    ComputePipeline()
+    {
+
+    }
+
+    ~ComputePipeline()
+    {
+
+    }
 
 	
     ComputePipeline(std::string shaderCode, EmbeddedShader::ShaderLanguage language = EmbeddedShader::ShaderLanguage::GLSL, const std::source_location &sourceLocation = std::source_location::current());
@@ -47,6 +54,6 @@ private:
     EmbeddedShader::ShaderCodeModule::ShaderResources shaderResource;
 
 
-    EmbeddedShader::ShaderCodeCompiler shaderCodeCompiler;
+    //EmbeddedShader::ShaderCodeCompiler shaderCodeCompiler;
     EmbeddedShader::ShaderCodeModule shaderCode;
 };
