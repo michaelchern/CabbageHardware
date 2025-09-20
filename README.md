@@ -5,3 +5,4 @@
 - 程序关闭时资源释放问题
 - BUG：mutiview初始化黑屏
 - 支持跨device传输（Vulkan与CUDA）
+- 画面改变大小会崩溃
