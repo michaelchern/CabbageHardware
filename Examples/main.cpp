@@ -492,7 +492,7 @@ int main()
                 auto timeD = std::chrono::duration<float, std::chrono::milliseconds::period>(std::chrono::high_resolution_clock::now() - start);
                 totalTimeMs += timeD.count();
                 frameCount++;
-                if (frameCount >= 100)
+                if (frameCount >= 1000)
                 {
                     std::cout << "Average time over " << frameCount << " frames: " << totalTimeMs / frameCount << " ms" << std::endl;
                     totalTimeMs = 0.0;
