@@ -177,7 +177,7 @@ ResourceManager::BufferHardwareWrap ResourceManager::createBuffer(VkDeviceSize s
         vbInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         vbInfo.size = size;
         vbInfo.usage = usage;
-        vbInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        vbInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
 
         VmaAllocationCreateInfo vbAllocCreateInfo = {};
         vbAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
@@ -300,7 +300,7 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage = imageUsage;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
         imageInfo.pNext = &externalInfo;
         //imageInfo.pNext = nullptr;
 
