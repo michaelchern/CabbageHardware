@@ -419,6 +419,16 @@ struct ComputeUniformBufferObject
 
 int main()
 {
+    //HardwareExecutor executor;
+
+    //executor << executor << executor;
+    ////....
+    //executor << executor;
+    ////....
+    //executor.commit() << executor << executor.commit();
+
+
+
     if (glfwInit() >= 0)
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

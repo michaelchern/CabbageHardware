@@ -154,3 +154,18 @@ struct HardwareDisplayer
 
     void *displaySurface = nullptr;
 };
+
+
+struct HardwareExecutor
+{
+	HardwareExecutor();
+	~HardwareExecutor();
+
+	HardwareExecutor& operator<<(const HardwareExecutor &)
+    {
+    }
+
+	HardwareExecutor &commit()
+	{
+	}
+};
