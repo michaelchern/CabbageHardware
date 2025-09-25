@@ -41,8 +41,6 @@ struct RasterizerPipeline
         return depthImage;
     }
 
-	//void executePipeline(std::vector<GeomMeshDrawIndexed> GeomMeshes, HardwareImage depthImage, std::vector<HardwareImage> renderTarget);
-    void executePipeline(ktm::uvec2 imageSize);
 
     std::variant<HardwarePushConstant, HardwareBuffer, HardwareImage> operator[](const std::string& resourceName)
     {
