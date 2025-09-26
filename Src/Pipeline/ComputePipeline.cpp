@@ -99,5 +99,5 @@ HardwareExecutor& ComputePipeline::operator()(uint16_t groupCountX, uint16_t gro
 			<< globalHardwareContext.mainDevice->deviceManager.endCommands();
 	}
 
-	return *this;
+	return executor;
 }

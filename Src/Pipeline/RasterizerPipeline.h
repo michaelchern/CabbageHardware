@@ -9,7 +9,7 @@
 #include "../CabbageDisplayer.h"
 
 
-struct RasterizerPipeline : HardwareExecutor
+struct RasterizerPipeline
 {
     struct GeomMeshDrawIndexed
     {
@@ -68,7 +68,7 @@ struct RasterizerPipeline : HardwareExecutor
     HardwareExecutor &operator()(uint16_t x, uint16_t y);
     HardwareExecutor &endRecord();
 
-    virtual HardwareExecutor &operator<<(const HardwareBuffer &indexBuffer);
+    HardwareExecutor& record(const HardwareBuffer &indexBuffer);
 
     // void recordGeomMesh()
     //{
@@ -130,4 +130,6 @@ struct RasterizerPipeline : HardwareExecutor
 
     EmbeddedShader::ShaderCodeModule::ShaderResources vertexResource;
     EmbeddedShader::ShaderCodeModule::ShaderResources fragmentResource;
+
+    HardwareExecutor executor;
 };

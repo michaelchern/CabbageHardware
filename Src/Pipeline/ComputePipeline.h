@@ -10,7 +10,7 @@
 #include"../CabbageDisplayer.h"
 
 
-struct ComputePipeline : HardwareExecutor
+struct ComputePipeline
 {
     ComputePipeline()
     {
@@ -52,4 +52,6 @@ private:
 
     //EmbeddedShader::ShaderCodeCompiler shaderCodeCompiler;
     EmbeddedShader::ShaderCodeModule shaderCode;
+
+    HardwareExecutor executor;
 };

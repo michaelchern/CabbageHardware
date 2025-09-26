@@ -437,7 +437,7 @@ HardwareExecutor &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t i
 
     globalHardwareContext.mainDevice->deviceManager.startCommands() << runCommand;
 
-    return *this;
+    return executor;
 }
 
 HardwareExecutor &RasterizerPipeline::endRecord()
@@ -448,10 +448,10 @@ HardwareExecutor &RasterizerPipeline::endRecord()
 
     globalHardwareContext.mainDevice->deviceManager << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
 
-    return *this;
+    return executor;
 }
 
-HardwareExecutor &RasterizerPipeline::operator<<(const HardwareBuffer &indexBuffer)
+HardwareExecutor &RasterizerPipeline::record(const HardwareBuffer &indexBuffer)
 {
     auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
         std::vector<VkBuffer> vertexBuffers;
@@ -483,5 +483,5 @@ HardwareExecutor &RasterizerPipeline::operator<<(const HardwareBuffer &indexBuff
 
     globalHardwareContext.mainDevice->deviceManager << runCommand;
 
-    return *this;
+    return executor;
 }

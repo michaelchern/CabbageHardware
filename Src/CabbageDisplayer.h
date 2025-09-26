@@ -162,22 +162,12 @@ struct HardwareExecutor
     HardwareExecutor() = default;
     ~HardwareExecutor() = default;
 
-    virtual HardwareExecutor &operator<<(const HardwareExecutor &)
+    HardwareExecutor &operator<<(const HardwareExecutor &)
     {
         return *this;
     }
 
-    virtual HardwareExecutor &operator<<(const HardwareImage&)
-    {
-        return *this;
-    }
-
-    virtual HardwareExecutor &operator<<(const HardwareBuffer&)
-    {
-        return *this;
-    }
-
-    virtual HardwareExecutor &commit()
+    HardwareExecutor &commit()
     {
         return *this;
     }
