@@ -9,7 +9,6 @@
 
 #include"Compiler/ShaderCodeCompiler.h"
 
-#include "HardwareExecutor.h"
 
 
 enum class ImageFormat : uint32_t
@@ -156,3 +155,19 @@ struct HardwareDisplayer
     void *displaySurface = nullptr;
 };
 
+
+struct HardwareExecutor
+{
+    HardwareExecutor() = default;
+    ~HardwareExecutor() = default;
+
+    HardwareExecutor &operator<<(const HardwareExecutor &)
+    {
+        return *this;
+    }
+
+    HardwareExecutor &commit()
+    {
+        return *this;
+    }
+};
