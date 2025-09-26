@@ -12,6 +12,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+
 #include "CabbageDisplayer.h"
 #include "Pipeline/ComputePipeline.h"
 #include "Pipeline/RasterizerPipeline.h"
@@ -419,13 +420,13 @@ struct ComputeUniformBufferObject
 
 int main()
 {
-    //HardwareExecutor executor;
+    HardwareExecutor executor;
 
-    //executor << executor << executor;
-    ////....
-    //executor << executor;
-    ////....
-    //executor.commit() << executor << executor.commit();
+    executor << executor << executor;
+    //....
+    executor << executor;
+    //....
+    executor.commit() << executor << executor.commit();
 
 
 

@@ -9,6 +9,7 @@
 
 #include"Compiler/ShaderCodeCompiler.h"
 
+#include "HardwareExecutor.h"
 
 
 enum class ImageFormat : uint32_t
