@@ -9,7 +9,7 @@
 #include "../CabbageDisplayer.h"
 
 
-struct RasterizerPipeline
+struct RasterizerPipeline : HardwareExecutor
 {
     struct GeomMeshDrawIndexed
     {
@@ -65,13 +65,10 @@ struct RasterizerPipeline
         return std::move(HardwarePushConstant());
     }
 
-    RasterizerPipeline& operator()(uint16_t x, uint16_t y);
-    RasterizerPipeline& endRecord();
-    RasterizerPipeline& operator<<(const RasterizerPipeline &)
-    {
-        return *this;
-    }
-    RasterizerPipeline &operator<<(const HardwareBuffer &indexBuffer);
+    HardwareExecutor &operator()(uint16_t x, uint16_t y);
+    HardwareExecutor &endRecord();
+
+    virtual HardwareExecutor &operator<<(const HardwareBuffer &indexBuffer);
 
     // void recordGeomMesh()
     //{

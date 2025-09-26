@@ -384,7 +384,7 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
     }
 }
 
-RasterizerPipeline &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t imageSizeY)
+HardwareExecutor &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t imageSizeY)
 {
     if (!depthImage)
     {
@@ -440,7 +440,7 @@ RasterizerPipeline &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t
     return *this;
 }
 
-RasterizerPipeline &RasterizerPipeline::endRecord()
+HardwareExecutor &RasterizerPipeline::endRecord()
 {
     auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
         vkCmdEndRenderPass(commandBuffer);
@@ -451,7 +451,7 @@ RasterizerPipeline &RasterizerPipeline::endRecord()
     return *this;
 }
 
-RasterizerPipeline &RasterizerPipeline::operator<<(const HardwareBuffer &indexBuffer)
+HardwareExecutor &RasterizerPipeline::operator<<(const HardwareBuffer &indexBuffer)
 {
     auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
         std::vector<VkBuffer> vertexBuffers;

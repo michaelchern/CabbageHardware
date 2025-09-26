@@ -9,9 +9,8 @@
 
 #include"../CabbageDisplayer.h"
 
-//using namespace EmbeddedShader;
 
-struct ComputePipeline
+struct ComputePipeline : HardwareExecutor
 {
     ComputePipeline()
     {

@@ -156,17 +156,28 @@ struct HardwareDisplayer
 };
 
 
+
 struct HardwareExecutor
 {
     HardwareExecutor() = default;
     ~HardwareExecutor() = default;
 
-    HardwareExecutor &operator<<(const HardwareExecutor &)
+    virtual HardwareExecutor &operator<<(const HardwareExecutor &)
     {
         return *this;
     }
 
-    HardwareExecutor &commit()
+    virtual HardwareExecutor &operator<<(const HardwareImage&)
+    {
+        return *this;
+    }
+
+    virtual HardwareExecutor &operator<<(const HardwareBuffer&)
+    {
+        return *this;
+    }
+
+    virtual HardwareExecutor &commit()
     {
         return *this;
     }
