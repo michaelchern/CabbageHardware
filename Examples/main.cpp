@@ -496,7 +496,7 @@ int main()
 
                 rasterizer.startRecord(ktm::uvec2(1920, 1080)) << indexBuffer << rasterizer.endRecord();
 
-                computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
+                computer(1920 / 8, 1080 / 8, 1);
 
                 displayManager = finalOutputImage;
 

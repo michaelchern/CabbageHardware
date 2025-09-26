@@ -40,10 +40,7 @@ struct ComputePipeline
         }
     }
 
-	//init and execute is all used this API
-	//please insure that the shader of init and execute is the same
-	void executePipeline(ktm::uvec3 groupCount);
-
+    void operator()(uint16_t x, uint16_t y, uint16_t z);
 
 private:
 	VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
