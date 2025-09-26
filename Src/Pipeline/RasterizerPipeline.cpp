@@ -384,11 +384,11 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
     }
 }
 
-RasterizerPipeline &RasterizerPipeline::startRecord(ktm::uvec2 imageSize)
+RasterizerPipeline &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t imageSizeY)
 {
     if (!depthImage)
     {
-        depthImage = HardwareImage(imageSize, ImageFormat::D32_FLOAT, ImageUsage::DepthImage);
+        depthImage = HardwareImage(ktm::uvec2(imageSizeX, imageSizeY), ImageFormat::D32_FLOAT, ImageUsage::DepthImage);
 
         createRenderPass(multiviewCount);
 

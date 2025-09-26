@@ -494,7 +494,7 @@ int main()
                 computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
 
-                rasterizer.startRecord(ktm::uvec2(1920, 1080)) << indexBuffer << rasterizer.endRecord();
+                rasterizer(1920, 1080) << indexBuffer << rasterizer.endRecord();
 
                 computer(1920 / 8, 1080 / 8, 1);
 

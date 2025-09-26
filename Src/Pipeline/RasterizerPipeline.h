@@ -65,9 +65,9 @@ struct RasterizerPipeline
         return std::move(HardwarePushConstant());
     }
 
-    RasterizerPipeline &startRecord(ktm::uvec2 imageSize);
-    RasterizerPipeline &endRecord();
-    RasterizerPipeline &operator<<(const RasterizerPipeline &)
+    RasterizerPipeline& operator()(uint16_t x, uint16_t y);
+    RasterizerPipeline& endRecord();
+    RasterizerPipeline& operator<<(const RasterizerPipeline &)
     {
         return *this;
     }
