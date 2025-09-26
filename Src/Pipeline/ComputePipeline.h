@@ -39,7 +39,7 @@ struct ComputePipeline : HardwareExecutor
         }
     }
 
-    void operator()(uint16_t x, uint16_t y, uint16_t z);
+    HardwareExecutor &operator()(uint16_t x, uint16_t y, uint16_t z);
 
 private:
 	VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;

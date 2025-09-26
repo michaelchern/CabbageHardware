@@ -484,15 +484,13 @@ int main()
                 computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
 
-                rasterizer(1920, 1080) << indexBuffer << rasterizer.endRecord();
-
-                computer(1920 / 8, 1080 / 8, 1);
+                //rasterizer(1920, 1080) << indexBuffer << rasterizer.endRecord() << computer(1920 / 8, 1080 / 8, 1);
 
 
-                //HardwareExecutor executor;
-                //executor << rasterizer(1920, 1080) << indexBuffer << rasterizer.endRecord()
-                //         << computer(1920 / 8, 1080 / 8, 1)
-                //         << executor.commit();
+                HardwareExecutor executor;
+                rasterizer(1920, 1080) << indexBuffer << rasterizer.endRecord()
+                         << computer(1920 / 8, 1080 / 8, 1)
+                         << executor.commit();
 
 
                 displayManager = finalOutputImage;
