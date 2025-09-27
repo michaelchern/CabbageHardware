@@ -384,11 +384,11 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
     }
 }
 
-RasterizerPipeline &RasterizerPipeline::startRecord(ktm::uvec2 imageSize)
+HardwareExecutor &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t imageSizeY)
 {
     if (!depthImage)
     {
-        depthImage = HardwareImage(imageSize, ImageFormat::D32_FLOAT, ImageUsage::DepthImage);
+        depthImage = HardwareImage(ktm::uvec2(imageSizeX, imageSizeY), ImageFormat::D32_FLOAT, ImageUsage::DepthImage);
 
         createRenderPass(multiviewCount);
 
@@ -437,10 +437,10 @@ RasterizerPipeline &RasterizerPipeline::startRecord(ktm::uvec2 imageSize)
 
     globalHardwareContext.mainDevice->deviceManager.startCommands() << runCommand;
 
-    return *this;
+    return executor;
 }
 
-RasterizerPipeline &RasterizerPipeline::endRecord()
+HardwareExecutor &RasterizerPipeline::endRecord()
 {
     auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
         vkCmdEndRenderPass(commandBuffer);
@@ -448,10 +448,10 @@ RasterizerPipeline &RasterizerPipeline::endRecord()
 
     globalHardwareContext.mainDevice->deviceManager << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
 
-    return *this;
+    return executor;
 }
 
-RasterizerPipeline &RasterizerPipeline::operator<<(const HardwareBuffer &indexBuffer)
+HardwareExecutor &RasterizerPipeline::record(const HardwareBuffer &indexBuffer)
 {
     auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
         std::vector<VkBuffer> vertexBuffers;
@@ -483,5 +483,5 @@ RasterizerPipeline &RasterizerPipeline::operator<<(const HardwareBuffer &indexBu
 
     globalHardwareContext.mainDevice->deviceManager << runCommand;
 
-    return *this;
+    return executor;
 }

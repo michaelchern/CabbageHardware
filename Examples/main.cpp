@@ -12,6 +12,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+
 #include "CabbageDisplayer.h"
 #include "Pipeline/ComputePipeline.h"
 #include "Pipeline/RasterizerPipeline.h"
@@ -419,16 +420,6 @@ struct ComputeUniformBufferObject
 
 int main()
 {
-    //HardwareExecutor executor;
-
-    //executor << executor << executor;
-    ////....
-    //executor << executor;
-    ////....
-    //executor.commit() << executor << executor.commit();
-
-
-
     if (glfwInit() >= 0)
     {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -493,9 +484,12 @@ int main()
                 computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
 
-                rasterizer.startRecord(ktm::uvec2(1920, 1080)) << indexBuffer << rasterizer.endRecord();
 
-                computer.executePipeline(ktm::uvec3(1920 / 8, 1080 / 8, 1));
+                HardwareExecutor executor;
+                executor << rasterizer(1920, 1080) << rasterizer.record(indexBuffer) << rasterizer.endRecord()
+                         << computer(1920 / 8, 1080 / 8, 1)
+                         << executor.commit();
+
 
                 displayManager = finalOutputImage;
 

@@ -65,13 +65,10 @@ struct RasterizerPipeline
         return std::move(HardwarePushConstant());
     }
 
-    RasterizerPipeline &startRecord(ktm::uvec2 imageSize);
-    RasterizerPipeline &endRecord();
-    RasterizerPipeline &operator<<(const RasterizerPipeline &)
-    {
-        return *this;
-    }
-    RasterizerPipeline &operator<<(const HardwareBuffer &indexBuffer);
+    HardwareExecutor &operator()(uint16_t x, uint16_t y);
+    HardwareExecutor &endRecord();
+
+    HardwareExecutor& record(const HardwareBuffer &indexBuffer);
 
     // void recordGeomMesh()
     //{
@@ -133,4 +130,6 @@ struct RasterizerPipeline
 
     EmbeddedShader::ShaderCodeModule::ShaderResources vertexResource;
     EmbeddedShader::ShaderCodeModule::ShaderResources fragmentResource;
+
+    HardwareExecutor executor;
 };

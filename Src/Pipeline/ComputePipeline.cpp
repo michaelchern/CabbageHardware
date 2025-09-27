@@ -14,11 +14,8 @@ ComputePipeline::ComputePipeline(std::string shaderCode, EmbeddedShader::ShaderL
 	shaderResource = shaderCodeCompiler.getShaderCode(EmbeddedShader::ShaderLanguage::SpirV).shaderResources;
 }
 
-//ComputePipeline::~ComputePipeline()
-//{
-//}
 
-void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
+HardwareExecutor& ComputePipeline::operator()(uint16_t groupCountX, uint16_t groupCountY, uint16_t groupCountZ)
 {
 	if (pipelineLayout == VK_NULL_HANDLE && pipeline == VK_NULL_HANDLE)
 	{
@@ -95,10 +92,12 @@ void ComputePipeline::executePipeline(ktm::uvec3 groupCount)
                     vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, shaderCode.shaderResources.pushConstantSize, data);
 				}
 
-				vkCmdDispatch(commandBuffer, groupCount.x, groupCount.y, groupCount.z);
+				vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
 			};
 
         globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::ComputeQueue) << runCommand
 			<< globalHardwareContext.mainDevice->deviceManager.endCommands();
 	}
+
+	return executor;
 }
