@@ -171,4 +171,7 @@ struct HardwareExecutor
     {
         return *this;
     }
+
+	bool renderPassOpen = false;
+	bool isCommited = false;
 };
