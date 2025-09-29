@@ -63,6 +63,5 @@ inline HardwareExecutor &operator<<(HardwareExecutor &executor, ComputePipeline 
 {
     other.executor = &executor;
     executor.computePipelineBegin = true;
-    executor.startCommand = true;
     return executor;
 }

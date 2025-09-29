@@ -143,6 +143,5 @@ inline HardwareExecutor &operator<<(HardwareExecutor &executor, RasterizerPipeli
 {
     other.executor = &executor;
     executor.rasterizerPipelineBegin = true;
-    executor.startCommand = true;
     return executor;
 }

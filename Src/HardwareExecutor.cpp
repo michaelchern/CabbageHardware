@@ -19,14 +19,20 @@ HardwareExecutor& HardwareExecutor::commit()
             vkCmdEndRenderPass(commandBuffer);
         };
 
-        globalHardwareContext.mainDevice->deviceManager << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
-
-        rasterizerPipelineBegin = false;
+        globalHardwareContext.mainDevice->deviceManager << runCommand;
     }
 
     if (computePipelineBegin)
     {
-        computePipelineBegin = false;
     }
+
+    if (rasterizerPipelineBegin || computePipelineBegin)
+    {
+        globalHardwareContext.mainDevice->deviceManager << globalHardwareContext.mainDevice->deviceManager.endCommands();
+
+        computePipelineBegin = false;
+        rasterizerPipelineBegin = false;
+    }
+
     return *this;
 }
