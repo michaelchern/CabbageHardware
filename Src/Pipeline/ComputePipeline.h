@@ -42,10 +42,9 @@ struct ComputePipeline
     ComputePipeline &operator()(uint16_t x, uint16_t y, uint16_t z);
 
     
-    HardwareExecutor* executor;
-
-
   private:
+    friend HardwareExecutor &operator<<(HardwareExecutor &executor, ComputePipeline &other);
+
 	VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 	VkPipeline pipeline = VK_NULL_HANDLE;
 
@@ -57,6 +56,7 @@ struct ComputePipeline
     //EmbeddedShader::ShaderCodeCompiler shaderCodeCompiler;
     EmbeddedShader::ShaderCodeModule shaderCode;
 
+    HardwareExecutor *executor;
 };
 
 inline HardwareExecutor &operator<<(HardwareExecutor &executor, ComputePipeline &other)
