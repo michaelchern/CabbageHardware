@@ -6,6 +6,8 @@
 
 HardwareExecutor& HardwareExecutor::operator()(ExecutorType type)
 {
+    globalHardwareContext.mainDevice->deviceManager.startCommands();
+
     this->type = type;
     return *this;
 }

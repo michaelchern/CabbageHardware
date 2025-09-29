@@ -435,7 +435,7 @@ RasterizerPipeline &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.startCommands() << runCommand;
+    globalHardwareContext.mainDevice->deviceManager << runCommand;
 
     return *this;
 }

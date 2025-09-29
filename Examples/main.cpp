@@ -487,8 +487,9 @@ int main()
 
                 HardwareExecutor executor;
                 executor(HardwareExecutor::ExecutorType::Graphics) 
-                    << rasterizer(1920, 1080) << rasterizer.record(indexBuffer) << executor.commit() 
-                    << computer(1920 / 8, 1080 / 8, 1);
+                    << rasterizer(1920, 1080) << rasterizer.record(indexBuffer)
+                    << computer(1920 / 8, 1080 / 8, 1) 
+                    << executor.commit();
 
 
                 displayManager = finalOutputImage;
