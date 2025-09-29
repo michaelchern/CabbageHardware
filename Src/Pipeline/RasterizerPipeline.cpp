@@ -384,7 +384,7 @@ void RasterizerPipeline::createFramebuffers(ktm::uvec2 imageSize)
     }
 }
 
-HardwareExecutor &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t imageSizeY)
+RasterizerPipeline &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t imageSizeY)
 {
     if (!depthImage)
     {
@@ -437,7 +437,7 @@ HardwareExecutor &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t i
 
     globalHardwareContext.mainDevice->deviceManager.startCommands() << runCommand;
 
-    return executor;
+    return *this;
 }
 
 HardwareExecutor &RasterizerPipeline::endRecord()

@@ -1,147 +1,143 @@
 ﻿#pragma once
 
-#include <mutex>
-#include <memory>
-#include <type_traits>
 #include <algorithm>
+#include <memory>
+#include <mutex>
+#include <type_traits>
 
 #include <ktm/ktm.h>
 
-#include"Compiler/ShaderCodeCompiler.h"
-
-
+#include "Compiler/ShaderCodeCompiler.h"
 
 enum class ImageFormat : uint32_t
 {
-	RGBA8_UINT,
-	RGBA8_SINT,
-	RGBA8_SRGB,
+    RGBA8_UINT,
+    RGBA8_SINT,
+    RGBA8_SRGB,
 
-	RGBA16_UINT,
-	RGBA16_SINT,
-	RGBA16_FLOAT,
+    RGBA16_UINT,
+    RGBA16_SINT,
+    RGBA16_FLOAT,
 
-	RGBA32_UINT,
-	RGBA32_SINT,
-	RGBA32_FLOAT,
+    RGBA32_UINT,
+    RGBA32_SINT,
+    RGBA32_FLOAT,
 
-	RG32_FLOAT,
+    RG32_FLOAT,
 
-	D16_UNORM, D32_FLOAT, //just for depth
+    D16_UNORM,
+    D32_FLOAT, // just for depth
 };
 
 enum class ImageUsage : uint32_t
 {
-	SampledImage = 1,
-	StorageImage = 2,
-	DepthImage = 3,
+    SampledImage = 1,
+    StorageImage = 2,
+    DepthImage = 3,
 };
 
 enum class BufferUsage : int32_t
 {
-	VertexBuffer = 1,
-	IndexBuffer = 2,  // must be uint32_t
-	UniformBuffer = 4,
-	StorageBuffer = 8,
+    VertexBuffer = 1,
+    IndexBuffer = 2, // must be uint32_t
+    UniformBuffer = 4,
+    StorageBuffer = 8,
 };
 
-
-template<typename T>
-concept is_container = requires(T a)
-{
-	a.size();
-	a.data();
-	a[0];
+template <typename T>
+concept is_container = requires(T a) {
+    a.size();
+    a.data();
+    a[0];
 };
 
 struct HardwareBuffer
 {
-	HardwareBuffer();
+    HardwareBuffer();
     HardwareBuffer(const HardwareBuffer &other);
-	HardwareBuffer(uint64_t size, BufferUsage usage, const void* data = nullptr);
+    HardwareBuffer(uint64_t size, BufferUsage usage, const void *data = nullptr);
 
-	template<typename Type>
-	HardwareBuffer(const Type& input, BufferUsage usage) requires is_container<Type>
-		: HardwareBuffer(input.size() * sizeof(input[0]), usage, input.data())
-	{}
+    template <typename Type>
+    HardwareBuffer(const Type &input, BufferUsage usage)
+        requires is_container<Type>
+        : HardwareBuffer(input.size() * sizeof(input[0]), usage, input.data())
+    {
+    }
 
-	~HardwareBuffer();
+    ~HardwareBuffer();
 
-	uint32_t storeDescriptor();
+    uint32_t storeDescriptor();
 
-	bool copyFromBuffer(const HardwareBuffer& inputBuffer, uint64_t size);
-	bool copyFromData(const void* inputData, uint64_t size);
+    bool copyFromBuffer(const HardwareBuffer &inputBuffer, uint64_t size);
+    bool copyFromData(const void *inputData, uint64_t size);
 
-	template<typename Type>
-	bool copyFromVector(const std::vector<Type>& input)
-	{
-		copyFromData(input.data(), input.size() * sizeof(Type));
-		return true;
-	}
+    template <typename Type>
+    bool copyFromVector(const std::vector<Type> &input)
+    {
+        copyFromData(input.data(), input.size() * sizeof(Type));
+        return true;
+    }
 
-	void* getMappedData();
+    void *getMappedData();
 
-	uint64_t getBufferSize();
+    uint64_t getBufferSize();
 
-	HardwareBuffer& operator= (const HardwareBuffer& other);
+    HardwareBuffer &operator=(const HardwareBuffer &other);
 
-	operator bool();
+    operator bool();
 
-	std::shared_ptr<uint64_t> bufferID;
+    std::shared_ptr<uint64_t> bufferID;
 };
-
 
 struct HardwareImage
 {
-	HardwareImage();
+    HardwareImage();
     HardwareImage(const HardwareImage &other);
-	HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage = ImageUsage::SampledImage, int arrayLayers = 1, void* imageData = nullptr);
+    HardwareImage(ktm::uvec2 imageSize, ImageFormat imageFormat, ImageUsage imageUsage = ImageUsage::SampledImage, int arrayLayers = 1, void *imageData = nullptr);
 
-	~HardwareImage();
+    ~HardwareImage();
 
-	operator bool();
+    operator bool();
 
-	uint32_t storeDescriptor();
+    uint32_t storeDescriptor();
 
-	bool blitFromImage(const HardwareImage& buffer);
-	bool copyFromImage(const HardwareImage& buffer);
+    bool blitFromImage(const HardwareImage &buffer);
+    bool copyFromImage(const HardwareImage &buffer);
 
+    HardwareImage &operator=(const HardwareImage &other);
 
-	HardwareImage& operator= (const HardwareImage& other);
-
-	std::shared_ptr<uint64_t> imageID;
+    std::shared_ptr<uint64_t> imageID;
 
   private:
     bool copyFromBuffer(const HardwareBuffer &buffer);
     bool copyFromData(const void *inputData);
 };
 
-
 struct HardwarePushConstant
 {
-	HardwarePushConstant();
-	~HardwarePushConstant();
+    HardwarePushConstant();
+    ~HardwarePushConstant();
 
-	HardwarePushConstant(const HardwarePushConstant &other);
+    HardwarePushConstant(const HardwarePushConstant &other);
 
-	template<typename Type>
-	HardwarePushConstant(Type data) requires (!std::is_same_v<std::remove_cvref_t<Type>, HardwarePushConstant>)
-	{
+    template <typename Type>
+    HardwarePushConstant(Type data)
+        requires(!std::is_same_v<std::remove_cvref_t<Type>, HardwarePushConstant>)
+    {
         copyFromRaw(&data, sizeof(Type));
-	}
+    }
 
-	HardwarePushConstant(uint64_t size, uint64_t offset, HardwarePushConstant* whole = nullptr);
+    HardwarePushConstant(uint64_t size, uint64_t offset, HardwarePushConstant *whole = nullptr);
 
-	HardwarePushConstant& operator= (const HardwarePushConstant& other);
+    HardwarePushConstant &operator=(const HardwarePushConstant &other);
 
-	uint8_t* getData() const;
+    uint8_t *getData() const;
     uint64_t getSize() const;
 
   private:
     void copyFromRaw(const void *src, uint64_t size);
     std::shared_ptr<uint64_t> pushConstantID;
 };
-
 
 struct HardwareDisplayer
 {
@@ -155,7 +151,8 @@ struct HardwareDisplayer
     void *displaySurface = nullptr;
 };
 
-
+struct ComputePipeline;
+struct RasterizerPipeline;
 
 struct HardwareExecutor
 {
@@ -167,11 +164,21 @@ struct HardwareExecutor
         return *this;
     }
 
+    HardwareExecutor &operator<<(const ComputePipeline &)
+    {
+        return *this;
+    }
+
+    HardwareExecutor &operator<<(const RasterizerPipeline &)
+    {
+        return *this;
+    }
+
     HardwareExecutor &commit()
     {
         return *this;
     }
 
-	bool renderPassOpen = false;
-	bool isCommited = false;
+    bool renderPassOpen = false;
+    bool isCommited = false;
 };

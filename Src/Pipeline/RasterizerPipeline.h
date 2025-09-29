@@ -65,7 +65,7 @@ struct RasterizerPipeline
         return std::move(HardwarePushConstant());
     }
 
-    HardwareExecutor &operator()(uint16_t x, uint16_t y);
+    RasterizerPipeline &operator()(uint16_t x, uint16_t y);
     HardwareExecutor &endRecord();
 
     HardwareExecutor& record(const HardwareBuffer &indexBuffer);
