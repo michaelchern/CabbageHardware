@@ -81,6 +81,8 @@ struct RasterizerPipeline
     //     geomMeshes.push_back(temp);
     // }
 
+    HardwareExecutor* executor;
+
   private:
     void createRenderPass(int multiviewCount = 1);
     void createGraphicsPipeline(EmbeddedShader::ShaderCodeModule vertShaderCode, EmbeddedShader::ShaderCodeModule fragShaderCode);
@@ -131,5 +133,10 @@ struct RasterizerPipeline
     EmbeddedShader::ShaderCodeModule::ShaderResources vertexResource;
     EmbeddedShader::ShaderCodeModule::ShaderResources fragmentResource;
 
-    HardwareExecutor executor;
 };
+
+inline HardwareExecutor &operator<<(HardwareExecutor &executor, RasterizerPipeline &other)
+{
+    other.executor = &executor;
+    return executor;
+}

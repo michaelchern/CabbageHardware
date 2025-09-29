@@ -151,25 +151,13 @@ struct HardwareDisplayer
     void *displaySurface = nullptr;
 };
 
-struct ComputePipeline;
-struct RasterizerPipeline;
 
 struct HardwareExecutor
 {
     HardwareExecutor() = default;
     ~HardwareExecutor() = default;
 
-    HardwareExecutor &operator<<(const HardwareExecutor &)
-    {
-        return *this;
-    }
-
-    HardwareExecutor &operator<<(const ComputePipeline &)
-    {
-        return *this;
-    }
-
-    HardwareExecutor &operator<<(const RasterizerPipeline &)
+    HardwareExecutor &operator<<(const HardwareExecutor &other)
     {
         return *this;
     }
@@ -178,6 +166,10 @@ struct HardwareExecutor
     {
         return *this;
     }
+
+private:
+    friend struct ComputePipeline;
+    friend struct RasterizerPipeline;
 
     bool renderPassOpen = false;
     bool isCommited = false;

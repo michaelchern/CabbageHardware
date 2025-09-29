@@ -448,7 +448,7 @@ HardwareExecutor &RasterizerPipeline::endRecord()
 
     globalHardwareContext.mainDevice->deviceManager << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
 
-    return executor;
+    return *executor;
 }
 
 HardwareExecutor &RasterizerPipeline::record(const HardwareBuffer &indexBuffer)
@@ -483,5 +483,5 @@ HardwareExecutor &RasterizerPipeline::record(const HardwareBuffer &indexBuffer)
 
     globalHardwareContext.mainDevice->deviceManager << runCommand;
 
-    return executor;
+    return *executor;
 }
