@@ -486,8 +486,7 @@ int main()
 
 
                 HardwareExecutor executor;
-                executor << rasterizer(1920, 1080) << rasterizer.record(indexBuffer) << executor.commit();
-                executor << computer(1920 / 8, 1080 / 8, 1);
+                executor() << rasterizer(1920, 1080) << rasterizer.record(indexBuffer) << executor.commit() << computer(1920 / 8, 1080 / 8, 1);
 
 
                 displayManager = finalOutputImage;

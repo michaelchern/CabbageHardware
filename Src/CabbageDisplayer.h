@@ -164,6 +164,11 @@ struct HardwareExecutor
         return *this;
     }
 
+    HardwareExecutor& operator()()
+    {
+        return *this;
+    }
+
     HardwareExecutor &commit();
 
   private:
