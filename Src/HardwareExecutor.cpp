@@ -13,10 +13,13 @@ HardwareExecutor& HardwareExecutor::commit()
         };
 
         globalHardwareContext.mainDevice->deviceManager << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
+
+        rasterizerPipelineBegin = false;
     }
 
-    if (computePipelineBegin || rasterizerPipelineBegin)
+    if (computePipelineBegin)
     {
+        computePipelineBegin = false;
     }
     return *this;
 }

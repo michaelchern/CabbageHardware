@@ -172,4 +172,6 @@ struct HardwareExecutor
 
     bool computePipelineBegin = false;
     bool rasterizerPipelineBegin = false;
+
+    bool startCommand = false;
 };
