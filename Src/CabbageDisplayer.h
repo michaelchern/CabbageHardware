@@ -151,6 +151,8 @@ struct HardwareDisplayer
     void *displaySurface = nullptr;
 };
 
+class RasterizerPipeline;
+class ComputePipeline;
 
 struct HardwareExecutor
 {
@@ -162,15 +164,12 @@ struct HardwareExecutor
         return *this;
     }
 
-    HardwareExecutor &commit()
-    {
-        return *this;
-    }
+    HardwareExecutor &commit();
 
-private:
-    friend struct ComputePipeline;
-    friend struct RasterizerPipeline;
+  private:
+    friend HardwareExecutor &operator<<(HardwareExecutor &executor, RasterizerPipeline &other);
+    friend HardwareExecutor &operator<<(HardwareExecutor &executor, ComputePipeline &other);
 
-    bool renderPassOpen = false;
-    bool isCommited = false;
+    bool computePipelineBegin = false;
+    bool rasterizerPipelineBegin = false;
 };

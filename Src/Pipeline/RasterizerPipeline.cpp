@@ -440,16 +440,6 @@ RasterizerPipeline &RasterizerPipeline::operator()(uint16_t imageSizeX, uint16_t
     return *this;
 }
 
-HardwareExecutor &RasterizerPipeline::endRecord()
-{
-    auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
-        vkCmdEndRenderPass(commandBuffer);
-    };
-
-    globalHardwareContext.mainDevice->deviceManager << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
-
-    return *executor;
-}
 
 HardwareExecutor &RasterizerPipeline::record(const HardwareBuffer &indexBuffer)
 {
