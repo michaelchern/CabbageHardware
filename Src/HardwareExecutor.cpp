@@ -1,7 +1,14 @@
 #include"CabbageDisplayer.h"
 
-
 #include <Hardware/GlobalContext.h>
+
+
+
+HardwareExecutor& HardwareExecutor::operator()(ExecutorType type)
+{
+    this->type = type;
+    return *this;
+}
 
 
 HardwareExecutor& HardwareExecutor::commit()

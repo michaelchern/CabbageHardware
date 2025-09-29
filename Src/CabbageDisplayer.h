@@ -156,6 +156,13 @@ class ComputePipeline;
 
 struct HardwareExecutor
 {
+    enum class ExecutorType
+    {
+        Graphics,
+        Compute,
+        Transfer
+    };
+
     HardwareExecutor() = default;
     ~HardwareExecutor() = default;
 
@@ -164,10 +171,7 @@ struct HardwareExecutor
         return *this;
     }
 
-    HardwareExecutor& operator()()
-    {
-        return *this;
-    }
+    HardwareExecutor &operator()(ExecutorType type);
 
     HardwareExecutor &commit();
 
@@ -179,4 +183,6 @@ struct HardwareExecutor
     bool rasterizerPipelineBegin = false;
 
     bool startCommand = false;
+
+    ExecutorType type;
 };
