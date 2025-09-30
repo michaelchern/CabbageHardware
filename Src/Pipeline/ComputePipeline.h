@@ -62,5 +62,6 @@ struct ComputePipeline
 inline HardwareExecutor &operator<<(HardwareExecutor &executor, ComputePipeline &other)
 {
     other.executor = &executor;
+    executor.computePipelineBegin = true;
     return executor;
 }

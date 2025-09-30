@@ -151,9 +151,18 @@ struct HardwareDisplayer
     void *displaySurface = nullptr;
 };
 
+class RasterizerPipeline;
+class ComputePipeline;
 
 struct HardwareExecutor
 {
+    enum class ExecutorType
+    {
+        Graphics,
+        Compute,
+        Transfer
+    };
+
     HardwareExecutor() = default;
     ~HardwareExecutor() = default;
 
@@ -162,15 +171,16 @@ struct HardwareExecutor
         return *this;
     }
 
-    HardwareExecutor &commit()
-    {
-        return *this;
-    }
+    HardwareExecutor &operator()(ExecutorType type);
 
-private:
-    friend struct ComputePipeline;
-    friend struct RasterizerPipeline;
+    HardwareExecutor &commit();
 
-    bool renderPassOpen = false;
-    bool isCommited = false;
+  private:
+    friend HardwareExecutor &operator<<(HardwareExecutor &executor, RasterizerPipeline &other);
+    friend HardwareExecutor &operator<<(HardwareExecutor &executor, ComputePipeline &other);
+
+    bool computePipelineBegin = false;
+    bool rasterizerPipelineBegin = false;
+
+    ExecutorType type;
 };

@@ -66,7 +66,7 @@ struct RasterizerPipeline
     }
 
     RasterizerPipeline &operator()(uint16_t x, uint16_t y);
-    HardwareExecutor &endRecord();
+    //HardwareExecutor &endRecord();
 
     HardwareExecutor& record(const HardwareBuffer &indexBuffer);
 
@@ -142,5 +142,6 @@ struct RasterizerPipeline
 inline HardwareExecutor &operator<<(HardwareExecutor &executor, RasterizerPipeline &other)
 {
     other.executor = &executor;
+    executor.rasterizerPipelineBegin = true;
     return executor;
 }
