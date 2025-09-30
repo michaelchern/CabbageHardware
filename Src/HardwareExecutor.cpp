@@ -6,7 +6,21 @@
 
 HardwareExecutor& HardwareExecutor::operator()(ExecutorType type)
 {
-    globalHardwareContext.mainDevice->deviceManager.startCommands();
+    switch (type)
+    {
+    case HardwareExecutor::ExecutorType::Graphics:
+        globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::QueueType::GraphicsQueue);
+        break;
+    case HardwareExecutor::ExecutorType::Compute:
+        globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::QueueType::ComputeQueue);
+        break;
+    case HardwareExecutor::ExecutorType::Transfer:
+        globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::QueueType::TransferQueue);
+        break;
+    default:
+        globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::QueueType::GraphicsQueue);
+        break;
+    }
 
     this->type = type;
     return *this;
