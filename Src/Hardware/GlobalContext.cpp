@@ -127,6 +127,7 @@ void HardwareContext::prepareFeaturesChain()
         deviceFeatures12.runtimeDescriptorArray = VK_TRUE;
         deviceFeatures12.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE;
         deviceFeatures12.descriptorBindingVariableDescriptorCount = VK_TRUE;
+        deviceFeatures12.descriptorIndexing = VK_TRUE;
 
         deviceFeatures12.timelineSemaphore = VK_TRUE;
 
