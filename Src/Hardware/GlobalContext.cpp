@@ -95,6 +95,7 @@ void HardwareContext::prepareFeaturesChain()
         requiredExtensions.insert(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 
         requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
+        requiredExtensions.insert(VK_EXT_EXTERNAL_MEMORY_HOST_EXTENSION_NAME);
 #if _WIN32 || _WIN64
         requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
 #elif __APPLE__
