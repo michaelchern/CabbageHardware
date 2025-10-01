@@ -177,7 +177,18 @@ ResourceManager::BufferHardwareWrap ResourceManager::createBuffer(VkDeviceSize s
         vbInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         vbInfo.size = size;
         vbInfo.usage = usage;
+
+        std::vector<uint32_t> queueFamilys(device->getQueueFamilyNumber());
+        for (size_t i = 0; i < queueFamilys.size(); i++)
+        {
+            queueFamilys[i] = i;
+        }
+
         vbInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+        vbInfo.queueFamilyIndexCount = queueFamilys.size();
+        vbInfo.pQueueFamilyIndices = queueFamilys.data();
+
+        vbInfo.pNext = nullptr;
 
         VmaAllocationCreateInfo vbAllocCreateInfo = {};
         vbAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
@@ -300,7 +311,17 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage = imageUsage;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+
+        std::vector<uint32_t> queueFamilys(device->getQueueFamilyNumber());
+        for (size_t i = 0; i < queueFamilys.size(); i++)
+        {
+            queueFamilys[i] = i;
+        }
+
         imageInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+        imageInfo.queueFamilyIndexCount = queueFamilys.size();
+        imageInfo.pQueueFamilyIndices = queueFamilys.data();
+
         imageInfo.pNext = &externalInfo;
         //imageInfo.pNext = nullptr;
 
