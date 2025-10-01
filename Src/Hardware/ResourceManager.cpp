@@ -747,6 +747,131 @@ void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDevic
     globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::TransferQueue) << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
 }
 
+
+ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const ExternalMemoryHandle &memHandle, const ImageHardwareWrap &sourceImage)
+{
+    ImageHardwareWrap importedImage = {};
+    importedImage.device = this->device;
+    importedImage.resourceManager = this;
+
+    // 复制源图像的描述符，因为导入的图像必须具有完全相同的属性
+    importedImage.imageSize = sourceImage.imageSize;
+    importedImage.imageFormat = sourceImage.imageFormat;
+    importedImage.arrayLayers = sourceImage.arrayLayers;
+    importedImage.mipLevels = sourceImage.mipLevels;
+    importedImage.imageUsage = sourceImage.imageUsage;
+    importedImage.aspectMask = sourceImage.aspectMask;
+    importedImage.pixelSize = sourceImage.pixelSize;
+    importedImage.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED; // 导入后布局是未定义的
+
+    // 1. 创建一个与源图像属性相同的 VkImage，但不为其分配内存
+    VkImageCreateInfo imageInfo = {};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.extent.width = importedImage.imageSize.x;
+    imageInfo.extent.height = importedImage.imageSize.y;
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = importedImage.mipLevels;
+    imageInfo.arrayLayers = importedImage.arrayLayers;
+    imageInfo.format = importedImage.imageFormat;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.usage = importedImage.imageUsage;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // 导入的内存不需要并发共享
+
+    VkExternalMemoryImageCreateInfo externalInfo = {};
+    externalInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
+#if _WIN32 || _WIN64
+    externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+#else
+    // 为其他平台设置相应的句柄类型
+#endif
+    imageInfo.pNext = &externalInfo;
+
+    if (vkCreateImage(this->device->logicalDevice, &imageInfo, nullptr, &importedImage.imageHandle) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create image for import!");
+    }
+
+    // 2. 导入外部内存
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(this->device->logicalDevice, importedImage.imageHandle, &memRequirements);
+
+    VkDeviceMemory importedMemory = VK_NULL_HANDLE;
+    VkMemoryAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+
+    // 查找与源内存兼容的内存类型
+    // 注意：这是一个简化的实现。一个健壮的实现需要仔细匹配内存类型。
+    // VMA 已经为我们处理了源图像的内存类型选择，这里我们假设相同的类型索引有效。
+    allocInfo.memoryTypeIndex = sourceImage.imageAllocInfo.memoryType;
+
+#if _WIN32 || _WIN64
+    VkImportMemoryWin32HandleInfoKHR importInfo = {};
+    importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
+    importInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    importInfo.handle = memHandle.handle;
+    allocInfo.pNext = &importInfo;
+#else
+    // 为其他平台设置导入结构体
+#endif
+
+    if (vkAllocateMemory(this->device->logicalDevice, &allocInfo, nullptr, &importedMemory) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to import image memory!");
+    }
+
+    // 3. 将导入的内存绑定到新创建的 VkImage
+    if (vkBindImageMemory(this->device->logicalDevice, importedImage.imageHandle, importedMemory, 0) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to bind imported memory to image!");
+    }
+
+    // 4. 创建 ImageView
+    importedImage.imageView = createImageView(importedImage);
+
+    // 注意：由于内存是外部导入的，VMA 不会跟踪它。
+    // 因此，imageAlloc 和 imageAllocInfo 保持为空。
+    // 您需要手动管理导入的 VkDeviceMemory 的生命周期。
+    // 在这个设计中，我们可能需要一个 destroyImportedImage 函数来调用 vkFreeMemory。
+
+    return importedImage;
+}
+
+ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHardwareWrap &sourceImage)
+{
+    ExternalMemoryHandle memHandle{};
+
+#if _WIN32 || _WIN64
+    VkMemoryGetWin32HandleInfoKHR getHandleInfo = {};
+    getHandleInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
+    getHandleInfo.memory = sourceImage.imageAllocInfo.deviceMemory;
+    getHandleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+
+    // VMA 动态加载了 Vulkan 函数，我们需要通过 VMA 获取函数指针
+    PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR =
+        (PFN_vkGetMemoryWin32HandleKHR)vkGetDeviceProcAddr(this->device->logicalDevice, "vkGetMemoryWin32HandleKHR");
+
+    if (vkGetMemoryWin32HandleKHR && vkGetMemoryWin32HandleKHR(this->device->logicalDevice, &getHandleInfo, &memHandle.handle) == VK_SUCCESS)
+    {
+        return memHandle;
+    }
+    else
+    {
+        throw std::runtime_error("failed to export image memory handle!");
+    }
+#else
+    // 为 Linux 或 macOS 实现类似的导出逻辑
+    // 例如，在 Linux 上使用 vkGetMemoryFdKHR
+    throw std::runtime_error("Exporting image memory is not implemented on this platform!");
+#endif
+
+    return memHandle;
+}
+
+
 void ResourceManager::createBindlessDescriptorSet()
 {
     VkPhysicalDeviceDescriptorIndexingProperties indexingProperties = {};
@@ -1055,3 +1180,4 @@ VkShaderModule ResourceManager::createShaderModule(const std::vector<unsigned in
 
     return shaderModule;
 }
+

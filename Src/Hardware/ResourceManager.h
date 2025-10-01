@@ -11,6 +11,14 @@
 
 struct ResourceManager
 {
+    struct ExternalMemoryHandle
+    {
+#if _WIN32 || _WIN64
+        HANDLE handle = nullptr;
+#else
+        int fd = -1;
+#endif
+    };
 
 	struct BufferHardwareWrap
 	{
@@ -85,6 +93,9 @@ struct ResourceManager
 	bool copyImageMemory(ImageHardwareWrap &source, ImageHardwareWrap &destination, BufferHardwareWrap *srcStaging = nullptr, BufferHardwareWrap *dstStaging = nullptr);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+    ExternalMemoryHandle exportImageMemory(ImageHardwareWrap &sourceImage);
+    ImageHardwareWrap importImageMemory(const ExternalMemoryHandle &memHandle, const ImageHardwareWrap &sourceImage);
 
 
 	//void transitionImageLayoutUnblocked(const VkCommandBuffer& commandBuffer,ImageHardwareWrap& image, VkImageLayout newLayout, VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
