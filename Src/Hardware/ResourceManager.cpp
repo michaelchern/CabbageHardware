@@ -297,6 +297,7 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
 #elif __APPLE__
 #elif __linux__
 #endif
+        externalInfo.pNext = nullptr;
 
         VkImageCreateInfo imageInfo = {};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
