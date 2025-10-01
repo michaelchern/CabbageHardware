@@ -850,6 +850,7 @@ ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHa
     getHandleInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
     getHandleInfo.memory = sourceImage.imageAllocInfo.deviceMemory;
     getHandleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    getHandleInfo.pNext = nullptr;
 
     // VMA 动态加载了 Vulkan 函数，我们需要通过 VMA 获取函数指针
     PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR =
