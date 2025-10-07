@@ -18,8 +18,6 @@
 #include "Pipeline/RasterizerPipeline.h"
 #include <Hardware/GlobalContext.h>
 
-// test github branch push
-
 std::string readStringFile(const std::string_view file_path)
 {
     std::ifstream file(file_path.data());

@@ -52,6 +52,26 @@ HardwareContext::HardwareContext()
     // demo of mutilple devices
 }
 
+HardwareContext::~HardwareContext() 
+{
+    // if (enableDebugLayer)
+    // {
+    //     auto DestroyDebugUtilsMessengerEXT = [](VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger) -> VkResult {
+    //         auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    //         if (func != nullptr)
+    //         {
+    //             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    //         }
+    //         else
+    //         {
+    //             return VK_ERROR_EXTENSION_NOT_PRESENT;
+    //         }
+    //     };
+    // }
+    
+    vkDestroyInstance(vkInstance, nullptr);
+}
+
 
 VkInstance HardwareContext::getVulkanInstance()
 {

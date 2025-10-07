@@ -7,7 +7,7 @@ struct HardwareContext
 {
     HardwareContext();
 
-    ~HardwareContext() = default;
+    ~HardwareContext();
 
     struct HardwareUtils
     {
