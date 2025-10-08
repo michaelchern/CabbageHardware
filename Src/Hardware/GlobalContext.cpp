@@ -115,6 +115,7 @@ void HardwareContext::prepareFeaturesChain()
         requiredExtensions.insert(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 
         requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
+        requiredExtensions.insert(VK_EXT_EXTERNAL_MEMORY_HOST_EXTENSION_NAME);
 #if _WIN32 || _WIN64
         requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
 #elif __APPLE__
@@ -147,6 +148,7 @@ void HardwareContext::prepareFeaturesChain()
         deviceFeatures12.runtimeDescriptorArray = VK_TRUE;
         deviceFeatures12.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE;
         deviceFeatures12.descriptorBindingVariableDescriptorCount = VK_TRUE;
+        deviceFeatures12.descriptorIndexing = VK_TRUE;
 
         deviceFeatures12.timelineSemaphore = VK_TRUE;
 

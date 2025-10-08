@@ -464,6 +464,8 @@ int main()
             double totalTimeMs = 0.0;
             int frameCount = 0;
 
+            HardwareExecutor executor;
+
             while (running.load())
             {
                 auto start = std::chrono::high_resolution_clock::now();
@@ -484,13 +486,10 @@ int main()
                 computeUniformBuffer.copyFromData(&computeUniformData, sizeof(computeUniformData));
                 computer["pushConsts.uniformBufferIndex"] = computeUniformBuffer.storeDescriptor();
 
-
-                HardwareExecutor executor;
                 executor(HardwareExecutor::ExecutorType::Graphics) 
                     << rasterizer(1920, 1080) << rasterizer.record(indexBuffer)
                     << computer(1920 / 8, 1080 / 8, 1) 
                     << executor.commit();
-
 
                 displayManager = finalOutputImage;
 
