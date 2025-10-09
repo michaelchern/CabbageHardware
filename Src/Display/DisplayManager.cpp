@@ -323,12 +323,12 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             ResourceManager::ImageHardwareWrap &sourceImage = imageGlobalPool[*displayImage.imageID];
 
             // 检查主渲染设备和显示设备是否为同一个 GPU
-            if (globalHardwareContext.mainDevice == displayDevice)
-            {
-                // 如果是同一个设备，直接使用源图像进行显示，无需任何拷贝或导入
-                this->displayImage = sourceImage;
-            }
-            else
+            //if (globalHardwareContext.mainDevice == displayDevice)
+            //{
+            //    // 如果是同一个设备，直接使用源图像进行显示，无需任何拷贝或导入
+            //    this->displayImage = sourceImage;
+            //}
+            //else
             {
                 // 如果是不同设备，执行零拷贝导入/导出
                 // 检查当前帧的图像是否是已经导入的图像

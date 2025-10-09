@@ -24,11 +24,11 @@ void ResourceManager::CreateVmaAllocator()
 {
     VmaAllocatorCreateInfo allocatorInfo = {};
 
-    //std::vector<VkExternalMemoryHandleTypeFlagsKHR> externalMemoryHandleTypes;
-//#if _WIN32 || _WIN64
-//    externalMemoryHandleTypes.push_back(VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
-//#endif
-    //allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes.data();
+    // std::vector<VkExternalMemoryHandleTypeFlagsKHR> externalMemoryHandleTypes;
+    // #if _WIN32 || _WIN64
+    //     externalMemoryHandleTypes.push_back(VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
+    // #endif
+    // allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes.data();
 
     bool g_EnableValidationLayer = true;
     bool VK_KHR_get_memory_requirements2_enabled = false;
@@ -81,6 +81,7 @@ void ResourceManager::CreateVmaAllocator()
         allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_KHR_MAINTENANCE5_BIT;
     }
 
+    allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_KHR_EXTERNAL_MEMORY_WIN32_BIT;
     // if (USE_CUSTOM_CPU_ALLOCATION_CALLBACKS)
     //{
     //	allocatorInfo.pAllocationCallbacks = &g_CpuAllocationCallbacks;
@@ -162,7 +163,6 @@ void ResourceManager::destroyBuffer(BufferHardwareWrap &buffer)
         vmaDestroyBuffer(g_hAllocator, buffer.bufferHandle, buffer.bufferAlloc);
     }
 }
-
 ResourceManager::BufferHardwareWrap ResourceManager::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage)
 {
     BufferHardwareWrap resultBuffer;
@@ -188,7 +188,12 @@ ResourceManager::BufferHardwareWrap ResourceManager::createBuffer(VkDeviceSize s
         vbInfo.queueFamilyIndexCount = queueFamilys.size();
         vbInfo.pQueueFamilyIndices = queueFamilys.data();
 
-        vbInfo.pNext = nullptr;
+        VkExternalMemoryBufferCreateInfo externalMemoryBufferInfo = {};
+        externalMemoryBufferInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
+#if _WIN32 || _WIN64
+        externalMemoryBufferInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+#endif
+        vbInfo.pNext = &externalMemoryBufferInfo;
 
         VmaAllocationCreateInfo vbAllocCreateInfo = {};
         vbAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
@@ -844,6 +849,12 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
 ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHardwareWrap &sourceImage)
 {
     ExternalMemoryHandle memHandle{};
+    
+//    VkExportMemoryAllocateInfo exportInfo = {};
+//    exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
+//#if _WIN32 || _WIN64
+//    exportInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+//#endif
 
 #if _WIN32 || _WIN64
     VkMemoryGetWin32HandleInfoKHR getHandleInfo = {};
@@ -852,11 +863,7 @@ ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHa
     getHandleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
     getHandleInfo.pNext = nullptr;
 
-    // VMA 动态加载了 Vulkan 函数，我们需要通过 VMA 获取函数指针
-    PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR =
-        (PFN_vkGetMemoryWin32HandleKHR)vkGetDeviceProcAddr(this->device->logicalDevice, "vkGetMemoryWin32HandleKHR");
-
-    if (vkGetMemoryWin32HandleKHR && vkGetMemoryWin32HandleKHR(this->device->logicalDevice, &getHandleInfo, &memHandle.handle) == VK_SUCCESS)
+    if (vkGetMemoryWin32HandleKHR(this->device->logicalDevice, &getHandleInfo, &memHandle.handle) == VK_SUCCESS)
     {
         return memHandle;
     }
