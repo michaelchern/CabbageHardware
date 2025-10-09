@@ -29,7 +29,11 @@ void ResourceManager::CreateVmaAllocator()
     //     externalMemoryHandleTypes.push_back(VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
     // #endif
     // allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes.data();
-
+#if _WIN32 || _WIN64
+    const VkExternalMemoryHandleTypeFlags externalMemoryHandleTypes[] = {
+        VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT};
+    allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes;
+#endif
     //bool g_EnableValidationLayer = true;
     //bool VK_KHR_get_memory_requirements2_enabled = false;
     //bool VK_KHR_get_physical_device_properties2_enabled = false;
@@ -850,30 +854,12 @@ ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHa
 {
     ExternalMemoryHandle memHandle{};
     
-//    VkExportMemoryAllocateInfo exportInfo = {};
-//    exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
-//#if _WIN32 || _WIN64
-//    exportInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-//#endif
-
 #if _WIN32 || _WIN64
-    //VkMemoryGetWin32HandleInfoKHR getHandleInfo = {};
-    //getHandleInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
-    //getHandleInfo.memory = sourceImage.imageAllocInfo.deviceMemory;
-    //getHandleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-    //getHandleInfo.pNext = nullptr;
-
-    if (vmaGetMemoryWin32Handle2(g_hAllocator, sourceImage.imageAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR, nullptr, &memHandle.handle) == VK_SUCCESS)
-    {
-        return memHandle;
-    }
-    else
+    if (!vmaGetMemoryWin32Handle2(g_hAllocator, sourceImage.imageAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR, nullptr, &memHandle.handle) == VK_SUCCESS)
     {
         throw std::runtime_error("failed to export image memory handle!");
     }
 #else
-    // 为 Linux 或 macOS 实现类似的导出逻辑
-    // 例如，在 Linux 上使用 vkGetMemoryFdKHR
     throw std::runtime_error("Exporting image memory is not implemented on this platform!");
 #endif
 
