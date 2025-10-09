@@ -781,6 +781,27 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     {
         throw std::runtime_error("Cannot import image with invalid memory handle!");
     }
+
+    VkPhysicalDeviceExternalImageFormatInfo externalImageFormatInfo{};
+    externalImageFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO;
+    externalImageFormatInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+
+    VkPhysicalDeviceImageFormatInfo2 imageFormatInfo{};
+    imageFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
+    imageFormatInfo.pNext = &externalImageFormatInfo;
+    imageFormatInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+    imageFormatInfo.type = VK_IMAGE_TYPE_2D;
+    imageFormatInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageFormatInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+    VkImageFormatProperties2 imageFormatProperties{};
+    imageFormatProperties.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
+
+    VkResult result = vkGetPhysicalDeviceImageFormatProperties2(this->device->physicalDevice, &imageFormatInfo, &imageFormatProperties);
+    if (result != VK_SUCCESS)
+    {
+        std::cerr << "Handle type not supported on this device!" << std::endl;
+    }
 #endif
     
     ImageHardwareWrap importedImage = {};

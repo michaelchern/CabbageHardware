@@ -322,35 +322,39 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
         {
             ResourceManager::ImageHardwareWrap &sourceImage = imageGlobalPool[*displayImage.imageID];
 
-            // 检查主渲染设备和显示设备是否为同一个 GPU
-            if (globalHardwareContext.mainDevice == displayDevice)
-            {
-                // 如果是同一个设备，直接使用源图像进行显示，无需任何拷贝或导入
-                this->displayImage = sourceImage;
-            }
-            else
-            {
-                // 如果是不同设备，执行零拷贝导入/导出
-                // 检查当前帧的图像是否是已经导入的图像
-                if (importedImageID == nullptr || *importedImageID != *displayImage.imageID)
+            auto runCommand1 = [&](const VkCommandBuffer &commandBuffer) {
+                // 检查主渲染设备和显示设备是否为同一个 GPU
+                if (globalHardwareContext.mainDevice == displayDevice)
                 {
-                    // 如果不是，或者从未导入过，则执行导入操作
-                    // 1. 从源设备导出内存句柄
-                    ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportImageMemory(sourceImage);
-
-                    // 2. 在显示设备上导入内存
-                    //    销毁旧的导入图像（如果存在）
-                    if (this->displayImage.imageHandle != VK_NULL_HANDLE)
-                    {
-                        displayDevice->resourceManager.destroyImage(this->displayImage);
-                    }
-                    this->displayImage = displayDevice->resourceManager.importImageMemory(memHandle, sourceImage);
-
-                    // 3. 更新已导入的图像ID
-                    importedImageID = displayImage.imageID;
+                    // 如果是同一个设备，直接使用源图像进行显示，无需任何拷贝或导入
+                    this->displayImage = sourceImage;
                 }
-                // 如果图像ID相同，则 this->displayImage 已经是正确的导入图像，无需任何操作
-            }
+                else
+                {
+                    // 如果是不同设备，执行零拷贝导入/导出
+                    // 检查当前帧的图像是否是已经导入的图像
+                    if (importedImageID == nullptr || *importedImageID != *displayImage.imageID)
+                    {
+                        // 如果不是，或者从未导入过，则执行导入操作
+                        // 1. 从源设备导出内存句柄
+                        ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportImageMemory(sourceImage);
+
+                        // 2. 在显示设备上导入内存
+                        //    销毁旧的导入图像（如果存在）
+                        if (this->displayImage.imageHandle != VK_NULL_HANDLE)
+                        {
+                            displayDevice->resourceManager.destroyImage(this->displayImage);
+                        }
+                        this->displayImage = displayDevice->resourceManager.importImageMemory(memHandle, sourceImage);
+
+                        // 3. 更新已导入的图像ID
+                        importedImageID = displayImage.imageID;
+                    }
+                    // 如果图像ID相同，则 this->displayImage 已经是正确的导入图像，无需任何操作
+                }
+            };
+
+            displayDevice->deviceManager.startCommands() << runCommand1 << displayDevice->deviceManager.endCommands();
 
             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
                 //// Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
