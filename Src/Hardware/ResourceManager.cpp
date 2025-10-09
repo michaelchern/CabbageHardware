@@ -30,69 +30,69 @@ void ResourceManager::CreateVmaAllocator()
     // #endif
     // allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes.data();
 
-    bool g_EnableValidationLayer = true;
-    bool VK_KHR_get_memory_requirements2_enabled = false;
-    bool VK_KHR_get_physical_device_properties2_enabled = false;
-    bool VK_KHR_dedicated_allocation_enabled = false;
-    bool VK_KHR_bind_memory2_enabled = false;
-    bool VK_EXT_memory_budget_enabled = false;
-    bool VK_AMD_device_coherent_memory_enabled = false;
-    bool VK_KHR_buffer_device_address_enabled = true;
-    bool VK_EXT_memory_priority_enabled = false;
-    bool VK_EXT_debug_utils_enabled = false;
-    bool VK_KHR_maintenance5_enabled = false;
-    bool g_SparseBindingEnabled = false;
+    //bool g_EnableValidationLayer = true;
+    //bool VK_KHR_get_memory_requirements2_enabled = false;
+    //bool VK_KHR_get_physical_device_properties2_enabled = false;
+    //bool VK_KHR_dedicated_allocation_enabled = false;
+    //bool VK_KHR_bind_memory2_enabled = false;
+    //bool VK_EXT_memory_budget_enabled = false;
+    //bool VK_AMD_device_coherent_memory_enabled = false;
+    //bool VK_KHR_buffer_device_address_enabled = true;
+    //bool VK_EXT_memory_priority_enabled = false;
+    //bool VK_EXT_debug_utils_enabled = false;
+    //bool VK_KHR_maintenance5_enabled = false;
+    //bool g_SparseBindingEnabled = false;
 
     allocatorInfo.physicalDevice = this->device->physicalDevice;
     allocatorInfo.device = this->device->logicalDevice;
     allocatorInfo.instance = globalHardwareContext.getVulkanInstance();
     allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_4;
 
-    if (VK_KHR_dedicated_allocation_enabled)
-    {
-        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_KHR_DEDICATED_ALLOCATION_BIT;
-    }
-    if (VK_KHR_bind_memory2_enabled)
-    {
-        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_KHR_BIND_MEMORY2_BIT;
-    }
-#if !defined(VMA_MEMORY_BUDGET) || VMA_MEMORY_BUDGET == 1
-    if (VK_EXT_memory_budget_enabled)
-    {
-        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
-    }
-#endif
-    if (VK_AMD_device_coherent_memory_enabled)
-    {
-        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_AMD_DEVICE_COHERENT_MEMORY_BIT;
-    }
-    if (VK_KHR_buffer_device_address_enabled)
-    {
-        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-    }
-#if !defined(VMA_MEMORY_PRIORITY) || VMA_MEMORY_PRIORITY == 1
-    if (VK_EXT_memory_priority_enabled)
-    {
-        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_EXT_MEMORY_PRIORITY_BIT;
-    }
-#endif
-    if (VK_KHR_maintenance5_enabled)
-    {
-        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_KHR_MAINTENANCE5_BIT;
-    }
-
+    //if (VK_KHR_dedicated_allocation_enabled)
+    //{
+    //    allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_KHR_DEDICATED_ALLOCATION_BIT;
+    //}
+    //if (VK_KHR_bind_memory2_enabled)
+    //{
+    //    allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_KHR_BIND_MEMORY2_BIT;
+    //}
+//#if !defined(VMA_MEMORY_BUDGET) || VMA_MEMORY_BUDGET == 1
+//    if (VK_EXT_memory_budget_enabled)
+//    {
+//        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+//    }
+//#endif
+//    if (VK_AMD_device_coherent_memory_enabled)
+//    {
+//        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_AMD_DEVICE_COHERENT_MEMORY_BIT;
+//    }
+//    if (VK_KHR_buffer_device_address_enabled)
+//    {
+//        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+//    }
+//#if !defined(VMA_MEMORY_PRIORITY) || VMA_MEMORY_PRIORITY == 1
+//    if (VK_EXT_memory_priority_enabled)
+//    {
+//        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_EXT_MEMORY_PRIORITY_BIT;
+//    }
+//#endif
+//    if (VK_KHR_maintenance5_enabled)
+//    {
+//        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_KHR_MAINTENANCE5_BIT;
+//    }
+    allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
     allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_KHR_EXTERNAL_MEMORY_WIN32_BIT;
     // if (USE_CUSTOM_CPU_ALLOCATION_CALLBACKS)
     //{
     //	allocatorInfo.pAllocationCallbacks = &g_CpuAllocationCallbacks;
     // }
 
-#if VMA_DYNAMIC_VULKAN_FUNCTIONS
-    static VmaVulkanFunctions vulkanFunctions = {};
+//#if VMA_DYNAMIC_VULKAN_FUNCTIONS
+    VmaVulkanFunctions vulkanFunctions = {};
     vulkanFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
     vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
     allocatorInfo.pVulkanFunctions = &vulkanFunctions;
-#endif
+//#endif
 
     // Uncomment to enable recording to CSV file.
     /*
@@ -857,13 +857,13 @@ ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHa
 //#endif
 
 #if _WIN32 || _WIN64
-    VkMemoryGetWin32HandleInfoKHR getHandleInfo = {};
-    getHandleInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
-    getHandleInfo.memory = sourceImage.imageAllocInfo.deviceMemory;
-    getHandleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-    getHandleInfo.pNext = nullptr;
+    //VkMemoryGetWin32HandleInfoKHR getHandleInfo = {};
+    //getHandleInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
+    //getHandleInfo.memory = sourceImage.imageAllocInfo.deviceMemory;
+    //getHandleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    //getHandleInfo.pNext = nullptr;
 
-    if (vkGetMemoryWin32HandleKHR(this->device->logicalDevice, &getHandleInfo, &memHandle.handle) == VK_SUCCESS)
+    if (vmaGetMemoryWin32Handle2(g_hAllocator, sourceImage.imageAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR, nullptr, &memHandle.handle) == VK_SUCCESS)
     {
         return memHandle;
     }
