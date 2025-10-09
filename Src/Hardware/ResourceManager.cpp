@@ -757,6 +757,21 @@ void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDevic
     globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::TransferQueue) << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
 }
 
+uint32_t ResourceManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(this->device->physicalDevice, &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+    {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+        {
+            return i;
+        }
+    }
+
+    throw std::runtime_error("failed to find suitable memory type!");
+}
 
 ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const ExternalMemoryHandle &memHandle, const ImageHardwareWrap &sourceImage)
 {
@@ -816,7 +831,9 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     // 查找与源内存兼容的内存类型
     // 注意：这是一个简化的实现。一个健壮的实现需要仔细匹配内存类型。
     // VMA 已经为我们处理了源图像的内存类型选择，这里我们假设相同的类型索引有效。
-    allocInfo.memoryTypeIndex = sourceImage.imageAllocInfo.memoryType;
+    //allocInfo.memoryTypeIndex = sourceImage.imageAllocInfo.memoryType;
+    //uint32_t memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 #if _WIN32 || _WIN64
     VkImportMemoryWin32HandleInfoKHR importInfo = {};
