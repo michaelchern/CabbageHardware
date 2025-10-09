@@ -446,7 +446,7 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
         //{
         //    if (source.device == destination.device)
         //    {
-        //        // Í¬ device£¬Ê¹ÓÃ vkCmdBlitImage
+        //        // Í¬ deviceï¿½ï¿½Ê¹ï¿½ï¿½ vkCmdBlitImage
         //        auto runCommand = [&](VkCommandBuffer &commandBuffer) {
         //            VkImageBlit imageBlit{};
         //            imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -474,11 +474,11 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
         //}
         //    else
         //    {
-        //        // device ²»Í¬£¬Ê¹ÓÃ staging buffer
+        //        // device ï¿½ï¿½Í¬ï¿½ï¿½Ê¹ï¿½ï¿½ staging buffer
         //        VkDeviceSize srcSize = source.imageSize.x * source.imageSize.y * source.pixelSize;
         //        VkDeviceSize dstSize = destination.imageSize.x * destination.imageSize.y * destination.pixelSize;
 
-        //        // 1. Ô´ device£ºimage -> buffer
+        //        // 1. Ô´ deviceï¿½ï¿½image -> buffer
         //        BufferHardwareWrap srcStaging = source.resourceManager->createBuffer(srcSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
         //        auto srcCopyCmd = [&](VkCommandBuffer commandBuffer) {
         //            VkBufferImageCopy region{};
@@ -495,11 +495,11 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
         //        };
         //        source.device->executeSingleTimeCommands(srcCopyCmd);
 
-        //        // 2. host ¿½±´
+        //        // 2. host ï¿½ï¿½ï¿½ï¿½
         //        void *mappedData = nullptr;
         //        vmaMapMemory(source.resourceManager->g_hAllocator, srcStaging.bufferAlloc, &mappedData);
 
-        //        // 3. Ä¿±ê device£ºbuffer -> image
+        //        // 3. Ä¿ï¿½ï¿½ deviceï¿½ï¿½buffer -> image
         //        BufferHardwareWrap dstStaging = destination.resourceManager->createBuffer(dstSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
         //        void *dstMappedData = nullptr;
         //        vmaMapMemory(destination.resourceManager->g_hAllocator, dstStaging.bufferAlloc, &dstMappedData);
@@ -775,11 +775,19 @@ uint32_t ResourceManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFl
 
 ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const ExternalMemoryHandle &memHandle, const ImageHardwareWrap &sourceImage)
 {
+    // éªŒè¯å¤–éƒ¨å†…å­˜å¥æŸ„çš„æœ‰æ•ˆæ€§
+#if _WIN32 || _WIN64
+    if (memHandle.handle == nullptr || memHandle.handle == INVALID_HANDLE_VALUE)
+    {
+        throw std::runtime_error("Cannot import image with invalid memory handle!");
+    }
+#endif
+    
     ImageHardwareWrap importedImage = {};
     importedImage.device = this->device;
     importedImage.resourceManager = this;
 
-    // ¸´ÖÆÔ´Í¼ÏñµÄÃèÊö·û£¬ÒòÎªµ¼ÈëµÄÍ¼Ïñ±ØĞë¾ßÓĞÍêÈ«ÏàÍ¬µÄÊôĞÔ
+    // ï¿½ï¿½ï¿½ï¿½Ô´Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     importedImage.imageSize = sourceImage.imageSize;
     importedImage.imageFormat = sourceImage.imageFormat;
     importedImage.arrayLayers = sourceImage.arrayLayers;
@@ -787,9 +795,9 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     importedImage.imageUsage = sourceImage.imageUsage;
     importedImage.aspectMask = sourceImage.aspectMask;
     importedImage.pixelSize = sourceImage.pixelSize;
-    importedImage.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED; // µ¼Èëºó²¼¾ÖÊÇÎ´¶¨ÒåµÄ
+    importedImage.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED; // ï¿½ï¿½ï¿½ï¿½ó²¼¾ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½
 
-    // 1. ´´½¨Ò»¸öÓëÔ´Í¼ÏñÊôĞÔÏàÍ¬µÄ VkImage£¬µ«²»ÎªÆä·ÖÅäÄÚ´æ
+    // 1. ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Ô´Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ VkImageï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -803,14 +811,14 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.usage = importedImage.imageUsage;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // µ¼ÈëµÄÄÚ´æ²»ĞèÒª²¢·¢¹²Ïí
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´æ²»ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     VkExternalMemoryImageCreateInfo externalInfo = {};
     externalInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
 #if _WIN32 || _WIN64
     externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
 #else
-    // ÎªÆäËûÆ½Ì¨ÉèÖÃÏàÓ¦µÄ¾ä±úÀàĞÍ
+    // Îªï¿½ï¿½ï¿½ï¿½Æ½Ì¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Ä¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 #endif
     imageInfo.pNext = &externalInfo;
 
@@ -819,7 +827,7 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
         throw std::runtime_error("failed to create image for import!");
     }
 
-    // 2. µ¼ÈëÍâ²¿ÄÚ´æ
+    // 2. ï¿½ï¿½ï¿½ï¿½ï¿½â²¿ï¿½Ú´ï¿½
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements(this->device->logicalDevice, importedImage.imageHandle, &memRequirements);
 
@@ -828,9 +836,9 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
 
-    // ²éÕÒÓëÔ´ÄÚ´æ¼æÈİµÄÄÚ´æÀàĞÍ
-    // ×¢Òâ£ºÕâÊÇÒ»¸ö¼ò»¯µÄÊµÏÖ¡£Ò»¸ö½¡×³µÄÊµÏÖĞèÒª×ĞÏ¸Æ¥ÅäÄÚ´æÀàĞÍ¡£
-    // VMA ÒÑ¾­ÎªÎÒÃÇ´¦ÀíÁËÔ´Í¼ÏñµÄÄÚ´æÀàĞÍÑ¡Ôñ£¬ÕâÀïÎÒÃÇ¼ÙÉèÏàÍ¬µÄÀàĞÍË÷ÒıÓĞĞ§¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½Ú´ï¿½ï¿½ï¿½İµï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½
+    // ×¢ï¿½â£ºï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ò»¯µï¿½Êµï¿½Ö¡ï¿½Ò»ï¿½ï¿½ï¿½ï¿½×³ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½Ï¸Æ¥ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½Í¡ï¿½
+    // VMA ï¿½Ñ¾ï¿½Îªï¿½ï¿½ï¿½Ç´ï¿½ï¿½ï¿½ï¿½ï¿½Ô´Í¼ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¼ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½
     //allocInfo.memoryTypeIndex = sourceImage.imageAllocInfo.memoryType;
     //uint32_t memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -842,7 +850,7 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     importInfo.handle = memHandle.handle;
     allocInfo.pNext = &importInfo;
 #else
-    // ÎªÆäËûÆ½Ì¨ÉèÖÃµ¼Èë½á¹¹Ìå
+    // Îªï¿½ï¿½ï¿½ï¿½Æ½Ì¨ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½á¹¹ï¿½ï¿½
 #endif
 
     if (vkAllocateMemory(this->device->logicalDevice, &allocInfo, nullptr, &importedMemory) != VK_SUCCESS)
@@ -850,19 +858,19 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
         throw std::runtime_error("failed to import image memory!");
     }
 
-    // 3. ½«µ¼ÈëµÄÄÚ´æ°ó¶¨µ½ĞÂ´´½¨µÄ VkImage
+    // 3. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ó¶¨µï¿½ï¿½Â´ï¿½ï¿½ï¿½ï¿½ï¿½ VkImage
     if (vkBindImageMemory(this->device->logicalDevice, importedImage.imageHandle, importedMemory, 0) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to bind imported memory to image!");
     }
 
-    // 4. ´´½¨ ImageView
+    // 4. ï¿½ï¿½ï¿½ï¿½ ImageView
     importedImage.imageView = createImageView(importedImage);
 
-    // ×¢Òâ£ºÓÉÓÚÄÚ´æÊÇÍâ²¿µ¼ÈëµÄ£¬VMA ²»»á¸ú×ÙËü¡£
-    // Òò´Ë£¬imageAlloc ºÍ imageAllocInfo ±£³ÖÎª¿Õ¡£
-    // ÄúĞèÒªÊÖ¶¯¹ÜÀíµ¼ÈëµÄ VkDeviceMemory µÄÉúÃüÖÜÆÚ¡£
-    // ÔÚÕâ¸öÉè¼ÆÖĞ£¬ÎÒÃÇ¿ÉÄÜĞèÒªÒ»¸ö destroyImportedImage º¯ÊıÀ´µ÷ÓÃ vkFreeMemory¡£
+    // ×¢ï¿½â£ºï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½â²¿ï¿½ï¿½ï¿½ï¿½Ä£ï¿½VMA ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    // ï¿½ï¿½Ë£ï¿½imageAlloc ï¿½ï¿½ imageAllocInfo ï¿½ï¿½ï¿½ï¿½Îªï¿½Õ¡ï¿½
+    // ï¿½ï¿½ï¿½ï¿½Òªï¿½Ö¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ VkDeviceMemory ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¡ï¿½
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ£ï¿½ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½ï¿½ï¿½ï¿½ÒªÒ»ï¿½ï¿½ destroyImportedImage ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ vkFreeMemoryï¿½ï¿½
 
     return importedImage;
 }
@@ -871,10 +879,27 @@ ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHa
 {
     ExternalMemoryHandle memHandle{};
     
-#if _WIN32 || _WIN64
-    if (!vmaGetMemoryWin32Handle2(g_hAllocator, sourceImage.imageAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR, nullptr, &memHandle.handle) == VK_SUCCESS)
+    // éªŒè¯æºå›¾åƒçš„æœ‰æ•ˆæ€§
+    if (sourceImage.imageHandle == VK_NULL_HANDLE)
     {
-        throw std::runtime_error("failed to export image memory handle!");
+        throw std::runtime_error("Cannot export memory from invalid image handle!");
+    }
+    
+    if (sourceImage.imageAlloc == VK_NULL_HANDLE)
+    {
+        throw std::runtime_error("Cannot export memory from invalid image allocation!");
+    }
+    
+#if _WIN32 || _WIN64
+    VkResult result = vmaGetMemoryWin32Handle2(g_hAllocator, sourceImage.imageAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR, nullptr, &memHandle.handle);
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to export image memory handle! VkResult: " + std::to_string(result));
+    }
+    
+    if (memHandle.handle == nullptr || memHandle.handle == INVALID_HANDLE_VALUE)
+    {
+        throw std::runtime_error("Exported memory handle is invalid!");
     }
 #else
     throw std::runtime_error("Exporting image memory is not implemented on this platform!");
