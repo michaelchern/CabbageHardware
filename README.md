@@ -1,6 +1,5 @@
 # TODO
-- (紧急)重构DisplayManager，由于多显卡间拷贝画面导致性能问题（尝试VK_EXT_external_memory_dma_buf），VMA不支持VK_EXT_external_memory
-- (紧急)支持跨device传输（Vulkan与CUDA）
+- (紧急)多显卡间拷贝画面传输VK_EXT_external_memory
 - (紧急)重构queue的任务间同步、vkCmdPipelineBarrier、自动记录Barrier
 - (紧急)重构多线程的锁、[ UNASSIGNED-Threading-MultipleThreads-Write ]
 - BUG：mutiview初始化黑屏
