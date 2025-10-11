@@ -912,7 +912,7 @@ ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHa
     }
     
 #if _WIN32 || _WIN64
-    VkResult result = vmaGetMemoryWin32Handle2(g_hAllocator, sourceImage.imageAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR, nullptr, &memHandle.handle);
+    VkResult result = vmaGetMemoryWin32Handle2(g_hAllocator, sourceImage.imageAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT, nullptr, &memHandle.handle);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("failed to export image memory handle! VkResult: " + std::to_string(result));
