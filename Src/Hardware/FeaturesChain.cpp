@@ -14,9 +14,12 @@ DeviceFeaturesChain::DeviceFeaturesChain()
 
 	//deviceFeatures13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
 	//deviceFeatures13.pNext = &accelerationStructureFeatures;
+
+	deviceFeatures14.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
+    deviceFeatures14.pNext = nullptr;
 	
 	deviceFeatures13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-	deviceFeatures13.pNext = nullptr;
+    deviceFeatures13.pNext = &deviceFeatures14;
 
 	deviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 	deviceFeatures12.pNext = &deviceFeatures13;

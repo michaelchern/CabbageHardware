@@ -54,7 +54,7 @@ HardwareContext::HardwareContext()
 
 HardwareContext::~HardwareContext() 
 {
-     if (enableDebugLayer)
+    if (debugMessenger != VK_NULL_HANDLE)
      {
          auto DestroyDebugUtilsMessengerEXT = [](VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator) -> VkResult {
              auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
@@ -170,7 +170,8 @@ void HardwareContext::createVkInstance(const CreateCallback &initInfo)
     std::vector<const char *> requiredLayers{};
 
 #ifdef CABBAGE_ENGINE_DEBUG
-    
+    bool enableDebugLayer = false;
+
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
