@@ -7,7 +7,7 @@
 
 #include<Hardware/GlobalContext.h>
 
-//#define EXPORT_IMAGE
+#define EXPORT_IMAGE
 
 
 //#if _WIN32 || _WIN64
@@ -284,6 +284,8 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 {
     if (displaySurface != nullptr)
     {
+        ResourceManager::ImageHardwareWrap &sourceImage = imageGlobalPool[*displayImage.imageID];
+
         if (this->displaySurface != displaySurface)
         {
             //this->displaySize = displaySize;
@@ -301,36 +303,6 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
             srcStaging = globalHardwareContext.mainDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
             dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-        }
-
-		VkSurfaceCapabilitiesKHR capabilities;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(displayDevice->deviceManager.physicalDevice, vkSurface, &capabilities);
-
-        ktm::uvec2 displaySize = ktm::uvec2{
-            std::clamp(capabilities.currentExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
-            std::clamp(capabilities.currentExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height)};
-
-        if (displaySize != this->displaySize)
-        {
-
-            for (auto &image : swapChainImages)
-            {
-               displayDevice->resourceManager.destroyImage(image);
-            }
-
-            createSwapChain();
-        }
-
-        vkWaitForFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-
-        uint32_t imageIndex;
-        VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
-
-        vkResetFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame]);
-
-		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
-        {
-            ResourceManager::ImageHardwareWrap &sourceImage = imageGlobalPool[*displayImage.imageID];
 
 #ifdef EXPORT_IMAGE
             auto runCommand1 = [&](const VkCommandBuffer &commandBuffer) {
@@ -366,7 +338,37 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             };
 
             displayDevice->deviceManager.startCommands() << runCommand1 << displayDevice->deviceManager.endCommands();
-#else // EXPORT_IMAGE
+#endif
+        }
+
+		VkSurfaceCapabilitiesKHR capabilities;
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(displayDevice->deviceManager.physicalDevice, vkSurface, &capabilities);
+
+        ktm::uvec2 displaySize = ktm::uvec2{
+            std::clamp(capabilities.currentExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
+            std::clamp(capabilities.currentExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height)};
+
+        if (displaySize != this->displaySize)
+        {
+
+            for (auto &image : swapChainImages)
+            {
+               displayDevice->resourceManager.destroyImage(image);
+            }
+
+            createSwapChain();
+        }
+
+        vkWaitForFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+
+        uint32_t imageIndex;
+        VkResult result = vkAcquireNextImageKHR(displayDevice->deviceManager.logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+        vkResetFences(displayDevice->deviceManager.logicalDevice, 1, &inFlightFences[currentFrame]);
+
+		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
+        {
+#ifndef EXPORT_IMAGE
             displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage, &srcStaging, &dstStaging);
 #endif
             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
