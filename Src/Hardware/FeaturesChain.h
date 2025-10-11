@@ -10,6 +10,7 @@
 struct DeviceFeaturesChain
 {
   public:
+
     DeviceFeaturesChain();
 
     VkPhysicalDeviceFeatures2 *getChainHead();
@@ -20,6 +21,7 @@ struct DeviceFeaturesChain
     DeviceFeaturesChain operator&(VkPhysicalDeviceVulkan11Features features);
     DeviceFeaturesChain operator&(VkPhysicalDeviceVulkan12Features features);
     DeviceFeaturesChain operator&(VkPhysicalDeviceVulkan13Features features);
+    DeviceFeaturesChain operator&(VkPhysicalDeviceVulkan14Features features);
     DeviceFeaturesChain operator&(VkPhysicalDeviceAccelerationStructureFeaturesKHR features);
     DeviceFeaturesChain operator&(VkPhysicalDeviceRayTracingPipelineFeaturesKHR features);
     DeviceFeaturesChain operator&(VkPhysicalDeviceRayQueryFeaturesKHR features);
@@ -30,15 +32,18 @@ struct DeviceFeaturesChain
     DeviceFeaturesChain operator|(VkPhysicalDeviceVulkan11Features features);
     DeviceFeaturesChain operator|(VkPhysicalDeviceVulkan12Features features);
     DeviceFeaturesChain operator|(VkPhysicalDeviceVulkan13Features features);
+    DeviceFeaturesChain operator|(VkPhysicalDeviceVulkan14Features features);
     DeviceFeaturesChain operator|(VkPhysicalDeviceAccelerationStructureFeaturesKHR features);
     DeviceFeaturesChain operator|(VkPhysicalDeviceRayTracingPipelineFeaturesKHR features);
     DeviceFeaturesChain operator|(VkPhysicalDeviceRayQueryFeaturesKHR features);
 
   private:
+
     VkPhysicalDeviceFeatures2 deviceFeatures2{};
     VkPhysicalDeviceVulkan11Features deviceFeatures11{};
     VkPhysicalDeviceVulkan12Features deviceFeatures12{};
     VkPhysicalDeviceVulkan13Features deviceFeatures13{};
+    VkPhysicalDeviceVulkan14Features deviceFeatures14{};
 
     VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{};
     VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};

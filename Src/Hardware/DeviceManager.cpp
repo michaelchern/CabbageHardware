@@ -6,6 +6,51 @@ DeviceManager::DeviceManager()
 
 DeviceManager::~DeviceManager()
 {
+    /*if (logicalDevice != VK_NULL_HANDLE)
+    {
+        vkDeviceWaitIdle(logicalDevice);
+        for (size_t i = 0; i < graphicsQueues.size(); i++)
+        {
+            if (graphicsQueues[i].commandPool != VK_NULL_HANDLE)
+            {
+                vkDestroyCommandPool(logicalDevice, graphicsQueues[i].commandPool, nullptr);
+                graphicsQueues[i].commandPool = VK_NULL_HANDLE;
+            }
+            if (graphicsQueues[i].timelineSemaphore != VK_NULL_HANDLE)
+            {
+                vkDestroySemaphore(logicalDevice, graphicsQueues[i].timelineSemaphore, nullptr);
+                graphicsQueues[i].timelineSemaphore = VK_NULL_HANDLE;
+            }
+        }
+        for (size_t i = 0; i < computeQueues.size(); i++)
+        {
+            if (computeQueues[i].commandPool != VK_NULL_HANDLE)
+            {
+                vkDestroyCommandPool(logicalDevice, computeQueues[i].commandPool, nullptr);
+                computeQueues[i].commandPool = VK_NULL_HANDLE;
+            }
+            if (computeQueues[i].timelineSemaphore != VK_NULL_HANDLE)
+            {
+                vkDestroySemaphore(logicalDevice, computeQueues[i].timelineSemaphore, nullptr);
+                computeQueues[i].timelineSemaphore = VK_NULL_HANDLE;
+            }
+        }
+        for (size_t i = 0; i < transferQueues.size(); i++)
+        {
+            if (transferQueues[i].commandPool != VK_NULL_HANDLE)
+            {
+                vkDestroyCommandPool(logicalDevice, transferQueues[i].commandPool, nullptr);
+                transferQueues[i].commandPool = VK_NULL_HANDLE;
+            }
+            if (transferQueues[i].timelineSemaphore != VK_NULL_HANDLE)
+            {
+                vkDestroySemaphore(logicalDevice, transferQueues[i].timelineSemaphore, nullptr);
+                transferQueues[i].timelineSemaphore = VK_NULL_HANDLE;
+            }
+        }
+        vkDestroyDevice(logicalDevice, nullptr);
+        logicalDevice = VK_NULL_HANDLE;
+    }*/
 }
 
 void DeviceManager::initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice)
