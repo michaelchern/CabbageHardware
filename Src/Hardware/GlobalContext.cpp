@@ -54,28 +54,23 @@ HardwareContext::HardwareContext()
 
 HardwareContext::~HardwareContext() 
 {
-    // if (enableDebugLayer)
-    // {
-    //     auto DestroyDebugUtilsMessengerEXT = [](VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger) -> VkResult {
-    //         auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    //         if (func != nullptr)
-    //         {
-    //             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-    //         }
-    //         else
-    //         {
-    //             return VK_ERROR_EXTENSION_NOT_PRESENT;
-    //         }
-    //     };
-    // }
+     if (enableDebugLayer)
+     {
+         auto DestroyDebugUtilsMessengerEXT = [](VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator) -> VkResult {
+             auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+             if (func != nullptr)
+             {
+                 func(instance, debugMessenger, pAllocator);
+                 return VK_SUCCESS;
+             }
+             else
+             {
+                 return VK_ERROR_EXTENSION_NOT_PRESENT;
+             }
+         };
+     }
     
     vkDestroyInstance(vkInstance, nullptr);
-}
-
-
-VkInstance HardwareContext::getVulkanInstance()
-{
-    return vkInstance;
 }
 
 
@@ -83,6 +78,7 @@ void HardwareContext::prepareFeaturesChain()
 {
     hardwareCreateInfos.requiredInstanceExtensions = [&](const VkInstance &instance, const VkPhysicalDevice &device) {
         std::set<const char *> requiredExtensions;
+
         requiredExtensions.insert("VK_KHR_surface");
         requiredExtensions.insert(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
         requiredExtensions.insert(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
@@ -93,7 +89,7 @@ void HardwareContext::prepareFeaturesChain()
         requiredExtensions.insert(VK_MVK_MOLTENVK_EXTENSION_NAME);
         requiredExtensions.insert(VK_MVK_MACOS_SURFACE_EXTENSION_NAME);
 #elif __linux__
-        requiredExtensions.insert(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+        requiredExtensions.insert(VK_KHR_XLIB_SURFACE_EXTENSION_NAME); // or VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME
 #endif
         return requiredExtensions;
     };
@@ -125,14 +121,19 @@ void HardwareContext::prepareFeaturesChain()
     };
 
     hardwareCreateInfos.requiredDeviceFeatures = [&](const VkInstance &instance, const VkPhysicalDevice &device) {
+
+        // Vulkan 1.0 core features
         VkPhysicalDeviceFeatures deviceFeatures{};
         deviceFeatures.samplerAnisotropy = VK_TRUE;
         deviceFeatures.shaderInt16 = VK_TRUE;
         deviceFeatures.wideLines = VK_TRUE;
 
-        VkPhysicalDeviceVulkan13Features deviceFeatures13{};
-        deviceFeatures13.synchronization2 = VK_TRUE;
+        // Vulkan 1.1 core features
+        VkPhysicalDeviceVulkan11Features deviceFeatures11{};
+        deviceFeatures11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES_KHR;
+        deviceFeatures11.multiview = VK_TRUE;
 
+        // Vulkan 1.2 core features
         VkPhysicalDeviceVulkan12Features deviceFeatures12{};
         deviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
         deviceFeatures12.bufferDeviceAddress = VK_TRUE;
@@ -152,14 +153,13 @@ void HardwareContext::prepareFeaturesChain()
 
         deviceFeatures12.timelineSemaphore = VK_TRUE;
 
-        VkPhysicalDeviceVulkan11Features deviceFeatures11{};
-        deviceFeatures11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES_KHR;
-        deviceFeatures11.multiview = VK_TRUE;
+        // Vulkan 1.3 core features
+        VkPhysicalDeviceVulkan13Features deviceFeatures13{};
+        deviceFeatures13.synchronization2 = VK_TRUE;
 
         return (DeviceFeaturesChain() | deviceFeatures | deviceFeatures13 | deviceFeatures12 | deviceFeatures11);
     };
 }
-
 
 
 void HardwareContext::createVkInstance(const CreateCallback &initInfo)
@@ -170,8 +170,7 @@ void HardwareContext::createVkInstance(const CreateCallback &initInfo)
     std::vector<const char *> requiredLayers{};
 
 #ifdef CABBAGE_ENGINE_DEBUG
-    bool enableDebugLayer = false;
-
+    
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 

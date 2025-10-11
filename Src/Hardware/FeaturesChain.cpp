@@ -37,13 +37,13 @@ VkPhysicalDeviceFeatures2* DeviceFeaturesChain::getChainHead()
 
 DeviceFeaturesChain DeviceFeaturesChain::operator&(DeviceFeaturesChain features)
 {
-	return (*this & features.deviceFeatures2 & features.deviceFeatures11 & features.deviceFeatures12 & features.deviceFeatures13);
+    return (*this & features.deviceFeatures2 & features.deviceFeatures11 & features.deviceFeatures12 & features.deviceFeatures13 & features.deviceFeatures14);
 }
 
 
 DeviceFeaturesChain DeviceFeaturesChain::operator|(DeviceFeaturesChain features)
 {
-	return (*this | features.deviceFeatures2 | features.deviceFeatures11 | features.deviceFeatures12 | features.deviceFeatures13);
+	return (*this | features.deviceFeatures2 | features.deviceFeatures11 | features.deviceFeatures12 | features.deviceFeatures13 | features.deviceFeatures14);
 }
 
 
@@ -151,6 +151,34 @@ DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceVulkan13Featu
 	resultFeaturesChain.deviceFeatures13.shaderIntegerDotProduct &= features.shaderIntegerDotProduct;
 	resultFeaturesChain.deviceFeatures13.maintenance4 &= features.maintenance4;
 	return resultFeaturesChain;
+}
+
+
+DeviceFeaturesChain DeviceFeaturesChain::operator&(VkPhysicalDeviceVulkan14Features features)
+{
+    DeviceFeaturesChain resultFeaturesChain = *this;
+    resultFeaturesChain.deviceFeatures14.globalPriorityQuery &= features.globalPriorityQuery;
+    resultFeaturesChain.deviceFeatures14.shaderSubgroupRotate &= features.shaderSubgroupRotate;
+    resultFeaturesChain.deviceFeatures14.shaderSubgroupRotateClustered &= features.shaderSubgroupRotateClustered;
+    resultFeaturesChain.deviceFeatures14.shaderFloatControls2 &= features.shaderFloatControls2;
+    resultFeaturesChain.deviceFeatures14.shaderExpectAssume &= features.shaderExpectAssume;
+    resultFeaturesChain.deviceFeatures14.rectangularLines &= features.rectangularLines;
+    resultFeaturesChain.deviceFeatures14.bresenhamLines &= features.bresenhamLines;
+    resultFeaturesChain.deviceFeatures14.smoothLines &= features.smoothLines;
+    resultFeaturesChain.deviceFeatures14.stippledRectangularLines &= features.stippledRectangularLines;
+    resultFeaturesChain.deviceFeatures14.stippledBresenhamLines &= features.stippledBresenhamLines;
+    resultFeaturesChain.deviceFeatures14.stippledSmoothLines &= features.stippledSmoothLines;
+    resultFeaturesChain.deviceFeatures14.vertexAttributeInstanceRateDivisor &= features.vertexAttributeInstanceRateDivisor;
+    resultFeaturesChain.deviceFeatures14.vertexAttributeInstanceRateZeroDivisor &= features.vertexAttributeInstanceRateZeroDivisor;
+    resultFeaturesChain.deviceFeatures14.indexTypeUint8 &= features.indexTypeUint8;
+    resultFeaturesChain.deviceFeatures14.dynamicRenderingLocalRead &= features.dynamicRenderingLocalRead;
+    resultFeaturesChain.deviceFeatures14.maintenance5 &= features.maintenance5;
+    resultFeaturesChain.deviceFeatures14.maintenance6 &= features.maintenance6;
+    resultFeaturesChain.deviceFeatures14.pipelineProtectedAccess &= features.pipelineProtectedAccess;
+    resultFeaturesChain.deviceFeatures14.pipelineRobustness &= features.pipelineRobustness;
+    resultFeaturesChain.deviceFeatures14.hostImageCopy &= features.hostImageCopy;
+    resultFeaturesChain.deviceFeatures14.pushDescriptor &= features.pushDescriptor;
+    return resultFeaturesChain;
 }
 
 
@@ -338,6 +366,34 @@ DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceVulkan13Featu
 	resultFeaturesChain.deviceFeatures13.shaderIntegerDotProduct |= features.shaderIntegerDotProduct;
 	resultFeaturesChain.deviceFeatures13.maintenance4 |= features.maintenance4;
 	return resultFeaturesChain;
+}
+
+
+DeviceFeaturesChain DeviceFeaturesChain::operator|(VkPhysicalDeviceVulkan14Features features)
+{
+    DeviceFeaturesChain resultFeaturesChain = *this;
+    resultFeaturesChain.deviceFeatures14.globalPriorityQuery |= features.globalPriorityQuery;
+    resultFeaturesChain.deviceFeatures14.shaderSubgroupRotate |= features.shaderSubgroupRotate;
+    resultFeaturesChain.deviceFeatures14.shaderSubgroupRotateClustered |= features.shaderSubgroupRotateClustered;
+    resultFeaturesChain.deviceFeatures14.shaderFloatControls2 |= features.shaderFloatControls2;
+    resultFeaturesChain.deviceFeatures14.shaderExpectAssume |= features.shaderExpectAssume;
+    resultFeaturesChain.deviceFeatures14.rectangularLines |= features.rectangularLines;
+    resultFeaturesChain.deviceFeatures14.bresenhamLines |= features.bresenhamLines;
+    resultFeaturesChain.deviceFeatures14.smoothLines |= features.smoothLines;
+    resultFeaturesChain.deviceFeatures14.stippledRectangularLines |= features.stippledRectangularLines;
+    resultFeaturesChain.deviceFeatures14.stippledBresenhamLines |= features.stippledBresenhamLines;
+    resultFeaturesChain.deviceFeatures14.stippledSmoothLines |= features.stippledSmoothLines;
+    resultFeaturesChain.deviceFeatures14.vertexAttributeInstanceRateDivisor |= features.vertexAttributeInstanceRateDivisor;
+    resultFeaturesChain.deviceFeatures14.vertexAttributeInstanceRateZeroDivisor |= features.vertexAttributeInstanceRateZeroDivisor;
+    resultFeaturesChain.deviceFeatures14.indexTypeUint8 |= features.indexTypeUint8;
+    resultFeaturesChain.deviceFeatures14.dynamicRenderingLocalRead |= features.dynamicRenderingLocalRead;
+    resultFeaturesChain.deviceFeatures14.maintenance5 |= features.maintenance5;
+    resultFeaturesChain.deviceFeatures14.maintenance6 |= features.maintenance6;
+    resultFeaturesChain.deviceFeatures14.pipelineProtectedAccess |= features.pipelineProtectedAccess;
+    resultFeaturesChain.deviceFeatures14.pipelineRobustness |= features.pipelineRobustness;
+    resultFeaturesChain.deviceFeatures14.hostImageCopy |= features.hostImageCopy;
+    resultFeaturesChain.deviceFeatures14.pushDescriptor |= features.pushDescriptor;
+    return resultFeaturesChain;
 }
 
 
