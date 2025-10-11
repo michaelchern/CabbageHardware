@@ -7,6 +7,8 @@
 
 #include<Hardware/GlobalContext.h>
 
+//#define EXPORT_IMAGE
+
 
 //#if _WIN32 || _WIN64
 //#include<vulkan/vulkan_win32.h>
@@ -291,6 +293,14 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
             // 首次初始化时，将 importedImageID 置空，以强制在下面进行首次导入
             importedImageID = nullptr;
+
+            this->displayImage = displayDevice->resourceManager.createImage(imageGlobalPool[*displayImage.imageID].imageSize, imageGlobalPool[*displayImage.imageID].imageFormat,
+                                                                            imageGlobalPool[*displayImage.imageID].pixelSize, imageGlobalPool[*displayImage.imageID].imageUsage);
+
+            VkDeviceSize imageSizeBytes = this->displayImage.imageSize.x * this->displayImage.imageSize.y * this->displayImage.pixelSize;
+
+            srcStaging = globalHardwareContext.mainDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+            dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
         }
 
 		VkSurfaceCapabilitiesKHR capabilities;
@@ -322,6 +332,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
         {
             ResourceManager::ImageHardwareWrap &sourceImage = imageGlobalPool[*displayImage.imageID];
 
+#ifdef EXPORT_IMAGE
             auto runCommand1 = [&](const VkCommandBuffer &commandBuffer) {
                 // 检查主渲染设备和显示设备是否为同一个 GPU
                 if (globalHardwareContext.mainDevice == displayDevice)
@@ -355,7 +366,9 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             };
 
             displayDevice->deviceManager.startCommands() << runCommand1 << displayDevice->deviceManager.endCommands();
-
+#else // EXPORT_IMAGE
+            displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage, &srcStaging, &dstStaging);
+#endif
             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
                 //// Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
                 //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, this->displayImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);

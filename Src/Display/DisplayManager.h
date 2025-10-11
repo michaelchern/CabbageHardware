@@ -63,4 +63,8 @@ private:
 	uint32_t currentFrame = 0;
 
     std::shared_ptr<uint64_t> importedImageID = nullptr; // 跟踪当前导入的图像ID
+
+    
+    ResourceManager::BufferHardwareWrap srcStaging;
+    ResourceManager::BufferHardwareWrap dstStaging;
 };
