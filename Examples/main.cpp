@@ -451,6 +451,12 @@ int main()
 
             int width, height, channels;
             unsigned char *data = stbi_load(std::string(shaderPath + "/awesomeface.png").c_str(), &width, &height, &channels, 0);
+            if (!data)
+            {
+                std::cerr << "stbi_load failed: " << stbi_failure_reason() << std::endl;
+                // if the image fails to load, maby image encryption.
+            }
+
             HardwareImage texture(ktm::uvec2(width, height), ImageFormat::RGBA8_SRGB, ImageUsage::SampledImage, 1, data);
 
             HardwareImage finalOutputImage(ktm::uvec2(1920, 1080), ImageFormat::RGBA16_FLOAT, ImageUsage::StorageImage);
