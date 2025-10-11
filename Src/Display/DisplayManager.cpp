@@ -7,7 +7,7 @@
 
 #include<Hardware/GlobalContext.h>
 
-#define EXPORT_IMAGE
+//#define EXPORT_IMAGE
 
 
 //#if _WIN32 || _WIN64
