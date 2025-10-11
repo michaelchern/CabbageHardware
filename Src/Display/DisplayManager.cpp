@@ -7,7 +7,7 @@
 
 #include<Hardware/GlobalContext.h>
 
-//#define EXPORT_IMAGE
+#define EXPORT_IMAGE
 
 
 //#if _WIN32 || _WIN64
@@ -305,7 +305,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
 #ifdef EXPORT_IMAGE
-            auto runCommand1 = [&](const VkCommandBuffer &commandBuffer) {
+            //auto runCommand1 = [&](const VkCommandBuffer &commandBuffer) {
                 if (globalHardwareContext.mainDevice == displayDevice)
                 {
                     this->displayImage = sourceImage;
@@ -325,9 +325,9 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                         importedImageID = displayImage.imageID;
                     }
                 }
-            };
+            //};
 
-            displayDevice->deviceManager.startCommands() << runCommand1 << displayDevice->deviceManager.endCommands();
+            //displayDevice->deviceManager.startCommands() << runCommand1 << displayDevice->deviceManager.endCommands();
 #endif
         }
 
