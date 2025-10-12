@@ -302,7 +302,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             VkDeviceSize imageSizeBytes = this->displayImage.imageSize.x * this->displayImage.imageSize.y * this->displayImage.pixelSize;
 
             srcStaging = globalHardwareContext.mainDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-            dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+            //dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
 #ifdef EXPORT_IMAGE
             //auto runCommand1 = [&](const VkCommandBuffer &commandBuffer) {
@@ -314,15 +314,15 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                 {
                     if (importedImageID == nullptr || *importedImageID != *displayImage.imageID)
                     {
-                        ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportImageMemory(sourceImage);
+                        ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportBufferMemory(srcStaging);
 
-                        if (this->displayImage.imageHandle != VK_NULL_HANDLE)
-                        {
-                            displayDevice->resourceManager.destroyImage(this->displayImage);
-                        }
-                        this->displayImage = displayDevice->resourceManager.importImageMemory(memHandle, sourceImage);
+                        //if (this->displayImage.imageHandle != VK_NULL_HANDLE)
+                        //{
+                        //    displayDevice->resourceManager.destroyImage(this->displayImage);
+                        //}
+                        dstStaging = displayDevice->resourceManager.importBufferMemory(memHandle, srcStaging);
 
-                        importedImageID = displayImage.imageID;
+                        //importedImageID = displayImage.imageID;
                     }
                 }
             //};
@@ -358,9 +358,9 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
-#ifndef EXPORT_IMAGE
-            displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage, &srcStaging, &dstStaging);
-#endif
+//#ifndef EXPORT_IMAGE
+            //displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage, &srcStaging, &dstStaging);
+//#endif
             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
                 //// Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
                 //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, this->displayImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
