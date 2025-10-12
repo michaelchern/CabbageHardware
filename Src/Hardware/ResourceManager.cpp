@@ -1,4 +1,4 @@
-#include "ResourceManager.h"
+﻿#include "ResourceManager.h"
 
 // #define VMA_STATS_STRING_ENABLED 0
 #define VK_NO_PROTOTYPES
@@ -906,21 +906,21 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
         throw std::runtime_error("failed to import image memory!");
     }
 
-    // 3. ��������ڴ�󶨵��´����� VkImage
-    if (vkBindImageMemory(this->device->logicalDevice, importedImage.imageHandle, importedMemory, 0) != VK_SUCCESS)
+    if (importedMemory != nullptr)
+    {
+        if (vkBindImageMemory(this->device->logicalDevice, importedImage.imageHandle, importedMemory, 0) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to bind imported memory to image!");
+        }
+
+        importedImage.imageView = createImageView(importedImage);
+
+        return importedImage;
+    }
+    else
     {
         throw std::runtime_error("failed to bind imported memory to image!");
     }
-
-    // 4. ���� ImageView
-    importedImage.imageView = createImageView(importedImage);
-
-    // ע�⣺�����ڴ����ⲿ����ģ�VMA �����������
-    // ��ˣ�imageAlloc �� imageAllocInfo ����Ϊ�ա�
-    // ����Ҫ�ֶ���������� VkDeviceMemory ���������ڡ�
-    // ���������У����ǿ�����Ҫһ�� destroyImportedImage ���������� vkFreeMemory��
-
-    return importedImage;
 }
 
 ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHardwareWrap &sourceImage)
