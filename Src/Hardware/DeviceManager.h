@@ -73,6 +73,7 @@ class DeviceManager
      
     void initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice);
 
+    void cleanupDeviceManager();
 
     DeviceManager &startCommands(QueueType queueType = QueueType::GraphicsQueue);
     DeviceManager &endCommands(std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos = std::vector<VkSemaphoreSubmitInfo>(),
