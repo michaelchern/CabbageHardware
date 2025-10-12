@@ -323,7 +323,21 @@ void HardwareContext::createVkInstance(const CreateCallback &initInfo)
 #endif
 }
 
-// 选择主用物理设备（优先独立GPU）
+/**
+ * @brief 选择主用物理设备，优先选择独立显卡（Discrete GPU）
+ * 
+ * 该函数按照设备类型的优先级顺序遍历可用的硬件设备：
+ * 1. 离散GPU (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) - 最高优先级，通常是独立显卡
+ * 2. 其他类型 (VK_PHYSICAL_DEVICE_TYPE_OTHER) - 自定义或特殊设备
+ * 3. 虚拟GPU (VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU) - 虚拟化环境中的GPU
+ * 4. 集成GPU (VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) - 集成显卡
+ * 5. CPU (VK_PHYSICAL_DEVICE_TYPE_CPU) - 最低优先级，作为备用选择
+ * 
+ * 如果找到匹配的设备，将其设置为 mainDevice 并立即返回。
+ * 如果没有任何可用设备，则抛出运行时错误异常。
+ * 
+ * @throws std::runtime_error 当未找到任何可用的物理设备时抛出[1](@ref)
+ */
 void HardwareContext::chooseMainDevice()
 {
     //for (size_t i = 0; i < hardwareUtils.size(); i++)
@@ -335,7 +349,7 @@ void HardwareContext::chooseMainDevice()
     //    }
     //}
 
-    // 优先选择离散GPU（独立显卡）
+    // 优先选择离散GPU（独立显卡），因其通常提供最佳图形性能[6](@ref)
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
         if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
@@ -345,6 +359,7 @@ void HardwareContext::chooseMainDevice()
         }
     }
 
+    // 其次选择OTHER类型设备（可能是特殊计算设备或未分类的高性能设备）
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
         if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_OTHER)
@@ -354,6 +369,7 @@ void HardwareContext::chooseMainDevice()
         }
     }
 
+    // 再次选择虚拟GPU（适用于虚拟化环境）
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
         if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
@@ -363,6 +379,7 @@ void HardwareContext::chooseMainDevice()
         }
     }
 
+    // 然后选择集成GPU（集成显卡，性能一般但功耗较低）
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
         if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
@@ -372,6 +389,7 @@ void HardwareContext::chooseMainDevice()
         }
     }
 
+    // 如果存在至少一个设备，则选择第一个作为默认设备[8](@ref)
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
         if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
@@ -381,12 +399,14 @@ void HardwareContext::chooseMainDevice()
         }
     }
 
+    // 如果存在至少一个设备，则选择第一个作为默认设备[8](@ref)
     if (hardwareUtils.size() > 0)
     {
         mainDevice = hardwareUtils[0];
     }
     else
     {
+        // 未找到任何可用的物理设备，抛出异常[1](@ref)
         throw std::runtime_error("Failed to find GPUs! Please buy a GPU!");
     }
 }
