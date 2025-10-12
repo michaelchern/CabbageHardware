@@ -3,12 +3,15 @@
 #define VOLK_IMPLEMENTATION
 #include <volk.h>
 
+// 全局硬件上下文实例
 HardwareContext globalHardwareContext;
 
+// 全局资源池：用于跨设备共享资源[7](@ref)
 HardwareContext::HardwareContext() 
 {
     prepareFeaturesChain();
 
+    // 初始化volk库以加载Vulkan函数指针
     if (volkInitialize() != VK_SUCCESS)
     {
         throw std::runtime_error("Failed volkInitialize!");
@@ -16,26 +19,36 @@ HardwareContext::HardwareContext()
 
     createVkInstance(hardwareCreateInfos);
 
+    // 让volk使用刚创建的Vulkan实例
     volkLoadInstance(vkInstance);
 
     uint32_t deviceCount = 0;
+    // 获取系统中可用的物理设备数量
     vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
+    // 列出所有可用的物理设备
     std::vector<VkPhysicalDevice> devices(deviceCount);
+    // 获取物理设备句柄列表
     vkEnumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
 
+    // 如果没有找到任何物理设备，抛出异常
     if (deviceCount <= 0)
     {
         throw std::runtime_error("Failed to find GPUs! Please buy a GPU!");
     }
 
+    // 为每个物理设备创建对应的硬件工具集
     //hardwareUtils.resize(devices.size());
     for (size_t i = 0; i < devices.size(); i++)
     {
+        
         hardwareUtils.push_back(std::make_shared<HardwareUtils>());
+        // 初始化设备管理器（设置逻辑设备、队列等）
         hardwareUtils[i]->deviceManager.initDeviceManager(hardwareCreateInfos, vkInstance, devices[i]);
+        // 初始化资源管理器（管理缓冲区、图像等资源）
         hardwareUtils[i]->resourceManager.initResourceManager(hardwareUtils[i]->deviceManager);
     }
 
+    // 选择主用物理设备
     chooseMainDevice();
 
     // demo of mutilple devices
@@ -73,7 +86,7 @@ HardwareContext::~HardwareContext()
     vkDestroyInstance(vkInstance, nullptr);
 }
 
-
+// 配置Vulkan实例和设备所需的特性、扩展链
 void HardwareContext::prepareFeaturesChain()
 {
     hardwareCreateInfos.requiredInstanceExtensions = [&](const VkInstance &instance, const VkPhysicalDevice &device) {
@@ -164,6 +177,7 @@ void HardwareContext::prepareFeaturesChain()
 
 void HardwareContext::createVkInstance(const CreateCallback &initInfo)
 {
+    // 获取所需的实例扩展
     std::set<const char *> inputExtensions = initInfo.requiredInstanceExtensions(vkInstance, nullptr);
 
     std::vector<const char *> requiredExtensions(inputExtensions.begin(), inputExtensions.end());
@@ -198,6 +212,7 @@ void HardwareContext::createVkInstance(const CreateCallback &initInfo)
         std::vector<VkExtensionProperties> availableExtensions(extensionCount);
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, availableExtensions.data());
 
+        // 过滤不支持的扩展
         for (size_t i = 0; i < requiredExtensions.size(); i++)
         {
             bool extensionSupported = false;
@@ -246,6 +261,7 @@ void HardwareContext::createVkInstance(const CreateCallback &initInfo)
         }
     }
 
+    // 应用信息和实例创建信息配置
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.apiVersion = VK_API_VERSION_1_4;
@@ -307,7 +323,7 @@ void HardwareContext::createVkInstance(const CreateCallback &initInfo)
 #endif
 }
 
-
+// 选择主用物理设备（优先独立GPU）
 void HardwareContext::chooseMainDevice()
 {
     //for (size_t i = 0; i < hardwareUtils.size(); i++)
@@ -319,6 +335,7 @@ void HardwareContext::chooseMainDevice()
     //    }
     //}
 
+    // 优先选择离散GPU（独立显卡）
     for (size_t i = 0; i < hardwareUtils.size(); i++)
     {
         if (hardwareUtils[i]->deviceManager.deviceFeaturesUtils.supportedProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
