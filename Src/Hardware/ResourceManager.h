@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <unordered_map>
 
@@ -94,8 +94,8 @@ struct ResourceManager
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
-    ExternalMemoryHandle exportImageMemory(ImageHardwareWrap &sourceImage);
-    ImageHardwareWrap importImageMemory(const ExternalMemoryHandle &memHandle, const ImageHardwareWrap &sourceImage);
+    ExternalMemoryHandle exportBufferMemory(BufferHardwareWrap &sourceBuffer);
+    BufferHardwareWrap importBufferMemory(const ExternalMemoryHandle &memHandle, const BufferHardwareWrap &sourceBuffer);
 
 	
 	uint32_t findExternalMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);

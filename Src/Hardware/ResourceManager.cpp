@@ -803,86 +803,54 @@ uint32_t ResourceManager::findExternalMemoryType(uint32_t typeFilter, VkMemoryPr
     throw std::runtime_error("failed to find suitable external memory type!");
 }
 
-ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const ExternalMemoryHandle &memHandle, const ImageHardwareWrap &sourceImage)
+ResourceManager::BufferHardwareWrap ResourceManager::importBufferMemory(const ExternalMemoryHandle &memHandle, const BufferHardwareWrap &sourceBuffer)
 {
     // 验证外部内存句柄的有效性
 #if _WIN32 || _WIN64
     if (memHandle.handle == nullptr || memHandle.handle == INVALID_HANDLE_VALUE)
     {
-        throw std::runtime_error("Cannot import image with invalid memory handle!");
+        throw std::runtime_error("Cannot import buffer with invalid memory handle!");
     }
 
-    VkPhysicalDeviceExternalImageFormatInfo externalImageFormatInfo{};
-    externalImageFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO;
-    externalImageFormatInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    VkPhysicalDeviceExternalBufferInfo externalBufferInfo{};
+    externalBufferInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_BUFFER_INFO;
+    externalBufferInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    externalBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-    VkPhysicalDeviceImageFormatInfo2 imageFormatInfo{};
-    imageFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
-    imageFormatInfo.pNext = &externalImageFormatInfo;
-    imageFormatInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-    imageFormatInfo.type = VK_IMAGE_TYPE_2D;
-    imageFormatInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageFormatInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    VkExternalBufferProperties externalBufferProperties{};
+    externalBufferProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_BUFFER_PROPERTIES;
 
-    VkImageFormatProperties2 imageFormatProperties{};
-    imageFormatProperties.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
-
-    VkResult result = vkGetPhysicalDeviceImageFormatProperties2(this->device->physicalDevice, &imageFormatInfo, &imageFormatProperties);
-    if (result != VK_SUCCESS)
-    {
-        std::cerr << "Handle type not supported on this device!" << std::endl;
-    }
+    vkGetPhysicalDeviceExternalBufferProperties(this->device->physicalDevice, &externalBufferInfo, &externalBufferProperties);
 #endif
-    
-    ImageHardwareWrap importedImage = {};
-    importedImage.device = this->device;
-    importedImage.resourceManager = this;
 
-    // ����Դͼ�������������Ϊ�����ͼ����������ȫ��ͼ������
-    importedImage.imageSize = sourceImage.imageSize;
-    importedImage.imageFormat = sourceImage.imageFormat;
-    importedImage.arrayLayers = sourceImage.arrayLayers;
-    importedImage.mipLevels = sourceImage.mipLevels;
-    importedImage.imageUsage = sourceImage.imageUsage;
-    importedImage.aspectMask = sourceImage.aspectMask;
-    importedImage.pixelSize = sourceImage.pixelSize;
-    importedImage.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED; // ����󲼾���δ�����
+    BufferHardwareWrap importedBuffer = {};
+    importedBuffer.device = this->device;
+    importedBuffer.resourceManager = this;
+    importedBuffer.bufferUsage = sourceBuffer.bufferUsage;
 
-    // 1. ����һ����Դͼ��������ͬ�� VkImage������Ϊ������ڴ�
-    VkImageCreateInfo imageInfo = {};
-    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent.width = importedImage.imageSize.x;
-    imageInfo.extent.height = importedImage.imageSize.y;
-    imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = importedImage.mipLevels;
-    imageInfo.arrayLayers = importedImage.arrayLayers;
-    imageInfo.format = importedImage.imageFormat;
-    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = importedImage.imageUsage;
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // ������ڴ治��Ҫ��������
+    // 创建新的缓冲区
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = sourceBuffer.bufferAllocInfo.size;
+    bufferInfo.usage = importedBuffer.bufferUsage;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    VkExternalMemoryImageCreateInfo externalInfo = {};
-    externalInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
+    VkExternalMemoryBufferCreateInfo externalInfo = {};
+    externalInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
 #if _WIN32 || _WIN64
     externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-#else
-    // Ϊ����ƽ̨������Ӧ�ľ������
 #endif
-    imageInfo.pNext = &externalInfo;
+    bufferInfo.pNext = &externalInfo;
 
-    if (vkCreateImage(this->device->logicalDevice, &imageInfo, nullptr, &importedImage.imageHandle) != VK_SUCCESS)
+    if (vkCreateBuffer(this->device->logicalDevice, &bufferInfo, nullptr, &importedBuffer.bufferHandle) != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to create image for import!");
+        throw std::runtime_error("failed to create buffer for import!");
     }
 
-    // 2. �����ⲿ�ڴ�
+    // 获取内存需求
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(this->device->logicalDevice, importedImage.imageHandle, &memRequirements);
+    vkGetBufferMemoryRequirements(this->device->logicalDevice, importedBuffer.bufferHandle, &memRequirements);
 
-    VkDeviceMemory importedMemory = VK_NULL_HANDLE;
     VkMemoryAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
@@ -894,11 +862,10 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     importInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
     importInfo.handle = memHandle.handle;
     allocInfo.pNext = &importInfo;
-#else
-    // Ϊ����ƽ̨���õ���ṹ��
 #endif
 
-    result = vkAllocateMemory(this->device->logicalDevice, &allocInfo, nullptr, &importedMemory);
+    VkDeviceMemory importedMemory = VK_NULL_HANDLE;
+    VkResult result = vkAllocateMemory(this->device->logicalDevice, &allocInfo, nullptr, &importedMemory);
     if (result != VK_SUCCESS)
     {
         std::string errorMsg = "Failed to allocate imported memory. Error code: " + std::to_string(result);
@@ -919,41 +886,34 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
 
     if (importedMemory != nullptr)
     {
-        if (vkBindImageMemory(this->device->logicalDevice, importedImage.imageHandle, importedMemory, 0) != VK_SUCCESS)
+        if (vkBindBufferMemory(this->device->logicalDevice, importedBuffer.bufferHandle, importedMemory, 0) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to bind imported memory to image!");
+            throw std::runtime_error("failed to bind imported memory to buffer!");
         }
 
-        importedImage.imageView = createImageView(importedImage);
-
-        return importedImage;
+        return importedBuffer;
     }
     else
     {
-        throw std::runtime_error("failed to bind imported memory to image!");
+        throw std::runtime_error("failed to bind imported memory to buffer!");
     }
 }
 
-ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHardwareWrap &sourceImage)
+ResourceManager::ExternalMemoryHandle ResourceManager::exportBufferMemory(BufferHardwareWrap &sourceBuffer)
 {
     ExternalMemoryHandle memHandle{};
     
     // 验证源图像的有效性
-    if (sourceImage.imageHandle == VK_NULL_HANDLE)
+    if (sourceBuffer.bufferHandle == VK_NULL_HANDLE || sourceBuffer.bufferAlloc == VK_NULL_HANDLE)
     {
-        throw std::runtime_error("Cannot export memory from invalid image handle!");
-    }
-    
-    if (sourceImage.imageAlloc == VK_NULL_HANDLE)
-    {
-        throw std::runtime_error("Cannot export memory from invalid image allocation!");
+        throw std::runtime_error("Cannot export memory from invalid buffer!");
     }
     
 #if _WIN32 || _WIN64
-    VkResult result = vmaGetMemoryWin32Handle2(g_hAllocator, sourceImage.imageAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT, nullptr, &memHandle.handle);
+    VkResult result = vmaGetMemoryWin32Handle2(g_hAllocator, sourceBuffer.bufferAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT, nullptr, &memHandle.handle);
     if (result != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to export image memory handle! VkResult: " + std::to_string(result));
+        throw std::runtime_error("failed to export memory handle! VkResult: " + std::to_string(result));
     }
     
     if (memHandle.handle == nullptr || memHandle.handle == INVALID_HANDLE_VALUE)
@@ -961,7 +921,7 @@ ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHa
         throw std::runtime_error("Exported memory handle is invalid!");
     }
 #else
-    throw std::runtime_error("Exporting image memory is not implemented on this platform!");
+    throw std::runtime_error("Exporting memory is not implemented on this platform!");
 #endif
 
     return memHandle;
