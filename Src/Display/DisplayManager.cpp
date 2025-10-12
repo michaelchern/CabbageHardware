@@ -306,25 +306,23 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
 #ifdef EXPORT_IMAGE
             //auto runCommand1 = [&](const VkCommandBuffer &commandBuffer) {
-                if (globalHardwareContext.mainDevice == displayDevice)
-                {
-                    this->displayImage = sourceImage;
-                }
-                else
-                {
-                    if (importedImageID == nullptr || *importedImageID != *displayImage.imageID)
-                    {
-                        ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportBufferMemory(srcStaging);
+            if (importedImageID == nullptr || *importedImageID != *displayImage.imageID)
+            {
+                // 导出缓冲区内存
+                ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportBufferMemory(srcStaging);
 
-                        //if (this->displayImage.imageHandle != VK_NULL_HANDLE)
-                        //{
-                        //    displayDevice->resourceManager.destroyImage(this->displayImage);
-                        //}
-                        dstStaging = displayDevice->resourceManager.importBufferMemory(memHandle, srcStaging);
-
-                        //importedImageID = displayImage.imageID;
-                    }
+                // 确保在导入前释放旧的资源
+                if (dstStaging.bufferHandle != VK_NULL_HANDLE)
+                {
+                    displayDevice->resourceManager.destroyBuffer(dstStaging);
                 }
+
+                // 导入到目标设备
+                dstStaging = displayDevice->resourceManager.importBufferMemory(memHandle, srcStaging);
+
+                // 更新导入的图像ID
+                importedImageID = displayImage.imageID;
+            }
             //};
 
             //displayDevice->deviceManager.startCommands() << runCommand1 << displayDevice->deviceManager.endCommands();
