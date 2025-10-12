@@ -762,14 +762,13 @@ uint32_t ResourceManager::findExternalMemoryType(uint32_t typeFilter, VkMemoryPr
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(this->device->physicalDevice, &memProperties);
 
-    // 查找同时支持外部内存和指定属性的内存类型
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
     {
         if ((typeFilter & (1 << i)) &&
             (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
         {
 
-            // 验证此内存类型是否支持外部内存
+            // 添加详细的外部内存类型验证
             VkPhysicalDeviceExternalImageFormatInfo extFormatInfo = {};
             extFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO;
             extFormatInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
@@ -777,23 +776,27 @@ uint32_t ResourceManager::findExternalMemoryType(uint32_t typeFilter, VkMemoryPr
             VkPhysicalDeviceImageFormatInfo2 formatInfo = {};
             formatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
             formatInfo.pNext = &extFormatInfo;
-            formatInfo.format = VK_FORMAT_R8G8B8A8_UNORM; // 使用通用格式进行测试
+            formatInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
             formatInfo.type = VK_IMAGE_TYPE_2D;
             formatInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
             formatInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-            VkExternalImageFormatProperties extFormatProps = {};
-            extFormatProps.sType = VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES;
-
             VkImageFormatProperties2 formatProps = {};
             formatProps.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
-            formatProps.pNext = &extFormatProps;
 
-            if (vkGetPhysicalDeviceImageFormatProperties2(this->device->physicalDevice,
-                                                          &formatInfo, &formatProps) == VK_SUCCESS)
+            VkResult result = vkGetPhysicalDeviceImageFormatProperties2(
+                this->device->physicalDevice,
+                &formatInfo,
+                &formatProps);
+
+            if (result == VK_SUCCESS)
             {
+                std::cout << "Found compatible memory type index: " << i << std::endl;
+                std::cout << "Memory type flags: " << memProperties.memoryTypes[i].propertyFlags << std::endl;
                 return i;
             }
+
+            std::cout << "Memory type " << i << " not compatible with external memory" << std::endl;
         }
     }
 
@@ -883,12 +886,6 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     VkMemoryAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-
-    // ������Դ�ڴ���ݵ��ڴ�����
-    // ע�⣺����һ���򻯵�ʵ�֡�һ����׳��ʵ����Ҫ��ϸƥ���ڴ����͡�
-    // VMA �Ѿ�Ϊ���Ǵ�����Դͼ����ڴ�����ѡ���������Ǽ�����ͬ������������Ч��
-    //allocInfo.memoryTypeIndex = sourceImage.imageAllocInfo.memoryType;
-    //uint32_t memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     allocInfo.memoryTypeIndex = findExternalMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 #if _WIN32 || _WIN64
@@ -901,9 +898,23 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     // Ϊ����ƽ̨���õ���ṹ��
 #endif
 
-    if (vkAllocateMemory(this->device->logicalDevice, &allocInfo, nullptr, &importedMemory) != VK_SUCCESS)
+    result = vkAllocateMemory(this->device->logicalDevice, &allocInfo, nullptr, &importedMemory);
+    if (result != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to import image memory!");
+        std::string errorMsg = "Failed to allocate imported memory. Error code: " + std::to_string(result);
+        switch (result)
+        {
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            errorMsg += " (VK_ERROR_OUT_OF_HOST_MEMORY)";
+            break;
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            errorMsg += " (VK_ERROR_OUT_OF_DEVICE_MEMORY)";
+            break;
+        case VK_ERROR_INVALID_EXTERNAL_HANDLE:
+            errorMsg += " (VK_ERROR_INVALID_EXTERNAL_HANDLE)";
+            break;
+        }
+        throw std::runtime_error(errorMsg);
     }
 
     if (importedMemory != nullptr)
