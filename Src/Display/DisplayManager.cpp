@@ -431,9 +431,9 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                                &imageBlit, VK_FILTER_LINEAR);
 
                  //// Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-                 //displayDevice->resourceManager.transitionImageLayoutUnblocked(
-                 //    commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                 //    VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+                 displayDevice->resourceManager.transitionImageLayoutUnblocked(
+                     commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
             std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos;
