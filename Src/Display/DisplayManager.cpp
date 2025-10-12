@@ -301,7 +301,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
             VkDeviceSize imageSizeBytes = this->displayImage.imageSize.x * this->displayImage.imageSize.y * this->displayImage.pixelSize;
 
-            srcStaging = globalHardwareContext.mainDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+            srcStaging = globalHardwareContext.mainDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
             //dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
 #ifdef EXPORT_IMAGE
@@ -358,14 +358,33 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
-            globalHardwareContext.mainDevice->resourceManager.copyImageToBuffer(sourceImage.imageHandle, srcStaging.bufferHandle, sourceImage.imageSize.x, sourceImage.imageSize.y);
-            //globalHardwareContext.mainDevice->resourceManager.copyBufferToImage(srcStaging.bufferHandle, sourceImage.imageHandle, sourceImage.imageSize.x, sourceImage.imageSize.y);
-            displayDevice->resourceManager.copyBufferToImage(dstStaging.bufferHandle, this->displayImage.imageHandle, this->displayImage.imageSize.x, this->displayImage.imageSize.y);
-                //#ifndef EXPORT_IMAGE
-            //displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage, &srcStaging, &dstStaging);
-//#endif
+            if (globalHardwareContext.mainDevice == displayDevice)
+            {
+                // 如果是同一个设备，直接复制
+                this->displayImage = sourceImage;
+            }
+            else
+            {
+                // 在主设备上：源图像 -> srcStaging
+                globalHardwareContext.mainDevice->resourceManager.copyImageToBuffer(
+                    sourceImage.imageHandle,
+                    srcStaging.bufferHandle,
+                    sourceImage.imageSize.x,
+                    sourceImage.imageSize.y);
 
-            //displayDevice->resourceManager.
+                // 等待主设备上的复制完成
+                vkDeviceWaitIdle(globalHardwareContext.mainDevice->deviceManager.logicalDevice);
+
+                // 在显示设备上：dstStaging -> 目标图像
+                displayDevice->resourceManager.copyBufferToImage(
+                    dstStaging.bufferHandle,
+                    this->displayImage.imageHandle,
+                    this->displayImage.imageSize.x,
+                    this->displayImage.imageSize.y);
+
+                // 等待显示设备上的复制完成
+                vkDeviceWaitIdle(displayDevice->deviceManager.logicalDevice);
+            }
 
             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
                 //// Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
