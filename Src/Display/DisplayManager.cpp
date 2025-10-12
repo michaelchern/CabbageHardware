@@ -371,7 +371,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                     sourceImage.imageSize.y);
 
                 // 等待主设备上的复制完成
-                vkDeviceWaitIdle(globalHardwareContext.mainDevice->deviceManager.logicalDevice);
+                //vkDeviceWaitIdle(globalHardwareContext.mainDevice->deviceManager.logicalDevice);
 
                 // 在显示设备上：dstStaging -> 目标图像
                 displayDevice->resourceManager.copyBufferToImage(
@@ -381,7 +381,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                     this->displayImage.imageSize.y);
 
                 // 等待显示设备上的复制完成
-                vkDeviceWaitIdle(displayDevice->deviceManager.logicalDevice);
+                //vkDeviceWaitIdle(displayDevice->deviceManager.logicalDevice);
             }
 
             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {

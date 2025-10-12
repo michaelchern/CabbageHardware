@@ -586,142 +586,142 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
     //}
 }
 
-//void ResourceManager::transitionImageLayoutUnblocked(const VkCommandBuffer &commandBuffer, ImageHardwareWrap &image,
-//                                                     VkImageLayout newLayout, VkPipelineStageFlags sourceStage,
-//                                                     VkPipelineStageFlags destinationStage)
-//{
-//    if (image.imageLayout != newLayout)
-//    {
-//        VkImageMemoryBarrier barrier{};
-//        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-//        barrier.oldLayout = image.imageLayout;
-//        barrier.newLayout = newLayout;
-//        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-//        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-//        barrier.image = image.imageHandle;
-//        barrier.subresourceRange.aspectMask = image.aspectMask;
-//        barrier.subresourceRange.baseMipLevel = 0;
-//        barrier.subresourceRange.levelCount = image.mipLevels;
-//        barrier.subresourceRange.baseArrayLayer = 0;
-//        barrier.subresourceRange.layerCount = image.arrayLayers;
-//
-//        barrier.srcAccessMask = 0;
-//        barrier.dstAccessMask = 0;
-//
-//        if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-//                 newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask =
-//                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_GENERAL)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-//        }
-//        else
-//        {
-//            throw std::invalid_argument("unsupported layout transition!");
-//        }
-//
-//        vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
-//
-//        image.imageLayout = newLayout;
-//    }
-//}
+void ResourceManager::transitionImageLayoutUnblocked(const VkCommandBuffer &commandBuffer, ImageHardwareWrap &image,
+                                                     VkImageLayout newLayout, VkPipelineStageFlags sourceStage,
+                                                     VkPipelineStageFlags destinationStage)
+{
+    if (image.imageLayout != newLayout)
+    {
+        VkImageMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.oldLayout = image.imageLayout;
+        barrier.newLayout = newLayout;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image = image.imageHandle;
+        barrier.subresourceRange.aspectMask = image.aspectMask;
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = image.mipLevels;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = image.arrayLayers;
 
-//void ResourceManager::transitionImageLayout(ImageHardwareWrap &image, VkImageLayout newLayout, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage)
-//{
-//    if (image.imageLayout != newLayout)
-//    {
-//        auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
-//            transitionImageLayoutUnblocked(commandBuffer, image, newLayout, sourceStage, destinationStage);
-//        };
-//
-//        globalHardwareContext.mainDevice->deviceManager.startCommands() << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
-//
-//    }
-//}
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = 0;
+
+        if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+                 newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask =
+                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_GENERAL)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        }
+        else
+        {
+            throw std::invalid_argument("unsupported layout transition!");
+        }
+
+        vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+        image.imageLayout = newLayout;
+    }
+}
+
+void ResourceManager::transitionImageLayout(ImageHardwareWrap &image, VkImageLayout newLayout, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage)
+{
+    if (image.imageLayout != newLayout)
+    {
+        auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
+            transitionImageLayoutUnblocked(commandBuffer, image, newLayout, sourceStage, destinationStage);
+        };
+
+        this->device->startCommands() << runCommand << this->device->endCommands();
+
+    }
+}
 
 void ResourceManager::copyImageToBuffer(VkImage image, VkBuffer buffer, uint32_t width, uint32_t height)
 {
@@ -743,7 +743,7 @@ void ResourceManager::copyImageToBuffer(VkImage image, VkBuffer buffer, uint32_t
         vkCmdCopyImageToBuffer(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer, 1, &region);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::TransferQueue) << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
+    this->device->startCommands(DeviceManager::TransferQueue) << runCommand << this->device->endCommands();
 }
 
 void ResourceManager::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
@@ -766,7 +766,7 @@ void ResourceManager::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t
         vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::TransferQueue) << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
+    this->device->startCommands(DeviceManager::TransferQueue) << runCommand << this->device->endCommands();
 }
 
 void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
@@ -777,7 +777,7 @@ void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDevic
         vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::TransferQueue) << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
+    this->device->startCommands(DeviceManager::TransferQueue) << runCommand << this->device->endCommands();
 }
 
 uint32_t ResourceManager::findExternalMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
