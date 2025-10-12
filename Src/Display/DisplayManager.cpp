@@ -293,8 +293,6 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
             initDisplayManager(displaySurface);
 
-            // 首次初始化时，将 importedImageID 置空，以强制在下面进行首次导入
-            importedImageID = nullptr;
 
             this->displayImage = displayDevice->resourceManager.createImage(imageGlobalPool[*displayImage.imageID].imageSize, imageGlobalPool[*displayImage.imageID].imageFormat,
                                                                             imageGlobalPool[*displayImage.imageID].pixelSize, imageGlobalPool[*displayImage.imageID].imageUsage);
@@ -305,8 +303,6 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             //dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
 #ifdef EXPORT_IMAGE
-            //auto runCommand1 = [&](const VkCommandBuffer &commandBuffer) {
-            if (importedImageID == nullptr || *importedImageID != *displayImage.imageID)
             {
                 // 导出缓冲区内存
                 ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportBufferMemory(srcStaging);
@@ -319,9 +315,6 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
                 // 导入到目标设备
                 dstStaging = displayDevice->resourceManager.importBufferMemory(memHandle, srcStaging);
-
-                // 更新导入的图像ID
-                importedImageID = displayImage.imageID;
             }
             //};
 

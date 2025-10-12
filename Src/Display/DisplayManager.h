@@ -62,8 +62,6 @@ private:
 
 	uint32_t currentFrame = 0;
 
-    std::shared_ptr<uint64_t> importedImageID = nullptr; // ���ٵ�ǰ�����ͼ��ID
-
     
     ResourceManager::BufferHardwareWrap srcStaging;
     ResourceManager::BufferHardwareWrap dstStaging;
