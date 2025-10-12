@@ -358,9 +358,15 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
-//#ifndef EXPORT_IMAGE
+            globalHardwareContext.mainDevice->resourceManager.copyImageToBuffer(sourceImage.imageHandle, srcStaging.bufferHandle, sourceImage.imageSize.x, sourceImage.imageSize.y);
+            //globalHardwareContext.mainDevice->resourceManager.copyBufferToImage(srcStaging.bufferHandle, sourceImage.imageHandle, sourceImage.imageSize.x, sourceImage.imageSize.y);
+            displayDevice->resourceManager.copyBufferToImage(dstStaging.bufferHandle, this->displayImage.imageHandle, this->displayImage.imageSize.x, this->displayImage.imageSize.y);
+                //#ifndef EXPORT_IMAGE
             //displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage, &srcStaging, &dstStaging);
 //#endif
+
+            //displayDevice->resourceManager.
+
             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
                 //// Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
                 //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, this->displayImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
