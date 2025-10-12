@@ -349,13 +349,27 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
-            if (globalHardwareContext.mainDevice == displayDevice)
+            //if (globalHardwareContext.mainDevice == displayDevice)
+            //{
+            //    // 如果是同一个设备，直接复制
+            //    this->displayImage = sourceImage;
+            //}
+            //else
             {
-                // 如果是同一个设备，直接复制
-                this->displayImage = sourceImage;
-            }
-            else
-            {
+                // 源图像转换为transfer src布局
+                globalHardwareContext.mainDevice->resourceManager.transitionImageLayout(
+                    sourceImage,
+                    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT);
+
+                // 目标图像转换为transfer dst布局
+                displayDevice->resourceManager.transitionImageLayout(
+                    this->displayImage,
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT);
+
                 // 在主设备上：源图像 -> srcStaging
                 globalHardwareContext.mainDevice->resourceManager.copyImageToBuffer(
                     sourceImage.imageHandle,
@@ -364,7 +378,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                     sourceImage.imageSize.y);
 
                 // 等待主设备上的复制完成
-                //vkDeviceWaitIdle(globalHardwareContext.mainDevice->deviceManager.logicalDevice);
+                vkDeviceWaitIdle(globalHardwareContext.mainDevice->deviceManager.logicalDevice);
 
                 // 在显示设备上：dstStaging -> 目标图像
                 displayDevice->resourceManager.copyBufferToImage(
@@ -374,15 +388,24 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                     this->displayImage.imageSize.y);
 
                 // 等待显示设备上的复制完成
-                //vkDeviceWaitIdle(displayDevice->deviceManager.logicalDevice);
+                vkDeviceWaitIdle(displayDevice->deviceManager.logicalDevice);
+
+                //// 转换回原来的布局
+                //globalHardwareContext.mainDevice->resourceManager.transitionImageLayout(
+                //    sourceImage,
+                //    VK_IMAGE_LAYOUT_GENERAL);
+
+                //displayDevice->resourceManager.transitionImageLayout(
+                //    this->displayImage,
+                //    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
             }
 
             auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
-                //// Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-                //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, this->displayImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+                // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+                displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, this->displayImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-                //// Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-                //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+                // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+                displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
                 VkImageBlit imageBlit;
                 imageBlit.dstOffsets[0] = VkOffset3D{0, 0, 0};
