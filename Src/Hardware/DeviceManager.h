@@ -73,16 +73,18 @@ class DeviceManager
      
     void initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice);
 
-    void cleanupDeviceManager();
+    void cleanUpDeviceManager();
 
     DeviceManager &startCommands(QueueType queueType = QueueType::GraphicsQueue);
     DeviceManager &endCommands(std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos = std::vector<VkSemaphoreSubmitInfo>(),
                                std::vector<VkSemaphoreSubmitInfo> signalSemaphoreInfos = std::vector<VkSemaphoreSubmitInfo>(),
                                VkFence fence = VK_NULL_HANDLE);
+
     DeviceManager &operator<<(const DeviceManager &)
     {
         return *this;
     }
+
     DeviceManager &operator<<(std::function<void(const VkCommandBuffer &commandBuffer)> commandsFunction);
     
     QueueUtils *currentRecordQueue = nullptr;
@@ -130,6 +132,8 @@ class DeviceManager
     bool createCommandBuffers();
 
     void createTimelineSemaphore();
+
+    void cleanUpQueueUtils(std::vector<QueueUtils> &queues);
 
     std::atomic_uint16_t currentGraphicsQueueIndex = 0;
     std::atomic_uint16_t currentComputeQueueIndex = 0;

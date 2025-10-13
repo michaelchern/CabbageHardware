@@ -6,7 +6,7 @@ DeviceManager::DeviceManager()
 
 DeviceManager::~DeviceManager()
 {
-    cleanupDeviceManager();
+    cleanUpDeviceManager();
 }
 
 void DeviceManager::initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice)
@@ -22,45 +22,41 @@ void DeviceManager::initDeviceManager(const CreateCallback &createCallback, cons
     createTimelineSemaphore();
 }
 
-void DeviceManager::cleanupDeviceManager()
+void DeviceManager::cleanUpDeviceManager()
 {
-    //VkDevice device = this->logicalDevice; // 假设logicalDevice是类成员
+    if (logicalDevice != VK_NULL_HANDLE)
+    {
+        vkDeviceWaitIdle(logicalDevice);
+    }
 
-    //// 1. 等待设备所有操作完成，避免资源正在使用时被释放
-    //if (device != VK_NULL_HANDLE)
-    //{
-    //    vkDeviceWaitIdle(device);
-    //}
+    cleanUpQueueUtils(graphicsQueues);
+    cleanUpQueueUtils(computeQueues);
+    cleanUpQueueUtils(transferQueues);
 
-    //// 2. 销毁时间线信号量
-    //if (timelineSemaphore != VK_NULL_HANDLE)
-    //{
-    //    vkDestroySemaphore(device, timelineSemaphore, nullptr);
-    //    timelineSemaphore = VK_NULL_HANDLE;
-    //}
+    if (logicalDevice != VK_NULL_HANDLE)
+    {
+        vkDestroyDevice(logicalDevice, nullptr);
+        logicalDevice = VK_NULL_HANDLE;
+    }
 
-    //// 3. 释放命令缓冲区
-    //if (commandPool != VK_NULL_HANDLE)
-    //{ // 假设有命令池成员
-    //    vkFreeCommandBuffers(device, commandPool,
-    //                         static_cast<uint32_t>(commandBuffers.size()),
-    //                         commandBuffers.data());
-    //    commandBuffers.clear(); // 清空命令缓冲区句柄列表
+    physicalDevice = VK_NULL_HANDLE;
+}
 
-    //    // 可选：销毁命令池
-    //    vkDestroyCommandPool(device, commandPool, nullptr);
-    //    commandPool = VK_NULL_HANDLE;
-    //}
+void DeviceManager::cleanUpQueueUtils(std::vector<QueueUtils> &queues)
+{
+    for (size_t i = 0; i < queues.size(); i++)
+    {
+        vkDestroySemaphore(logicalDevice, queues[i].timelineSemaphore, nullptr);
+        queues[i].timelineSemaphore = VK_NULL_HANDLE;
 
-    //// 4. 销毁逻辑设备
-    //if (device != VK_NULL_HANDLE)
-    //{
-    //    vkDestroyDevice(device, nullptr);
-    //    this->logicalDevice = VK_NULL_HANDLE; // 假设logicalDevice是成员变量
-    //}
+        vkFreeCommandBuffers(logicalDevice, queues[i].commandPool, 1, &queues[i].commandBuffer);
+        queues[i].commandBuffer = VK_NULL_HANDLE;
 
-    //// 5. 重置物理设备句柄（无需实际销毁）
-    //this->physicalDevice = VK_NULL_HANDLE;
+        vkDestroyCommandPool(logicalDevice, queues[i].commandPool, nullptr);
+        queues[i].commandPool = VK_NULL_HANDLE;
+
+        queues[i].vkQueue = VK_NULL_HANDLE;
+    }
 }
 
 void DeviceManager::createTimelineSemaphore()
@@ -85,10 +81,12 @@ void DeviceManager::createTimelineSemaphore()
     {
         createTimelineSemaphore(graphicsQueues[i]);
     }
+
     for (size_t i = 0; i < computeQueues.size(); i++)
     {
         createTimelineSemaphore(computeQueues[i]);
     }
+
     for (size_t i = 0; i < transferQueues.size(); i++)
     {
         createTimelineSemaphore(transferQueues[i]);
@@ -266,10 +264,12 @@ bool DeviceManager::createCommandBuffers()
     {
         createCommand(graphicsQueues[i]);
     }
+
     for (size_t i = 0; i < computeQueues.size(); i++)
     {
         createCommand(computeQueues[i]);
     }
+
     for (size_t i = 0; i < transferQueues.size(); i++)
     {
         createCommand(transferQueues[i]);
