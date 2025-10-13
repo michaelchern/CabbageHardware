@@ -5,4 +5,4 @@
 - BUG：mutiview初始化黑屏
 - 画面改变大小会崩溃
 - 程序关闭时资源释放问题
-- GTX 1660Ti 中vmaCreateImage创建crash
+- (待测试)GTX 1660Ti 中vmaCreateImage创建crash
