@@ -37,7 +37,7 @@ DisplayManager::~DisplayManager()
 }
 
 
-void DisplayManager::cleaarupDisplayManager()
+void DisplayManager::cleanUpDisplayManager()
 {
 	//if (displayDevice.logicalDevice != VK_NULL_HANDLE)
 	//{

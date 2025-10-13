@@ -74,7 +74,7 @@ struct ResourceManager
     ~ResourceManager();
 
     void initResourceManager(DeviceManager &device);
-    void cleanupResourceManager();
+    void cleanUpResourceManager();
 
 	void destroyImage(ImageHardwareWrap& image);
 	VkImageView createImageView(ImageHardwareWrap& image);

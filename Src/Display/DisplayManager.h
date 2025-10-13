@@ -47,7 +47,7 @@ private:
     std::shared_ptr<HardwareContext::HardwareUtils> displayDevice;
 
 
-	void cleaarupDisplayManager();
+	void cleanUpDisplayManager();
 
 
 	void createVkSurface(void* surface);

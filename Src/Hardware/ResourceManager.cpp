@@ -13,7 +13,7 @@ ResourceManager::ResourceManager()
 
 ResourceManager::~ResourceManager()
 {
-    cleanupResourceManager();
+    cleanUpResourceManager();
 }
 
 void ResourceManager::initResourceManager(DeviceManager &device)
@@ -25,18 +25,8 @@ void ResourceManager::initResourceManager(DeviceManager &device)
     createBindlessDescriptorSet();
 }
 
-void ResourceManager::cleanupResourceManager()
+void ResourceManager::cleanUpResourceManager()
 {
-    /*vkDestroySampler(device->logicalDevice, textureSampler, nullptr);
-    vkDestroyDescriptorSetLayout(device->logicalDevice, bindlessDescriptors[0].descriptorSetLayout, nullptr);
-    vkDestroyDescriptorPool(device->logicalDevice, bindlessDescriptors[0].descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(device->logicalDevice, bindlessDescriptors[1].descriptorSetLayout, nullptr);
-    vkDestroyDescriptorPool(device->logicalDevice, bindlessDescriptors[1].descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(device->logicalDevice, bindlessDescriptors[2].descriptorSetLayout, nullptr);
-    vkDestroyDescriptorPool(device->logicalDevice, bindlessDescriptors[2].descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(device->logicalDevice, bindlessDescriptors[3].descriptorSetLayout, nullptr);
-    vkDestroyDescriptorPool(device->logicalDevice, bindlessDescriptors[3].descriptorPool, nullptr);
-    vmaDestroyAllocator(g_hAllocator);*/
 }
 
 void ResourceManager::CreateVmaAllocator()
