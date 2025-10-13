@@ -7,7 +7,7 @@
 
 #include<Hardware/GlobalContext.h>
 
-#define EXPORT_IMAGE
+#define USE_SAME_DEVICE
 
 
 //#if _WIN32 || _WIN64
@@ -137,6 +137,17 @@ void DisplayManager::createVkSurface(void *surface)
 
 void DisplayManager::choosePresentDevice()
 {
+#ifdef USE_SAME_DEVICE
+
+    auto pickQueuesRoles = [&](const DeviceManager::QueueUtils &queues) -> bool {
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(globalHardwareContext.mainDevice->deviceManager.physicalDevice, queues.queueFamilyIndex, vkSurface, &presentSupport);
+        return presentSupport;
+    };
+    displayDevice = globalHardwareContext.mainDevice;
+    presentQueues = globalHardwareContext.mainDevice->deviceManager.pickAvailableQueues(pickQueuesRoles);
+
+#else
     for (int i = 0; i < globalHardwareContext.hardwareUtils.size(); i++)
 	{
         auto pickQueuesRoles = [&](const DeviceManager::QueueUtils &queues) -> bool {
@@ -156,6 +167,7 @@ void DisplayManager::choosePresentDevice()
 			break;
 		}
 	}
+#endif
 }
 
 
@@ -302,7 +314,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             srcStaging = globalHardwareContext.mainDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
             //dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
-#ifdef EXPORT_IMAGE
+//#ifdef EXPORT_IMAGE
             {
                 // 导出缓冲区内存
                 ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportBufferMemory(srcStaging);
@@ -319,7 +331,7 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
             //};
 
             //displayDevice->deviceManager.startCommands() << runCommand1 << displayDevice->deviceManager.endCommands();
-#endif
+//#endif
         }
 
 		VkSurfaceCapabilitiesKHR capabilities;
