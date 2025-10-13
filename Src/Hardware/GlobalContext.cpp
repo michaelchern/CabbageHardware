@@ -54,6 +54,9 @@ HardwareContext::HardwareContext()
 
 HardwareContext::~HardwareContext() 
 {
+    mainDevice.reset();
+    hardwareUtils.clear();
+
     if (debugMessenger != VK_NULL_HANDLE)
      {
          auto DestroyDebugUtilsMessengerEXT = [](VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator) -> VkResult {
@@ -306,7 +309,6 @@ void HardwareContext::createVkInstance(const CreateCallback &initInfo)
     }
 #endif
 }
-
 
 void HardwareContext::chooseMainDevice()
 {

@@ -21,8 +21,6 @@ struct HardwareContext
 
     [[nodiscard]] VkInstance getVulkanInstance() const { return vkInstance; }
 
-    [[nodiscard]] bool getEnableValidationLayer() const { return enableDebugLayer; }
-
 private:
     void prepareFeaturesChain();
     CreateCallback hardwareCreateInfos{};
@@ -31,7 +29,6 @@ private:
 
     VkInstance vkInstance = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
-    bool enableDebugLayer = false;
 
     void chooseMainDevice();
 };

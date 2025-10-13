@@ -6,51 +6,7 @@ DeviceManager::DeviceManager()
 
 DeviceManager::~DeviceManager()
 {
-    /*if (logicalDevice != VK_NULL_HANDLE)
-    {
-        vkDeviceWaitIdle(logicalDevice);
-        for (size_t i = 0; i < graphicsQueues.size(); i++)
-        {
-            if (graphicsQueues[i].commandPool != VK_NULL_HANDLE)
-            {
-                vkDestroyCommandPool(logicalDevice, graphicsQueues[i].commandPool, nullptr);
-                graphicsQueues[i].commandPool = VK_NULL_HANDLE;
-            }
-            if (graphicsQueues[i].timelineSemaphore != VK_NULL_HANDLE)
-            {
-                vkDestroySemaphore(logicalDevice, graphicsQueues[i].timelineSemaphore, nullptr);
-                graphicsQueues[i].timelineSemaphore = VK_NULL_HANDLE;
-            }
-        }
-        for (size_t i = 0; i < computeQueues.size(); i++)
-        {
-            if (computeQueues[i].commandPool != VK_NULL_HANDLE)
-            {
-                vkDestroyCommandPool(logicalDevice, computeQueues[i].commandPool, nullptr);
-                computeQueues[i].commandPool = VK_NULL_HANDLE;
-            }
-            if (computeQueues[i].timelineSemaphore != VK_NULL_HANDLE)
-            {
-                vkDestroySemaphore(logicalDevice, computeQueues[i].timelineSemaphore, nullptr);
-                computeQueues[i].timelineSemaphore = VK_NULL_HANDLE;
-            }
-        }
-        for (size_t i = 0; i < transferQueues.size(); i++)
-        {
-            if (transferQueues[i].commandPool != VK_NULL_HANDLE)
-            {
-                vkDestroyCommandPool(logicalDevice, transferQueues[i].commandPool, nullptr);
-                transferQueues[i].commandPool = VK_NULL_HANDLE;
-            }
-            if (transferQueues[i].timelineSemaphore != VK_NULL_HANDLE)
-            {
-                vkDestroySemaphore(logicalDevice, transferQueues[i].timelineSemaphore, nullptr);
-                transferQueues[i].timelineSemaphore = VK_NULL_HANDLE;
-            }
-        }
-        vkDestroyDevice(logicalDevice, nullptr);
-        logicalDevice = VK_NULL_HANDLE;
-    }*/
+    cleanUpDeviceManager();
 }
 
 void DeviceManager::initDeviceManager(const CreateCallback &createCallback, const VkInstance &vkInstance, const VkPhysicalDevice &physicalDevice)
@@ -64,6 +20,43 @@ void DeviceManager::initDeviceManager(const CreateCallback &createCallback, cons
     createCommandBuffers();
 
     createTimelineSemaphore();
+}
+
+void DeviceManager::cleanUpDeviceManager()
+{
+    if (logicalDevice != VK_NULL_HANDLE)
+    {
+        vkDeviceWaitIdle(logicalDevice);
+    }
+
+    cleanUpQueueUtils(graphicsQueues);
+    cleanUpQueueUtils(computeQueues);
+    cleanUpQueueUtils(transferQueues);
+
+    if (logicalDevice != VK_NULL_HANDLE)
+    {
+        vkDestroyDevice(logicalDevice, nullptr);
+        logicalDevice = VK_NULL_HANDLE;
+    }
+
+    physicalDevice = VK_NULL_HANDLE;
+}
+
+void DeviceManager::cleanUpQueueUtils(std::vector<QueueUtils> &queues)
+{
+    for (size_t i = 0; i < queues.size(); i++)
+    {
+        vkDestroySemaphore(logicalDevice, queues[i].timelineSemaphore, nullptr);
+        queues[i].timelineSemaphore = VK_NULL_HANDLE;
+
+        vkFreeCommandBuffers(logicalDevice, queues[i].commandPool, 1, &queues[i].commandBuffer);
+        queues[i].commandBuffer = VK_NULL_HANDLE;
+
+        vkDestroyCommandPool(logicalDevice, queues[i].commandPool, nullptr);
+        queues[i].commandPool = VK_NULL_HANDLE;
+
+        queues[i].vkQueue = VK_NULL_HANDLE;
+    }
 }
 
 void DeviceManager::createTimelineSemaphore()
@@ -88,10 +81,12 @@ void DeviceManager::createTimelineSemaphore()
     {
         createTimelineSemaphore(graphicsQueues[i]);
     }
+
     for (size_t i = 0; i < computeQueues.size(); i++)
     {
         createTimelineSemaphore(computeQueues[i]);
     }
+
     for (size_t i = 0; i < transferQueues.size(); i++)
     {
         createTimelineSemaphore(transferQueues[i]);
@@ -269,10 +264,12 @@ bool DeviceManager::createCommandBuffers()
     {
         createCommand(graphicsQueues[i]);
     }
+
     for (size_t i = 0; i < computeQueues.size(); i++)
     {
         createCommand(computeQueues[i]);
     }
+
     for (size_t i = 0; i < transferQueues.size(); i++)
     {
         createCommand(transferQueues[i]);

@@ -11,6 +11,11 @@ ResourceManager::ResourceManager()
 {
 }
 
+ResourceManager::~ResourceManager()
+{
+    cleanUpResourceManager();
+}
+
 void ResourceManager::initResourceManager(DeviceManager &device)
 {
     this->device = &device;
@@ -18,6 +23,10 @@ void ResourceManager::initResourceManager(DeviceManager &device)
     CreateVmaAllocator();
     createTextureSampler();
     createBindlessDescriptorSet();
+}
+
+void ResourceManager::cleanUpResourceManager()
+{
 }
 
 void ResourceManager::CreateVmaAllocator()
