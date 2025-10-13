@@ -336,7 +336,7 @@ ResourceManager::ImageHardwareWrap ResourceManager::createImage(ktm::uvec2 image
         //imageInfo.pNext = nullptr;
 
         VmaAllocationCreateInfo imageAllocCreateInfo = {};
-        imageAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+        imageAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
 
         if (vmaCreateImage(g_hAllocator, &imageInfo, &imageAllocCreateInfo, &resultImage.imageHandle, &resultImage.imageAlloc, &resultImage.imageAllocInfo) != VK_SUCCESS)
         {
@@ -586,142 +586,165 @@ bool ResourceManager::copyImageMemory(ImageHardwareWrap &source, ImageHardwareWr
     //}
 }
 
-//void ResourceManager::transitionImageLayoutUnblocked(const VkCommandBuffer &commandBuffer, ImageHardwareWrap &image,
-//                                                     VkImageLayout newLayout, VkPipelineStageFlags sourceStage,
-//                                                     VkPipelineStageFlags destinationStage)
-//{
-//    if (image.imageLayout != newLayout)
-//    {
-//        VkImageMemoryBarrier barrier{};
-//        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-//        barrier.oldLayout = image.imageLayout;
-//        barrier.newLayout = newLayout;
-//        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-//        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-//        barrier.image = image.imageHandle;
-//        barrier.subresourceRange.aspectMask = image.aspectMask;
-//        barrier.subresourceRange.baseMipLevel = 0;
-//        barrier.subresourceRange.levelCount = image.mipLevels;
-//        barrier.subresourceRange.baseArrayLayer = 0;
-//        barrier.subresourceRange.layerCount = image.arrayLayers;
-//
-//        barrier.srcAccessMask = 0;
-//        barrier.dstAccessMask = 0;
-//
-//        if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-//                 newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask =
-//                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_GENERAL)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
-//        {
-//            barrier.srcAccessMask = 0;
-//            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//        }
-//        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-//                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-//        {
-//            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-//            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-//        }
-//        else
-//        {
-//            throw std::invalid_argument("unsupported layout transition!");
-//        }
-//
-//        vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
-//
-//        image.imageLayout = newLayout;
-//    }
-//}
+void ResourceManager::transitionImageLayoutUnblocked(const VkCommandBuffer &commandBuffer, ImageHardwareWrap &image,
+                                                     VkImageLayout newLayout, VkPipelineStageFlags sourceStage,
+                                                     VkPipelineStageFlags destinationStage)
+{
+    if (image.imageLayout != newLayout)
+    {
+        VkImageMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.oldLayout = image.imageLayout;
+        barrier.newLayout = newLayout;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image = image.imageHandle;
+        barrier.subresourceRange.aspectMask = image.aspectMask;
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = image.mipLevels;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = image.arrayLayers;
 
-//void ResourceManager::transitionImageLayout(ImageHardwareWrap &image, VkImageLayout newLayout, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage)
-//{
-//    if (image.imageLayout != newLayout)
-//    {
-//        auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
-//            transitionImageLayoutUnblocked(commandBuffer, image, newLayout, sourceStage, destinationStage);
-//        };
-//
-//        globalHardwareContext.mainDevice->deviceManager.startCommands() << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
-//
-//    }
-//}
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = 0;
+
+        if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+                 newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask =
+                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_GENERAL)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+        {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        }
+        else if (image.imageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        }
+        else
+        {
+            throw std::invalid_argument("unsupported layout transition!");
+        }
+
+        vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+        image.imageLayout = newLayout;
+    }
+}
+
+void ResourceManager::transitionImageLayout(ImageHardwareWrap &image, VkImageLayout newLayout, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage)
+{
+    if (image.imageLayout != newLayout)
+    {
+        auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
+            transitionImageLayoutUnblocked(commandBuffer, image, newLayout, sourceStage, destinationStage);
+        };
+
+        this->device->startCommands() << runCommand << this->device->endCommands();
+
+    }
+}
+
+void ResourceManager::copyImageToBuffer(VkImage image, VkBuffer buffer, uint32_t width, uint32_t height)
+{
+    auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
+        VkBufferImageCopy region{};
+        region.bufferOffset = 0;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.mipLevel = 0;
+        region.imageSubresource.baseArrayLayer = 0;
+        region.imageSubresource.layerCount = 1;
+        region.imageOffset = {0, 0, 0};
+        region.imageExtent = {
+            width,
+            height,
+            1};
+
+        vkCmdCopyImageToBuffer(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer, 1, &region);
+    };
+
+    this->device->startCommands(DeviceManager::TransferQueue) << runCommand << this->device->endCommands();
+}
 
 void ResourceManager::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
 {
@@ -743,7 +766,7 @@ void ResourceManager::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t
         vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::TransferQueue) << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
+    this->device->startCommands(DeviceManager::TransferQueue) << runCommand << this->device->endCommands();
 }
 
 void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
@@ -754,7 +777,7 @@ void ResourceManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDevic
         vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
     };
 
-    globalHardwareContext.mainDevice->deviceManager.startCommands(DeviceManager::TransferQueue) << runCommand << globalHardwareContext.mainDevice->deviceManager.endCommands();
+    this->device->startCommands(DeviceManager::TransferQueue) << runCommand << this->device->endCommands();
 }
 
 uint32_t ResourceManager::findExternalMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -762,14 +785,13 @@ uint32_t ResourceManager::findExternalMemoryType(uint32_t typeFilter, VkMemoryPr
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(this->device->physicalDevice, &memProperties);
 
-    // 查找同时支持外部内存和指定属性的内存类型
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
     {
         if ((typeFilter & (1 << i)) &&
             (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
         {
 
-            // 验证此内存类型是否支持外部内存
+            // 添加详细的外部内存类型验证
             VkPhysicalDeviceExternalImageFormatInfo extFormatInfo = {};
             extFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO;
             extFormatInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
@@ -777,119 +799,85 @@ uint32_t ResourceManager::findExternalMemoryType(uint32_t typeFilter, VkMemoryPr
             VkPhysicalDeviceImageFormatInfo2 formatInfo = {};
             formatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
             formatInfo.pNext = &extFormatInfo;
-            formatInfo.format = VK_FORMAT_R8G8B8A8_UNORM; // 使用通用格式进行测试
+            formatInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
             formatInfo.type = VK_IMAGE_TYPE_2D;
             formatInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
             formatInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-            VkExternalImageFormatProperties extFormatProps = {};
-            extFormatProps.sType = VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES;
-
             VkImageFormatProperties2 formatProps = {};
             formatProps.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
-            formatProps.pNext = &extFormatProps;
 
-            if (vkGetPhysicalDeviceImageFormatProperties2(this->device->physicalDevice,
-                                                          &formatInfo, &formatProps) == VK_SUCCESS)
+            VkResult result = vkGetPhysicalDeviceImageFormatProperties2(
+                this->device->physicalDevice,
+                &formatInfo,
+                &formatProps);
+
+            if (result == VK_SUCCESS)
             {
+                std::cout << "Found compatible memory type index: " << i << std::endl;
+                std::cout << "Memory type flags: " << memProperties.memoryTypes[i].propertyFlags << std::endl;
                 return i;
             }
+
+            std::cout << "Memory type " << i << " not compatible with external memory" << std::endl;
         }
     }
 
     throw std::runtime_error("failed to find suitable external memory type!");
 }
 
-ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const ExternalMemoryHandle &memHandle, const ImageHardwareWrap &sourceImage)
+ResourceManager::BufferHardwareWrap ResourceManager::importBufferMemory(const ExternalMemoryHandle &memHandle, const BufferHardwareWrap &sourceBuffer)
 {
     // 验证外部内存句柄的有效性
 #if _WIN32 || _WIN64
     if (memHandle.handle == nullptr || memHandle.handle == INVALID_HANDLE_VALUE)
     {
-        throw std::runtime_error("Cannot import image with invalid memory handle!");
+        throw std::runtime_error("Cannot import buffer with invalid memory handle!");
     }
 
-    VkPhysicalDeviceExternalImageFormatInfo externalImageFormatInfo{};
-    externalImageFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO;
-    externalImageFormatInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    VkPhysicalDeviceExternalBufferInfo externalBufferInfo{};
+    externalBufferInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_BUFFER_INFO;
+    externalBufferInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    externalBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-    VkPhysicalDeviceImageFormatInfo2 imageFormatInfo{};
-    imageFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
-    imageFormatInfo.pNext = &externalImageFormatInfo;
-    imageFormatInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-    imageFormatInfo.type = VK_IMAGE_TYPE_2D;
-    imageFormatInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageFormatInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    VkExternalBufferProperties externalBufferProperties{};
+    externalBufferProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_BUFFER_PROPERTIES;
 
-    VkImageFormatProperties2 imageFormatProperties{};
-    imageFormatProperties.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
-
-    VkResult result = vkGetPhysicalDeviceImageFormatProperties2(this->device->physicalDevice, &imageFormatInfo, &imageFormatProperties);
-    if (result != VK_SUCCESS)
-    {
-        std::cerr << "Handle type not supported on this device!" << std::endl;
-    }
+    vkGetPhysicalDeviceExternalBufferProperties(this->device->physicalDevice, &externalBufferInfo, &externalBufferProperties);
 #endif
-    
-    ImageHardwareWrap importedImage = {};
-    importedImage.device = this->device;
-    importedImage.resourceManager = this;
 
-    // ����Դͼ�������������Ϊ�����ͼ����������ȫ��ͼ������
-    importedImage.imageSize = sourceImage.imageSize;
-    importedImage.imageFormat = sourceImage.imageFormat;
-    importedImage.arrayLayers = sourceImage.arrayLayers;
-    importedImage.mipLevels = sourceImage.mipLevels;
-    importedImage.imageUsage = sourceImage.imageUsage;
-    importedImage.aspectMask = sourceImage.aspectMask;
-    importedImage.pixelSize = sourceImage.pixelSize;
-    importedImage.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED; // ����󲼾���δ�����
+    BufferHardwareWrap importedBuffer = {};
+    importedBuffer.device = this->device;
+    importedBuffer.resourceManager = this;
+    importedBuffer.bufferUsage = sourceBuffer.bufferUsage;
 
-    // 1. ����һ����Դͼ��������ͬ�� VkImage������Ϊ������ڴ�
-    VkImageCreateInfo imageInfo = {};
-    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent.width = importedImage.imageSize.x;
-    imageInfo.extent.height = importedImage.imageSize.y;
-    imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = importedImage.mipLevels;
-    imageInfo.arrayLayers = importedImage.arrayLayers;
-    imageInfo.format = importedImage.imageFormat;
-    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = importedImage.imageUsage;
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // ������ڴ治��Ҫ��������
+    // 创建新的缓冲区
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = sourceBuffer.bufferAllocInfo.size;
+    bufferInfo.usage = importedBuffer.bufferUsage;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    VkExternalMemoryImageCreateInfo externalInfo = {};
-    externalInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
+    VkExternalMemoryBufferCreateInfo externalInfo = {};
+    externalInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
 #if _WIN32 || _WIN64
     externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-#else
-    // Ϊ����ƽ̨������Ӧ�ľ������
 #endif
-    imageInfo.pNext = &externalInfo;
+    bufferInfo.pNext = &externalInfo;
 
-    if (vkCreateImage(this->device->logicalDevice, &imageInfo, nullptr, &importedImage.imageHandle) != VK_SUCCESS)
+    if (vkCreateBuffer(this->device->logicalDevice, &bufferInfo, nullptr, &importedBuffer.bufferHandle) != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to create image for import!");
+        throw std::runtime_error("failed to create buffer for import!");
     }
 
-    // 2. �����ⲿ�ڴ�
+    // 获取内存需求
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(this->device->logicalDevice, importedImage.imageHandle, &memRequirements);
+    vkGetBufferMemoryRequirements(this->device->logicalDevice, importedBuffer.bufferHandle, &memRequirements);
 
-    VkDeviceMemory importedMemory = VK_NULL_HANDLE;
     VkMemoryAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-
-    // ������Դ�ڴ���ݵ��ڴ�����
-    // ע�⣺����һ���򻯵�ʵ�֡�һ����׳��ʵ����Ҫ��ϸƥ���ڴ����͡�
-    // VMA �Ѿ�Ϊ���Ǵ�����Դͼ����ڴ�����ѡ���������Ǽ�����ͬ������������Ч��
-    //allocInfo.memoryTypeIndex = sourceImage.imageAllocInfo.memoryType;
-    //uint32_t memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    allocInfo.memoryTypeIndex = findExternalMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    allocInfo.memoryTypeIndex = findExternalMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
 #if _WIN32 || _WIN64
     VkImportMemoryWin32HandleInfoKHR importInfo = {};
@@ -897,52 +885,58 @@ ResourceManager::ImageHardwareWrap ResourceManager::importImageMemory(const Exte
     importInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
     importInfo.handle = memHandle.handle;
     allocInfo.pNext = &importInfo;
-#else
-    // Ϊ����ƽ̨���õ���ṹ��
 #endif
 
-    if (vkAllocateMemory(this->device->logicalDevice, &allocInfo, nullptr, &importedMemory) != VK_SUCCESS)
+    VkDeviceMemory importedMemory = VK_NULL_HANDLE;
+    VkResult result = vkAllocateMemory(this->device->logicalDevice, &allocInfo, nullptr, &importedMemory);
+    if (result != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to import image memory!");
+        std::string errorMsg = "Failed to allocate imported memory. Error code: " + std::to_string(result);
+        switch (result)
+        {
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            errorMsg += " (VK_ERROR_OUT_OF_HOST_MEMORY)";
+            break;
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            errorMsg += " (VK_ERROR_OUT_OF_DEVICE_MEMORY)";
+            break;
+        case VK_ERROR_INVALID_EXTERNAL_HANDLE:
+            errorMsg += " (VK_ERROR_INVALID_EXTERNAL_HANDLE)";
+            break;
+        }
+        throw std::runtime_error(errorMsg);
     }
 
     if (importedMemory != nullptr)
     {
-        if (vkBindImageMemory(this->device->logicalDevice, importedImage.imageHandle, importedMemory, 0) != VK_SUCCESS)
+        if (vkBindBufferMemory(this->device->logicalDevice, importedBuffer.bufferHandle, importedMemory, 0) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to bind imported memory to image!");
+            throw std::runtime_error("failed to bind imported memory to buffer!");
         }
 
-        importedImage.imageView = createImageView(importedImage);
-
-        return importedImage;
+        return importedBuffer;
     }
     else
     {
-        throw std::runtime_error("failed to bind imported memory to image!");
+        throw std::runtime_error("failed to bind imported memory to buffer!");
     }
 }
 
-ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHardwareWrap &sourceImage)
+ResourceManager::ExternalMemoryHandle ResourceManager::exportBufferMemory(BufferHardwareWrap &sourceBuffer)
 {
     ExternalMemoryHandle memHandle{};
     
     // 验证源图像的有效性
-    if (sourceImage.imageHandle == VK_NULL_HANDLE)
+    if (sourceBuffer.bufferHandle == VK_NULL_HANDLE || sourceBuffer.bufferAlloc == VK_NULL_HANDLE)
     {
-        throw std::runtime_error("Cannot export memory from invalid image handle!");
-    }
-    
-    if (sourceImage.imageAlloc == VK_NULL_HANDLE)
-    {
-        throw std::runtime_error("Cannot export memory from invalid image allocation!");
+        throw std::runtime_error("Cannot export memory from invalid buffer!");
     }
     
 #if _WIN32 || _WIN64
-    VkResult result = vmaGetMemoryWin32Handle2(g_hAllocator, sourceImage.imageAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT, nullptr, &memHandle.handle);
+    VkResult result = vmaGetMemoryWin32Handle2(g_hAllocator, sourceBuffer.bufferAlloc, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT, nullptr, &memHandle.handle);
     if (result != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to export image memory handle! VkResult: " + std::to_string(result));
+        throw std::runtime_error("failed to export memory handle! VkResult: " + std::to_string(result));
     }
     
     if (memHandle.handle == nullptr || memHandle.handle == INVALID_HANDLE_VALUE)
@@ -950,7 +944,7 @@ ResourceManager::ExternalMemoryHandle ResourceManager::exportImageMemory(ImageHa
         throw std::runtime_error("Exported memory handle is invalid!");
     }
 #else
-    throw std::runtime_error("Exporting image memory is not implemented on this platform!");
+    throw std::runtime_error("Exporting memory is not implemented on this platform!");
 #endif
 
     return memHandle;

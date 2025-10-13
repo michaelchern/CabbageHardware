@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <chrono>  
 
@@ -61,8 +61,6 @@ private:
 
 
 	uint32_t currentFrame = 0;
-
-    std::shared_ptr<uint64_t> importedImageID = nullptr; // ¸ú×Ùµ±Ç°µ¼ÈëµÄÍ¼ÏñID
 
     
     ResourceManager::BufferHardwareWrap srcStaging;

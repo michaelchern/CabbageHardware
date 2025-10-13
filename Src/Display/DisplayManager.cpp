@@ -293,38 +293,29 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
             initDisplayManager(displaySurface);
 
-            // 首次初始化时，将 importedImageID 置空，以强制在下面进行首次导入
-            importedImageID = nullptr;
 
             this->displayImage = displayDevice->resourceManager.createImage(imageGlobalPool[*displayImage.imageID].imageSize, imageGlobalPool[*displayImage.imageID].imageFormat,
                                                                             imageGlobalPool[*displayImage.imageID].pixelSize, imageGlobalPool[*displayImage.imageID].imageUsage);
 
             VkDeviceSize imageSizeBytes = this->displayImage.imageSize.x * this->displayImage.imageSize.y * this->displayImage.pixelSize;
 
-            srcStaging = globalHardwareContext.mainDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-            dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+            srcStaging = globalHardwareContext.mainDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+            //dstStaging = displayDevice->resourceManager.createBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
 #ifdef EXPORT_IMAGE
-            //auto runCommand1 = [&](const VkCommandBuffer &commandBuffer) {
-                if (globalHardwareContext.mainDevice == displayDevice)
-                {
-                    this->displayImage = sourceImage;
-                }
-                else
-                {
-                    if (importedImageID == nullptr || *importedImageID != *displayImage.imageID)
-                    {
-                        ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportImageMemory(sourceImage);
+            {
+                // 导出缓冲区内存
+                ResourceManager::ExternalMemoryHandle memHandle = globalHardwareContext.mainDevice->resourceManager.exportBufferMemory(srcStaging);
 
-                        if (this->displayImage.imageHandle != VK_NULL_HANDLE)
-                        {
-                            displayDevice->resourceManager.destroyImage(this->displayImage);
-                        }
-                        this->displayImage = displayDevice->resourceManager.importImageMemory(memHandle, sourceImage);
-
-                        importedImageID = displayImage.imageID;
-                    }
+                // 确保在导入前释放旧的资源
+                if (dstStaging.bufferHandle != VK_NULL_HANDLE)
+                {
+                    displayDevice->resourceManager.destroyBuffer(dstStaging);
                 }
+
+                // 导入到目标设备
+                dstStaging = displayDevice->resourceManager.importBufferMemory(memHandle, srcStaging);
+            }
             //};
 
             //displayDevice->deviceManager.startCommands() << runCommand1 << displayDevice->deviceManager.endCommands();
@@ -358,15 +349,63 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
         {
-#ifndef EXPORT_IMAGE
-            displayDevice->resourceManager.copyImageMemory(imageGlobalPool[*displayImage.imageID], this->displayImage, &srcStaging, &dstStaging);
-#endif
-            auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
-                //// Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-                //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, this->displayImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            //if (globalHardwareContext.mainDevice == displayDevice)
+            //{
+            //    // 如果是同一个设备，直接复制
+            //    this->displayImage = sourceImage;
+            //}
+            //else
+            {
+                // 源图像转换为transfer src布局
+                globalHardwareContext.mainDevice->resourceManager.transitionImageLayout(
+                    sourceImage,
+                    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-                //// Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-                //displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+                // 目标图像转换为transfer dst布局
+                displayDevice->resourceManager.transitionImageLayout(
+                    this->displayImage,
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT);
+
+                // 在主设备上：源图像 -> srcStaging
+                globalHardwareContext.mainDevice->resourceManager.copyImageToBuffer(
+                    sourceImage.imageHandle,
+                    srcStaging.bufferHandle,
+                    sourceImage.imageSize.x,
+                    sourceImage.imageSize.y);
+
+                // 等待主设备上的复制完成
+                vkDeviceWaitIdle(globalHardwareContext.mainDevice->deviceManager.logicalDevice);
+
+                // 在显示设备上：dstStaging -> 目标图像
+                displayDevice->resourceManager.copyBufferToImage(
+                    dstStaging.bufferHandle,
+                    this->displayImage.imageHandle,
+                    this->displayImage.imageSize.x,
+                    this->displayImage.imageSize.y);
+
+                // 等待显示设备上的复制完成
+                vkDeviceWaitIdle(displayDevice->deviceManager.logicalDevice);
+
+                //// 转换回原来的布局
+                //globalHardwareContext.mainDevice->resourceManager.transitionImageLayout(
+                //    sourceImage,
+                //    VK_IMAGE_LAYOUT_GENERAL);
+
+                //displayDevice->resourceManager.transitionImageLayout(
+                //    this->displayImage,
+                //    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+            }
+
+            auto runCommand = [&](const VkCommandBuffer &commandBuffer) {
+                // Transition displayImage to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+                displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, this->displayImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+
+                // Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+                displayDevice->resourceManager.transitionImageLayoutUnblocked(commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
                 VkImageBlit imageBlit;
                 imageBlit.dstOffsets[0] = VkOffset3D{0, 0, 0};
@@ -392,9 +431,9 @@ bool DisplayManager::displayFrame(void *displaySurface, HardwareImage displayIma
                                &imageBlit, VK_FILTER_LINEAR);
 
                  //// Transition swapChainImages[currentFrame] to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-                 //displayDevice->resourceManager.transitionImageLayoutUnblocked(
-                 //    commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                 //    VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+                 displayDevice->resourceManager.transitionImageLayoutUnblocked(
+                     commandBuffer, swapChainImages[imageIndex], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                     VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
             };
 
             std::vector<VkSemaphoreSubmitInfo> waitSemaphoreInfos;

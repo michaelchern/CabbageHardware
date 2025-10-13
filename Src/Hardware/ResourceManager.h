@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <unordered_map>
 
@@ -90,18 +90,21 @@ struct ResourceManager
 	//uint32_t storeDescriptor(VkAccelerationStructureKHR m_tlas);
 
 
-	bool copyImageMemory(ImageHardwareWrap &source, ImageHardwareWrap &destination, BufferHardwareWrap *srcStaging = nullptr, BufferHardwareWrap *dstStaging = nullptr);
-	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	bool copyImageMemory(ImageHardwareWrap &source, ImageHardwareWrap &destination, BufferHardwareWrap *srcStaging = nullptr, BufferHardwareWrap *dstStaging = nullptr);
 
-    ExternalMemoryHandle exportImageMemory(ImageHardwareWrap &sourceImage);
-    ImageHardwareWrap importImageMemory(const ExternalMemoryHandle &memHandle, const ImageHardwareWrap &sourceImage);
+	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+    void copyImageToBuffer(VkImage image, VkBuffer buffer, uint32_t width, uint32_t height);
+
+
+    ExternalMemoryHandle exportBufferMemory(BufferHardwareWrap &sourceBuffer);
+    BufferHardwareWrap importBufferMemory(const ExternalMemoryHandle &memHandle, const BufferHardwareWrap &sourceBuffer);
 
 	
 	uint32_t findExternalMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-	//void transitionImageLayoutUnblocked(const VkCommandBuffer& commandBuffer,ImageHardwareWrap& image, VkImageLayout newLayout, VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
+	void transitionImageLayoutUnblocked(const VkCommandBuffer& commandBuffer,ImageHardwareWrap& image, VkImageLayout newLayout, VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
 
-	//void transitionImageLayout(ImageHardwareWrap& image, VkImageLayout newLayout, VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
+	void transitionImageLayout(ImageHardwareWrap& image, VkImageLayout newLayout, VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
 
 
 	VkShaderModule createShaderModule(const std::vector<unsigned int>& code);
